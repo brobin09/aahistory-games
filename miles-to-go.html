@@ -454,6 +454,19 @@ function bt(id,k){const b=document.getElementById(id);
   b.addEventListener('touchstart',e=>{e.preventDefault();T[k]=true;},{passive:false});
   b.addEventListener('touchend',e=>{e.preventDefault();T[k]=false;},{passive:false});
   b.addEventListener('touchcancel',()=>T[k]=false);}
+// ── touch the road to steer: the car follows your finger ──
+T.tx=null;
+(function(){
+  function toGameX(e){
+    const r=cv.getBoundingClientRect();
+    const t=e.touches[0];
+    return (t.clientX-r.left)/r.width*VW;
+  }
+  cv.addEventListener('touchstart',e=>{e.preventDefault();T.tx=toGameX(e);},{passive:false});
+  cv.addEventListener('touchmove',e=>{e.preventDefault();T.tx=toGameX(e);},{passive:false});
+  cv.addEventListener('touchend',e=>{if(e.touches.length===0)T.tx=null;},{passive:false});
+  cv.addEventListener('touchcancel',()=>{T.tx=null;});
+})();
 bt('tL','l');bt('tR','r');
 // GAS = tap to toggle cruise (no holding); BRAKE tap cancels cruise
 (function(){
@@ -519,7 +532,12 @@ function step(){
   else if(br)speed=Math.max(0,speed-1.6);
   else speed=Math.max(0,speed-0.12);
   const steer=2.2+speed*0.03;
-  if(left)carV-=0.5;if(right)carV+=0.5;
+  if(T.tx!==null&&state==='drive'){
+    const d=T.tx-(carX+19);
+    carV+=Math.max(-0.85,Math.min(0.85,d*0.016));
+  }else{
+    if(left)carV-=0.5;if(right)carV+=0.5;
+  }
   carV*=0.86;carX+=carV*(0.4+speed/70);
   carX=Math.max(ROAD_L-38,Math.min(ROAD_R+6,carX));
 
