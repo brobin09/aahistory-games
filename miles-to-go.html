@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>MILES TO GO · A Green Book Journey, 1954</title>
+<style>
+/* ════════════════════════════════════════════════════════════
+   MILES TO GO — A GREEN BOOK JOURNEY, 1954
+   Top-down driving game. Chicago → New Orleans, five legs.
+   The mechanic is the history: fuel, dignity, daylight, and
+   the guide that mapped safety onto a hostile road.
+   ════════════════════════════════════════════════════════════ */
+:root{--gb-green:#1E6E4E;--gb-green-dk:#134A34;--cream:#F2EBD8;--ink:#20241E;
+  --road:#3E4248;--sun:#E8B84A;--danger:#B54232;--sky:#8FB3C9;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
+html,body{height:100%;overflow:hidden;background:#0c0e0c;}
+body{font-family:Georgia,serif;color:var(--cream);}
+button{font-family:Georgia,serif;cursor:pointer;}
+button:focus-visible{outline:3px solid var(--sun);outline-offset:2px;}
+
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;}
+canvas{display:block;max-width:100vw;max-height:100dvh;}
+
+/* overlays */
+.ov{position:fixed;inset:0;z-index:20;display:none;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:20px;overflow-y:auto;
+  background:linear-gradient(180deg,#10231B,#0A1610);}
+.ov.on{display:flex;}
+.gbcover{background:var(--gb-green);border:2px solid #0d3625;border-radius:4px;max-width:400px;width:100%;
+  padding:26px 24px 30px;box-shadow:0 16px 40px rgba(0,0,0,.6),0 1px 0 #3f9a72 inset;}
+.gbcover .gbtop{letter-spacing:.32em;font-size:clamp(9px,2.6vw,11px);color:#BFE3CD;margin-bottom:10px;}
+.gbcover h1{font-size:clamp(30px,9vw,50px);font-weight:400;line-height:1.05;color:var(--cream);
+  text-shadow:0 2px 0 #0d3625;}
+.gbcover h1 em{font-style:italic;color:var(--sun);}
+.gbcover .gbsub{font-style:italic;color:#CFE8D8;font-size:clamp(12px,3.3vw,14.5px);line-height:1.75;margin:14px 0 4px;}
+.gbcover .gbyr{font-family:'Courier New',monospace;letter-spacing:.4em;color:var(--sun);font-size:clamp(11px,3vw,13px);margin-top:12px;}
+.obtn{background:linear-gradient(180deg,var(--sun),#b8892a);color:#241a05;border:1px solid #6d5610;
+  font-weight:700;letter-spacing:.18em;font-size:clamp(13px,3.7vw,16px);padding:14px 40px;border-radius:3px;
+  min-height:50px;margin-top:22px;box-shadow:0 3px 0 #5c470d,0 10px 26px rgba(0,0,0,.5);}
+.obtn:active{transform:translateY(2px);box-shadow:0 1px 0 #5c470d;}
+.onote{color:#7fa38d;font-size:clamp(10px,2.7vw,12px);margin-top:18px;max-width:480px;line-height:1.8;font-style:italic;}
+.okeys{color:#9dc2ab;font-family:'Courier New',monospace;font-size:clamp(10px,2.7vw,12px);margin-top:12px;letter-spacing:.06em;}
+
+/* leg briefing (the Green Book page) */
+.gbpage{background:var(--cream);color:var(--ink);border-radius:3px;max-width:440px;width:100%;
+  text-align:left;padding:18px 20px;box-shadow:0 14px 36px rgba(0,0,0,.6);}
+.gbpage .ph{display:flex;justify-content:space-between;border-bottom:2px solid var(--ink);
+  padding-bottom:6px;margin-bottom:10px;font-family:'Courier New',monospace;
+  font-size:clamp(9.5px,2.6vw,11px);letter-spacing:.14em;}
+.gbpage h2{font-weight:400;font-size:clamp(19px,5.4vw,26px);margin-bottom:2px;}
+.gbpage .route{font-family:'Courier New',monospace;color:var(--gb-green);font-size:clamp(10px,2.8vw,12px);letter-spacing:.1em;margin-bottom:10px;}
+.gbpage .ptext{font-size:clamp(12.5px,3.3vw,14px);line-height:1.7;color:#3E4438;}
+.gbpage .ptext p+p{margin-top:8px;}
+.listing{font-family:'Courier New',monospace;font-size:clamp(10.5px,2.9vw,12px);line-height:1.9;
+  border:1px dashed #9aa08e;padding:8px 12px;margin-top:10px;background:#faf5e6;}
+.listing b{color:var(--gb-green);}
+.listing .lx{color:#8a8f80;}
+
+/* event card */
+.evcard{background:var(--cream);color:var(--ink);border-radius:3px;max-width:420px;width:100%;
+  text-align:left;padding:18px 20px;box-shadow:0 14px 36px rgba(0,0,0,.6);}
+.evcard .eh{color:var(--danger);letter-spacing:.22em;font-family:'Courier New',monospace;
+  font-size:clamp(9.5px,2.6vw,11px);margin-bottom:8px;}
+.evcard .eh.ok{color:var(--gb-green);}
+.evcard .etext{font-size:clamp(13px,3.4vw,15px);line-height:1.7;color:#33382E;}
+.evbtns{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.evb{text-align:left;background:#E7DFC8;border:1px solid #B8B098;border-radius:2px;
+  padding:11px 13px;font-size:clamp(12.5px,3.3vw,14px);line-height:1.5;min-height:46px;color:var(--ink);}
+.evb:hover{background:#DDD2B4;}
+.evb b{display:block;font-family:'Courier New',monospace;letter-spacing:.1em;font-size:.85em;color:var(--gb-green-dk);}
+.evb .cost{color:#8a6a20;font-family:'Courier New',monospace;font-size:.82em;}
+.evb:disabled{opacity:.5;cursor:default;}
+
+/* road map */
+.mapcard{background:var(--cream);border-radius:3px;max-width:440px;width:100%;margin-bottom:12px;
+  box-shadow:0 14px 36px rgba(0,0,0,.6);padding:10px 12px 6px;}
+.mapcard .mh{display:flex;justify-content:space-between;font-family:'Courier New',monospace;
+  font-size:9.5px;letter-spacing:.18em;color:var(--gb-green);border-bottom:1px solid #C9C0A8;padding-bottom:4px;}
+.mapcard svg{width:100%;height:auto;display:block;}
+@keyframes dashmove{to{stroke-dashoffset:-14;}}
+.routeNow{animation:dashmove 1.2s linear infinite;}
+@media(prefers-reduced-motion:reduce){.routeNow{animation:none;}}
+
+/* almanac */
+.alm{background:var(--cream);color:var(--ink);border-radius:3px;max-width:460px;width:100%;
+  text-align:left;padding:18px 20px;box-shadow:0 14px 36px rgba(0,0,0,.6);max-height:78dvh;overflow-y:auto;}
+.alm h2{font-weight:400;font-size:clamp(18px,5vw,24px);border-bottom:2px solid var(--ink);padding-bottom:6px;}
+.alm h3{color:var(--gb-green);font-size:clamp(13px,3.5vw,15px);letter-spacing:.06em;margin:14px 0 4px;}
+.alm p{font-size:clamp(12px,3.2vw,13.5px);line-height:1.7;color:#3E4438;}
+.abtn{background:transparent;border:2px solid var(--sun);color:var(--sun);letter-spacing:.14em;
+  font-weight:700;padding:11px 26px;border-radius:3px;min-height:46px;font-size:clamp(11px,3vw,13px);margin-top:12px;}
+.notetag{display:inline-block;background:var(--gb-green);color:var(--cream);font-family:'Courier New',monospace;
+  font-size:9.5px;letter-spacing:.2em;padding:3px 8px;border-radius:2px;margin-bottom:8px;}
+
+/* HUD */
+#hud{position:fixed;top:0;left:0;right:0;z-index:10;display:none;padding:8px 10px;pointer-events:none;
+  font-family:'Courier New',monospace;}
+#hud.on{display:block;}
+.hrow{display:flex;justify-content:space-between;gap:6px;max-width:520px;margin:0 auto;}
+.hb{background:rgba(10,18,12,.72);border:1px solid rgba(232,184,74,.4);border-radius:4px;
+  padding:5px 9px;font-size:clamp(10px,2.8vw,12.5px);letter-spacing:.04em;}
+.bar{width:64px;height:8px;background:#222;border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:5px;}
+.bar i{display:block;height:100%;background:var(--sun);border-radius:4px;transition:width .3s;}
+#fBar i{background:#D97742;}
+#mBar i{background:#5FB379;}
+#clock{color:var(--sun);}
+#speedo{color:#cfe8d8;}
+
+/* touch controls */
+#ctrl{position:fixed;inset:0;z-index:9;display:none;pointer-events:none;}
+#ctrl.on{display:block;}
+.tb{position:absolute;pointer-events:auto;border-radius:50%;border:2px solid rgba(232,184,74,.5);
+  background:rgba(10,18,12,.5);color:var(--sun);display:flex;align-items:center;justify-content:center;
+  touch-action:none;font-size:26px;width:70px;height:70px;
+  bottom:calc(16px + env(safe-area-inset-bottom));}
+.tb:active{background:rgba(232,184,74,.22);}
+#tL{left:calc(14px + env(safe-area-inset-left));}
+#tR{left:calc(98px + env(safe-area-inset-left));}
+#tGo{right:calc(14px + env(safe-area-inset-right));font-size:15px;letter-spacing:.06em;}
+#tBr{right:calc(98px + env(safe-area-inset-right));font-size:15px;letter-spacing:.06em;}
+@media(min-width:900px) and (hover:hover){#ctrl.on{display:none;}}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="cv"></canvas></div>
+
+<div id="hud"><div class="hrow">
+  <span class="hb" id="clock">7:00 AM</span>
+  <span class="hb">FUEL<span class="bar" id="fBar"><i style="width:100%"></i></span></span>
+  <span class="hb">FAMILY<span class="bar" id="mBar"><i style="width:100%"></i></span></span>
+  <span class="hb">$<span id="cash">90</span></span>
+  <span class="hb" id="speedo">0 mph</span>
+  <span class="hb" id="radioBtn" style="pointer-events:auto;cursor:pointer">📻 OFF</span>
+</div>
+<div class="hrow" style="margin-top:4px"><span class="hb" id="radioLine" style="display:none;flex:1;text-align:center;color:#9dc2ab;font-style:italic"></span></div></div>
+
+<div id="ctrl">
+  <div class="tb" id="tL">◀</div><div class="tb" id="tR">▶</div>
+  <div class="tb" id="tBr">BRAKE</div><div class="tb" id="tGo">GAS</div>
+</div>
+
+<!-- TITLE -->
+<div class="ov on" id="ovTitle">
+  <div class="gbcover">
+    <div class="gbtop">THE NEGRO MOTORIST'S COMPANION · A GAME</div>
+    <h1>MILES<br><em>to</em> GO</h1>
+    <div class="gbsub">Chicago to New Orleans, 1954. Your family in the Buick, your savings in the glovebox, and on the seat beside you the little green guide that maps which gas stations will fill your tank, which kitchens will serve you, and which towns you must not be in when the sun goes down.</div>
+    <div class="gbyr">★ 1,000 MILES · 5 LEGS · ONE RULE: BE SOMEWHERE SAFE BY DARK ★</div>
+  </div>
+  <button class="obtn" onclick="showLeg()">START THE ENGINE</button>
+  <button class="abtn" onclick="openAlm()">📗 THE TRAVELER'S ALMANAC</button>
+  <div class="okeys">← → steer · ↑ gas · ↓ brake &nbsp;|&nbsp; pull RIGHT onto a stop &amp; brake to visit</div>
+  <div class="onote">Inspired by Victor Hugo Green's travel guide (1936–1966), which listed businesses that would serve Black travelers. Green wrote that he looked forward to the day his guide would no longer be needed. This game is about the driving skill that day never should have required.</div>
+</div>
+
+<!-- LEG BRIEFING -->
+<div class="ov" id="ovLeg">
+  <div class="mapcard">
+    <div class="mh"><span>HIGHWAY MAP · CHICAGO — NEW ORLEANS</span><span>COMPLIMENTS OF YOUR SERVICE STATION</span></div>
+    <svg id="tripMap" viewBox="0 0 300 210" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div class="gbpage">
+    <div class="ph"><span>THE TRAVELER'S GUIDE</span><span id="pgNo">PAGE 1</span></div>
+    <h2 id="legTitle"></h2>
+    <div class="route" id="legRoute"></div>
+    <div class="ptext" id="legText"></div>
+    <div class="listing" id="legList"></div>
+  </div>
+  <button class="obtn" onclick="beginLeg('hwy')">TAKE THE HIGHWAY → <span style="display:block;font-size:.62em;font-weight:400;letter-spacing:.06em;opacity:.85">faster · speed zones &amp; cruisers</span></button>
+  <button class="obtn" style="background:linear-gradient(180deg,#5FB379,#2E6B45);color:#0d2416" onclick="beginLeg('cty')">TAKE THE COUNTY ROAD → <span style="display:block;font-size:.62em;font-weight:400;letter-spacing:.06em;opacity:.85">fewer police · rough asphalt, hold 50</span></button>
+  <button class="abtn" onclick="openAlm()">📗 ALMANAC</button>
+</div>
+
+<!-- EVENT -->
+<div class="ov" id="ovEvent" style="background:rgba(6,12,8,.82)">
+  <div class="evcard">
+    <div class="eh" id="evHead"></div>
+    <div class="etext" id="evText"></div>
+    <div class="evbtns" id="evBtns"></div>
+  </div>
+</div>
+
+<!-- ALMANAC -->
+<div class="ov" id="ovAlm" style="background:rgba(6,12,8,.88);z-index:30">
+  <div class="alm">
+    <h2>The Traveler's Almanac</h2>
+    <p style="font-style:italic;margin-top:6px">Tap any entry to open it. The road rewards the well-read.</p>
+
+    <details open><summary style="cursor:pointer"><h3 style="display:inline">📗 THE GREEN BOOK</h3></summary>
+    <p>From 1936 to 1966, Victor Hugo Green — a Black postal carrier from Harlem — published an annual guide listing hotels, gas stations, restaurants, tourist homes, and beauty shops across America that would serve Black travelers. It grew from a local pamphlet to a national institution selling tens of thousands of copies, sold at Esso stations and by mail. Families planned entire routes around its pages.</p></details>
+
+    <details><summary style="cursor:pointer"><h3 style="display:inline">🌇 SUNDOWN TOWNS</h3></summary>
+    <p>Thousands of American towns — most of them outside the South — excluded Black people after dark, by ordinance, by posted signs, or by unwritten rule enforced with harassment and violence. Historian James Loewen documented the practice across the country and found it far more widespread than most Americans ever learned. For a Black family, nightfall between cities was not an inconvenience; it was a hazard to be engineered around, every single day of a trip.</p></details>
+
+    <details><summary style="cursor:pointer"><h3 style="display:inline">🏠 TOURIST HOMES</h3></summary>
+    <p>Since most hotels and motels refused Black guests, private families opened their homes as "tourist homes" — a spare room, a hot breakfast, and safety, listed in the guide by the owner's name. They were the backbone of Black travel, an economy of hospitality built where the public one refused to function.</p></details>
+
+    <details><summary style="cursor:pointer"><h3 style="display:inline">🧺 THE PICNIC BASKET</h3></summary>
+    <p>Black families packed fried chicken, boiled eggs, pound cake, and thermoses of coffee not as a picnic tradition but as infrastructure — food for the hundreds of miles where no kitchen would serve them. The shoebox lunch is remembered warmly, but it was born of necessity. Shaded pull-offs and church groves, passed along by word of mouth and penciled into the guide's margins, served as the dining rooms of the road.</p></details>
+
+    <details><summary style="cursor:pointer"><h3 style="display:inline">🍑 ROADSIDE STANDS</h3></summary>
+    <p>Farm stands sold to anyone with a nickel — a cash transaction at a plank table asked no questions a lunch counter did. Travelers' memoirs remember the melon from the washtub of ice and the paper sack of peaches as small mercies of the road, and Black farm families running stands were themselves part of the route's quiet economy.</p></details>
+
+    <details><summary style="cursor:pointer"><h3 style="display:inline">⛽ ESSO STATIONS</h3></summary>
+    <p>Esso (later Exxon) stood out among oil companies for serving Black motorists and franchising stations to Black owners — one reason Esso stations appear so often in the guide's pages, and why the guide itself was sold at many of them.</p></details>
+
+    <details><summary style="cursor:pointer"><h3 style="display:inline">📻 THE RADIO DIAL</h3></summary>
+    <p>In 1948 Memphis's WDIA became the first American station programmed entirely for Black listeners — 50,000 watts of blues, gospel, and news, with B.B. King spinning records before his own career took off. Chess Records was cutting Muddy Waters in Chicago; New Orleans had its own "sepia stations." The dial mapped Black America as surely as the guide did, and a family could hear the region change out the window.</p></details>
+
+    <details><summary style="cursor:pointer"><h3 style="display:inline">💵 MONEY ON THE ROAD</h3></summary>
+    <p>Travel ran on cash — credit cards were rare and bank access away from home rarer, so a family carried its whole trip in the glovebox and a hidden reserve in a coffee can. A padded "fine" at a speed trap or an overpriced repair came straight out of the vacation, which is why travelers drove gently, carried spare parts, and did their own roadside repairs when they could.</p></details>
+
+    <details><summary style="cursor:pointer"><h3 style="display:inline">🚔 SPEED TRAPS & THE ROADSIDE STOP</h3></summary>
+    <p>Small-town speed traps squeezed money from all travelers, but a traffic stop carried different stakes for a Black driver — searches, invented fines, escalation with no recourse. Families drove rigidly under the limit through hostile counties and taught their children the survival etiquette of the roadside stop.</p></details>
+
+    <details><summary style="cursor:pointer"><h3 style="display:inline">⚖️ AFTER 1964</h3></summary>
+    <p>The Civil Rights Act of 1964 outlawed discrimination in public accommodations, and the guide ceased publication in 1966 — the outcome its founder had explicitly hoped for. The last editions note the change in tone: a guide preparing for its own obsolescence, which was the whole point.</p></details>
+
+    <button class="obtn" style="margin-top:14px;width:100%" onclick="closeAlm()">BACK TO THE ROAD</button>
+  </div>
+</div>
+
+<!-- END -->
+<div class="ov" id="ovEnd">
+  <div class="gbpage">
+    <div class="ph"><span>THE TRAVELER'S GUIDE</span><span>LAST PAGE</span></div>
+    <h2 id="endTitle"></h2>
+    <div class="ptext" id="endText"></div>
+  </div>
+  <button class="obtn" onclick="location.reload()">DRIVE IT AGAIN</button>
+</div>
+
+<script>
+'use strict';
+/* ════════════════════ DATA · THE FIVE LEGS ════════════════════ */
+const LEGS=[
+ {from:'CHICAGO',to:'ST. LOUIS',mi:300,
+  text:`<p>You leave the South Side before first light — Uncle Theo's directions folded in the guide, sandwiches from your mother packed in wax paper, because the family knows better than to count on roadside kitchens. Route 66 south, then the river road.</p><p><b>The rule of the road:</b> green signs mark Guide-listed stops — safe gas, safe food, safe beds. Gray signs are a gamble. Watch your fuel, watch the family's spirits, and watch the sun.</p>`,
+  list:[['PRODUCE STAND, Kankakee Rd.','FRUIT','listed'],['ESSO SERVICE, Pontiac','GAS','listed'],['THREADGILL CAFÉ, Springfield','MEALS','listed'],['MOTEL ROYAL, Litchfield','ROOMS','listed']]},
+ {from:'ST. LOUIS',to:'MEMPHIS',mi:290,
+  text:`<p>South out of St. Louis the listings thin. The guide's pages for southern Missouri are nearly blank — not because travelers didn't pass this way, but because so few doors were open. Long gaps between safe stops mean planning ahead: top off the tank when you can, not when you must.</p>`,
+  list:[['SERVICE STATION, Cape Girardeau','GAS','listed'],['— 120 MILES, NO LISTINGS —','','gap'],['LORRAINE MOTEL, Memphis','ROOMS','listed']]},
+ {from:'MEMPHIS',to:'JACKSON',mi:210,
+  text:`<p>Highway 51 into the Delta. The speed traps south of Memphis are famous among travelers like you — a mile of sudden 25-per limit and a cruiser behind the billboard, and the fine is whatever the man says it is. Hold your speed down through the zones. Arrive with the afternoon to spare; the towns between here and Jackson do not want you in them at dusk.</p>`,
+  list:[["GREEN'S SERVICE, Clarksdale",'GAS','listed'],['MRS. HALL TOURIST HOME, Grenada','ROOMS','listed'],['CAFÉ (UNLISTED), Winona','MEALS?','risk']]},
+ {from:'JACKSON',to:'HATTIESBURG',mi:90,
+  text:`<p>The short leg — and the hardest. A late start (the alternator, fixed at a Guide-listed garage, cost the morning) means you're racing the sun on the day you can least afford to. The guide shows exactly one listed motel before Hattiesburg. Miss it, and the dark catches you between towns whose curfews are not written down anywhere except in what everyone knows.</p>`,
+  list:[['★ START DELAYED — 2:00 PM ★','','gap'],['PALACE TOURIST HOME, Mendenhall','ROOMS','listed'],['ALL OTHER TOWNS','SUNDOWN','risk']]},
+ {from:'HATTIESBURG',to:'NEW ORLEANS',mi:110,
+  text:`<p>The last morning. Coffee from a thermos, the children asleep against the windows, and the pines giving way to bayou. Grandmother's house is on Dryades Street, and she has been cooking for two days. One more tank of gas, one more careful hour, and the road — this time — lets you through.</p>`,
+  list:[['DERBY SERVICE STATION, Slidell','GAS','listed'],['DRYADES ST., NEW ORLEANS','HOME','listed']]},
+];
+
+const EPILOGUE_WIN=`<p>Grandmother meets the car at the curb before the engine is off. A thousand miles, and the stories you will tell at her table are the funny ones — the flat tire, the children's songs — not the mile you drove at exactly 24 miles an hour, or the town you did not stop in, or the arithmetic of daylight you ran in your head all the way down.</p>
+<p><b>The history:</b> Victor Hugo Green, a Harlem postal carrier, published his guide from 1936 to 1966 — thirty years of editions listing gas stations, tourist homes, restaurants, and beauty shops that would serve Black travelers. It sold in the tens of thousands. The skills this game asked of you — planning fuel around sparse listings, holding speed through hostile counties, beating the dusk into a safe town — were the ordinary competence of ordinary Black families on vacation. The guide ceased publication after the Civil Rights Act of 1964 began, unevenly, to make it unnecessary — the day its author had said he looked forward to, when the book could go out of print.</p>`;
+const EPILOGUE_LOSE=`<p>The trip ends short of New Orleans — the tank dry, or the family too worn, or the dark caught you where dark was dangerous. Sit with what that meant in 1954: the same wrong turn that costs a white traveler an hour costs your family something with no bottom to it.</p>
+<p><b>The history:</b> this is why Victor Hugo Green's guide existed, why families carried food in wax paper and gas cans in trunks, and why "vacation" for Black America required a navigator's discipline. Turn the key and run the road again — the planning is the game, because the planning was the life.</p>`;
+
+/* ════════════════════ ENGINE ════════════════════ */
+const VW=480,VH=720;
+const cv=document.getElementById('cv'),c=cv.getContext('2d');
+cv.width=VW;cv.height=VH;
+function fit(){const s=Math.min(innerWidth/VW,innerHeight/VH);
+  cv.style.width=(VW*s)+'px';cv.style.height=(VH*s)+'px';}
+addEventListener('resize',fit);fit();
+
+const ROAD_L=110,ROAD_R=370; // road x bounds
+let state='title',leg=0,tick=0;
+let carX=240,carV=0,speed=0;        // speed in mph (0..70)
+let dist=0;                          // miles covered this leg
+let fuel=100,morale=100,cash=90;
+let clock=7*60;                      // minutes since midnight
+let world=[];                        // roadside objects {y(mi-based),kind,...}
+let traffic=[];let pot2=[];
+let pfx=[];let pulled=0,zoneLimit=0; // active speed zone
+let nightDrive=false,gameMsg='',msgT=0;
+let famTxt='',famWho='',famT=0,famIdle=0;
+function fam(who,txt){famWho=who;famTxt=txt;famT=260;}
+const IDLE=[
+ ['Robbie','“Are we THERE yet? …What about NOW?”'],
+ ['June','“Seven states of plates. Robbie has two, and one was a tractor.”'],
+ ['Robbie','“A tractor COUNTS.”'],
+ ['Ruth','(pencil out, annotating the guide) “I\u2019m marking this stretch for your sister\u2019s trip.”'],
+ ['Robbie','(asleep, one hand still in the peach bag)'],
+ ['June','“When I drive us, I\u2019m going to know every listing by heart.”'],
+ ['Ruth','“Eyes on the road, love. I\u2019ve got the signs — that\u2019s my department.”'],
+ ['Robbie','“I spy something… green.” June: “The GUIDE. You always pick the guide.”'],
+ ['Ruth','(softly, to herself, watching the fields) “Lord, this country is beautiful anyway.”'],
+];
+const LEGIDLE=[
+ [ ['June','“Route 66! Like the song Daddy hums when he thinks we\u2019re sleep.”'],
+   ['Ruth','“St. Louis by supper if the road behaves. Theo says the café\u2019s pie is worth the miles.”'] ],
+ [ ['Robbie','“Is that the SAME river? It\u2019s been following us all day.”'],
+   ['Ruth','“Memphis tonight. Your uncle says you can hear the music from the sidewalk.”'] ],
+ [ ['June','(watching the fields go by) “Mama… who picks all that cotton?”'],
+   ['Ruth','(a moment) “People like your grandmother did, baby. Every row you can see, and past it.”'],
+   ['June','(quiet for a while, then writes something in her notebook)'] ],
+ [ ['Ruth','(checking the sun, then the guide, then the sun) “One motel between here and Hattiesburg. We don\u2019t dawdle today.”'],
+   ['Robbie','“Why\u2019s everybody quiet?” June: “Count your plates, Robbie.”'] ],
+ [ ['Robbie','“I smell something GOOD.” June: “That\u2019s Louisiana, dummy.” Ruth: “June.”'],
+   ['Ruth','“Your grandmother will have the gumbo on since Thursday. Act surprised.”'] ],
+];
+
+const RADIO=[
+ // leg 0 · Chicago → St. Louis
+ ["♫ CHESS RECORDS HOUR — Muddy Waters, live from the South Side ♫",
+  "NEWS: the Supreme Court ruled this May, in Brown v. Board of Education, that segregated schools are unconstitutional…",
+  "♫ The Spaniels — 'Goodnite, Sweetheart, Goodnite' ♫",
+  "Farm report: corn steady, hogs up a quarter at the St. Louis yards."],
+ // leg 1 · → Memphis
+ ["You're tuned toward WDIA Memphis — the first station in America programmed for Black listeners, 50,000 watts.",
+  "♫ B.B. King spinning records on WDIA before his own show tonight ♫",
+  "NEWS: in Indianola, Mississippi, white men have organized a 'Citizens' Council' to resist the school ruling…",
+  "♫ Sister Rosetta Tharpe — gospel with an electric guitar ♫"],
+ // leg 2 · Delta
+ ["♫ THE GOSPEL HOUR — 'How I Got Over' ♫",
+  "Local bulletin: revival meeting Thursday; dinner on the grounds.",
+  "NEWS: Delta planters warn of 'agitation' following the school decision. The announcer's voice is careful.",
+  "♫ Muddy sings about the same Highway 61 under your wheels ♫"],
+ // leg 3 · the squeeze
+ ["Static — the Jackson station fades among the pines…",
+  "♫ The Soul Stirrers, with a young Sam Cooke singing lead ♫",
+  "Weather: clear tonight. Sundown at seven sharp.",
+  "NEWS: NAACP attorneys say the school ruling is 'the beginning, not the end.'"],
+ // leg 4 · → New Orleans
+ ["♫ Fats Domino — that New Orleans piano rolling up the highway to meet you ♫",
+  "You've found WMRY New Orleans — 'the sepia station of the South.'",
+  "♫ Professor Longhair — nobody's hands move like that ♫",
+  "Weather: fair in the Crescent City. Fine day for a homecoming."],
+];
+
+/* ══════════ THE RADIO BAND — procedural 12-bar blues/jazz ══════════
+   All music is generated live and is original — filtered to sound
+   like a 1954 AM car radio: bandpassed, a little static, a lot of soul. */
+let AC=null,radioBus=null,staticSrc=null,musTimer=null;
+let musNext=0,musStep=0,chorus=0,leadDeg=3;
+const STYLES=[
+ {bpm:152,root:45,swing:0.66,piano:0.85,lead:true,name:'chicago jump'},   // A — bright jump swing
+ {bpm:138,root:46,swing:0.65,piano:0.7, lead:true,name:'memphis swing'},  // Bb
+ {bpm:120,root:43,swing:0.64,piano:0.55,lead:true,name:'delta swing'},    // G — looser
+ {bpm:132,root:48,swing:0.65,piano:0.9, lead:true,name:'jackson stride'}, // C
+ {bpm:168,root:41,swing:0.68,piano:1.0, lead:true,name:'nola second line'},// F — flying home
+];
+const BLUES12=[0,0,0,0,5,5,0,0,7,5,0,7]; // I I I I IV IV I I V IV I V
+function mtof(m){return 440*Math.pow(2,(m-69)/12);}
+function initAudio(){
+  if(AC)return;
+  AC=new (window.AudioContext||window.webkitAudioContext)();
+  // radio voicing: bandpass + gentle drive + master gain
+  const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1350;bp.Q.value=0.4;
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=4400;
+  const master=AC.createGain();master.gain.value=0.55;
+  bp.connect(lp);lp.connect(master);master.connect(AC.destination);
+  radioBus=bp;
+  // static bed
+  const len=AC.sampleRate*2,buf=AC.createBuffer(1,len,AC.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*0.5;
+  staticSrc=AC.createBufferSource();staticSrc.buffer=buf;staticSrc.loop=true;
+  const sg=AC.createGain();sg.gain.value=0.012;
+  const shp=AC.createBiquadFilter();shp.type='highpass';shp.frequency.value=1800;
+  staticSrc.connect(shp);shp.connect(sg);sg.connect(master);staticSrc.start();
+}
+function tone(t,freq,dur,type,vol,att,filt){
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol,t+(att||0.008));
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  if(filt){const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=filt;
+    o.connect(f);f.connect(g);}else o.connect(g);
+  g.connect(radioBus);o.start(t);o.stop(t+dur+0.05);
+}
+function hush(t,dur,vol,hp){ // brushed noise: hats & snare
+  const len=Math.ceil(AC.sampleRate*dur),buf=AC.createBuffer(1,len,AC.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+  const src=AC.createBufferSource();src.buffer=buf;
+  const f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=hp;
+  const g=AC.createGain();g.gain.value=vol;
+  src.connect(f);f.connect(g);g.connect(radioBus);src.start(t);
+}
+function scheduleMusic(){
+  if(!radioOn||!AC)return;
+  const st=STYLES[Math.min(leg,STYLES.length-1)];
+  const spb=60/st.bpm, e8=spb/2;                    // seconds per beat / eighth
+  while(musNext<AC.currentTime+0.35){
+    const bar=Math.floor(musStep/8)%12, e=musStep%8;      // 8 eighths per bar
+    const beat=Math.floor(e/2), off=e%2;                  // beat 0-3, offbeat flag
+    const root=st.root+BLUES12[bar];
+    const t=musNext;
+    // ── drums: RIDE pattern (ding · ding-a-ding), hi-hat chick 2&4, brush snare, feathered kick ──
+    const ridePat=[1,0,1,1,1,0,1,1];                    // 1, 2, &-of-2, 3, 4, &-of-4
+    if(ridePat[e])hush(t,0.05,e%2?0.055:0.085,7000);
+    if(!off&&(beat===1||beat===3)){hush(t,0.02,0.07,3600);          // hat chick
+      if(Math.random()<0.35)hush(t+e8*0.5,0.07,0.05,2400);}         // brush comment
+    if(!off&&(beat===0)&&Math.random()<0.6)tone(t,52,0.07,'sine',0.10,0.003); // feathered kick
+    // ── WALKING BASS — quarters with chromatic approach into each new bar ──
+    if(!off){
+      const nextRoot=st.root+BLUES12[(bar+1)%12];
+      let iv=[0,4,7,9][beat];
+      if(beat===3)iv=(nextRoot-root)+(Math.random()<0.5?-1:1);       // chromatic approach tone
+      tone(t,mtof(root-12+iv),spb*0.95,'triangle',0.185,0.008,1100);
+    }
+    // ── comping: crisp 6/9 & shell stabs, syncopated (and-of-1, and-of-3, beat 4 push) ──
+    if(Math.random()<st.piano&&((beat===0&&off)||(beat===2&&off)||(beat===3&&!off&&Math.random()<0.4))){
+      const voicing=Math.random()<0.5?[4,9,14]:[4,10,16];            // 6/9 color or dom shell up top
+      voicing.forEach(iv=>tone(t,mtof(root+iv),e8*0.9,'square',0.03,0.004,2100));
+    }
+    // ── lead: horn-like lines every chorus — eighth runs with rests ──
+    if(st.lead&&chorus>0&&Math.random()<(off?0.42:0.22)){
+      const scale=[0,2,3,4,7,9,10,12];                               // major-blues hybrid
+      leadDeg+= (Math.random()<0.5?1:-1)*(Math.random()<0.75?1:2);
+      leadDeg=Math.max(0,Math.min(scale.length-1,leadDeg));
+      const dur=Math.random()<0.2?e8*2.4:e8*0.95;
+      tone(t,mtof(root+12+scale[leadDeg]),dur,'triangle',0.085,0.012,3000);
+    }
+    // swing: long-short eighths
+    musNext+= off ? e8*2*(1-st.swing) : e8*2*st.swing;
+    musStep++;
+    if(musStep%(8*12)===0)chorus++;
+  }
+}
+function radioMusic(on){
+  if(on){
+    initAudio();
+    if(AC.state==='suspended')AC.resume();
+    musNext=AC.currentTime+0.1;musStep=0;chorus=0;
+    hush(AC.currentTime,0.25,0.20,900);           // tuning static burst
+    if(!musTimer)musTimer=setInterval(scheduleMusic,120);
+  }else{
+    if(musTimer){clearInterval(musTimer);musTimer=null;}
+    if(AC)AC.suspend();
+  }
+}
+
+let radioOn=false,radioIdx=0,radioT=0;
+document.getElementById('radioBtn').addEventListener('click',()=>{
+  radioOn=!radioOn;
+  document.getElementById('radioBtn').textContent=radioOn?'📻 ON':'📻 OFF';
+  document.getElementById('radioLine').style.display=radioOn?'block':'none';
+  radioMusic(radioOn);
+  if(radioOn)tuneRadio();});
+addEventListener('keydown',e=>{if(e.code==='KeyR')document.getElementById('radioBtn').click();});
+function tuneRadio(){
+  const pr=RADIO[Math.min(leg,RADIO.length-1)];
+  document.getElementById('radioLine').textContent=pr[radioIdx%pr.length];
+  radioIdx++;}
+const keys={};
+addEventListener('keydown',e=>{keys[e.code]=true;
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
+addEventListener('keyup',e=>{keys[e.code]=false;});
+const T={l:false,r:false,g:false,b:false};
+function bt(id,k){const b=document.getElementById(id);
+  b.addEventListener('touchstart',e=>{e.preventDefault();T[k]=true;},{passive:false});
+  b.addEventListener('touchend',e=>{e.preventDefault();T[k]=false;},{passive:false});
+  b.addEventListener('touchcancel',()=>T[k]=false);}
+bt('tL','l');bt('tR','r');bt('tGo','g');bt('tBr','b');
+
+/* ── leg generation ── */
+const LEGHWY=['66','61','51','49','11'];
+function genLeg(i){
+  needStop=false;needT=0;tipGiven=false;
+  fuel=Math.max(fuel,85); // topped off at a listed city station before departing
+  world=[];traffic=[];pot2=[];pulled=0;zoneLimit=0;
+  const L=LEGS[i],M=L.mi;
+  dist=0;nightDrive=false;
+  clock=(i===3)?14*60:7*60;                    // leg 4 starts late — the squeeze
+  // stops: distribute listed & unlisted
+  const stops=[];
+  function addStop(mi,kind,listed,name){world.push({mi,kind,listed,name,used:false});}
+  if(i===0){addStop(45,'stand',true,'PRODUCE STAND');addStop(70,'gas',true,'ESSO · LISTED');addStop(115,'picnic',true,'ROADSIDE GROVE');addStop(140,'food',true,'CAFÉ · LISTED');addStop(160,'gas',false,'GAS · UNLISTED');addStop(205,'gas',true,'TEXACO · LISTED');addStop(230,'motel',true,'MOTEL · LISTED');addStop(255,'food',false,'DINER · UNLISTED');}
+  if(i===1){addStop(35,'picnic',true,'RIVER OVERLOOK');addStop(60,'gas',true,'SERVICE · LISTED');addStop(140,'stand',true,'MELON STAND');addStop(95,'food',false,'CAFÉ · UNLISTED');addStop(215,'gas',true,'SERVICE · LISTED');addStop(235,'gas',false,'GAS · UNLISTED');addStop(262,'motel',true,'LORRAINE · LISTED');}
+  if(i===2){addStop(30,'stand',true,'PEACH STAND');addStop(55,'gas',true,"GREEN'S · LISTED");addStop(95,'picnic',true,'CHURCH GROVE');addStop(110,'motel',true,'TOURIST HOME · LISTED');addStop(130,'food',false,'CAFÉ · UNLISTED');addStop(160,'gas',true,'SERVICE · LISTED');}
+  if(i===3){addStop(25,'stand',true,'PECAN STAND');addStop(45,'motel',true,'PALACE · LISTED');addStop(70,'gas',false,'GAS · UNLISTED');}
+  if(i===4){addStop(20,'picnic',true,'PINE GROVE');addStop(40,'gas',true,'DERBY · LISTED');addStop(70,'stand',true,'PRALINE STAND');addStop(85,'food',true,'LUNCH COUNTER · LISTED');}
+  // passing businesses across the road — visible, not stoppable
+  const PASS=['motorcourt','diner','drivein'];
+  for(let k=0;k<3;k++){
+    const m2=Math.round(M*(0.18+k*0.28))+((i*7+k*11)%9);
+    world.push({mi:m2,kind:'pass',pk:PASS[(i+k)%3]});
+  }
+  // signage: route shields + city-distance boards
+  for(let m2=18;m2<M-8;m2+=26)world.push({mi:m2,kind:'sign',st:'shield'});
+  for(let m2=Math.round(M*0.25);m2<M-6;m2+=Math.round(M*0.25))world.push({mi:m2,kind:'sign',st:'dist'});
+  // speed zones (mi start, length, limit)
+  const addZone=(o)=>{if(route==='hwy'||i===3)world.push(o);}; // county road dodges most traps; leg 4's is unavoidable
+
+  if(i===0)addZone({mi:180,kind:'zone',len:8,limit:45});
+  if(i===1){addZone({mi:120,kind:'zone',len:8,limit:45});addZone({mi:200,kind:'zone',len:8,limit:40});}
+  if(i===2){addZone({mi:70,kind:'zone',len:10,limit:25});addZone({mi:165,kind:'zone',len:10,limit:25});}
+  if(i===3)world.push({mi:55,kind:'zone',len:8,limit:25});
+  if(i===4)addZone({mi:60,kind:'zone',len:8,limit:35});
+  // potholes & traffic seeds are spawned dynamically
+}
+
+/* ── time & rates ──
+   1 real second at 60mph ≈ 1.1 miles; clock: 1 mile of driving = 1 min. */
+function step(){
+  tick++;
+  if(state!=='drive')return;
+  const L=LEGS[leg];
+  const left=keys.ArrowLeft||keys.KeyA||T.l,right=keys.ArrowRight||keys.KeyD||T.r;
+  const gas=keys.ArrowUp||keys.KeyW||T.g,br=keys.ArrowDown||keys.KeyS||T.b;
+
+  const topSpd=route==='cty'?52:70;
+  if(gas)speed=Math.min(topSpd,speed+0.5);
+  else if(br)speed=Math.max(0,speed-1.6);
+  else speed=Math.max(0,speed-0.12);
+  const steer=2.2+speed*0.03;
+  if(left)carV-=0.5;if(right)carV+=0.5;
+  carV*=0.86;carX+=carV*(0.4+speed/70);
+  carX=Math.max(ROAD_L-38,Math.min(ROAD_R+6,carX));
+
+  const mph=speed;
+  const miTick=mph/60/60;               // miles per frame at 60fps ≈ mph/3600
+  dist+=miTick*1.9;                     // compression factor — a leg ≈ 2.5–4 min
+  clock+=miTick*1.9;                    // 1 compressed mile = 1 minute
+  fuel-=miTick*1.9*(0.42+speed/200);    // faster burns more
+  if(tick%240===0&&speed>5)morale=Math.max(0,morale-1);   // road weariness
+  if(morale<=0&&state==='drive'){
+    moraleStrikes++;
+    if(moraleStrikes>=2){
+      return endTrip(false,'WORN THROUGH',
+        'It happens quietly — Ruth stops answering, the children stop asking, and somewhere past the next county line you admit the trip is over. You turn for the nearest city with a listing and wire Grandmother that you\u2019ll try again another season.');
+    }
+    speed=0;
+    showEvent('THE CAR GOES QUIET',false,
+      `Ruth touches your arm. "Pull over a minute, love." Nobody is angry — everybody in this car knows exactly why the day is what it is. But the children are at the end of what children have, and so, truth be told, are you.`,
+      [{t:'PULL OVER AND REST',d:'A shade tree, the shoebox lunch, forty-five minutes of just being a family.',cost:'+25 family · −45 min',
+        fn:()=>{clock+=45;morale=30;resume();fam('Robbie','“…tell the one about Grandmother and the mule again.”');}},
+       {t:'ASK THEM FOR PATIENCE',d:'"We\u2019re close. I need you all a little longer." Press on.',cost:'+12 family',
+        fn:()=>{morale=15;resume();fam('June','(straightening up) “We\u2019re alright, Daddy. Robbie\u2019s alright too.”');}}]);
+  }
+  if(fuel<=14&&gasCans>0&&!canOffered){canOffered=true;speed=Math.min(speed,20);
+    teach('gascan',()=>{
+      showEvent('LOW FUEL — THE TRUNK',true,
+        `The gauge is on the pin. You pull to the shoulder and lift the gas can out from under the blankets.`,
+        [{t:'EMPTY THE CAN INTO THE TANK',d:`+40 fuel · ${gasCans} can${gasCans>1?'s':''} left`,
+          fn:()=>{gasCans--;fuel=Math.min(100,fuel+40);canOffered=false;clock+=8;resume();}},
+         {t:'SAVE IT — RISK THE GAUGE',fn:()=>{resume();}}]);});}
+  if(fuel<=0){fuel=0;speed=Math.max(0,speed-2);if(speed<1)return endTrip(false,'DRY TANK','The tank runs dry between towns — miles from a listing, on a road where waiting for help is its own risk.');}
+
+  // spawn traffic & potholes
+  if(tick%110===0&&Math.random()<0.8){
+    const cols=[['#5A6E52','#3E4E38'],['#3E5E7A','#2A4258'],['#7A6A3E','#5A4E2A'],['#333A40','#22282E'],['#8A8478','#5E5A50']];
+    const cc=cols[Math.floor(Math.random()*cols.length)];
+    traffic.push({x:ROAD_L+30+Math.random()*(ROAD_R-ROAD_L-90),y:-80,v:28+Math.random()*18,c1:cc[0],c2:cc[1]});}
+  if(tick%(route==='cty'?70:150)===0&&Math.random()<0.7)pot2.push({x:ROAD_L+20+Math.random()*(ROAD_R-ROAD_L-60),y:-40});
+  traffic.forEach(t=>{t.y+=(speed-t.v)*0.14;});
+  pot2.forEach(p=>{p.y+=speed*0.14;});
+  traffic=traffic.filter(t=>t.y<VH+120&&t.y>-400);
+  propT++;if(propT>34&&props.length<14){propT=0;if(Math.random()<0.8)spawnProp();}
+  props.forEach(pr=>{pr.y+=speed*0.14*pr.v;});
+  props=props.filter(pr=>pr.y<VH+180);
+  pot2=pot2.filter(p=>p.y<VH+60);
+
+  // collisions
+  const cy=VH-170;
+  traffic.forEach(t=>{
+    if(Math.abs(t.x+22-(carX+19))<38&&Math.abs(t.y+35-(cy+32))<58){
+      speed=Math.max(0,speed-14);t.y-=60;morale=Math.max(0,morale-4);
+      msg('Close one — easy on the bumper.');burst(carX+19,cy,'#E8B84A');}});
+  pot2.forEach(p=>{
+    if(!p.hit&&Math.abs(p.x-(carX+19))<26&&Math.abs(p.y-(cy+40))<24){
+      p.hit=true;speed=Math.max(0,speed-8);burst(p.x,p.y,'#8a8f80');
+      if(Math.random()<0.12)flatTire();}});
+
+  // speed zones
+  zoneLimit=0;
+  world.forEach(w=>{
+    if(w.kind==='zone'&&dist>=w.mi&&dist<=w.mi+w.len){zoneLimit=w.limit;
+      if(!noteSeen.zone){speed=Math.min(speed,w.limit);teach('zone',()=>{resume();});return;}
+      if(mph>w.limit+6&&pulled<=0){pulledOver(w);}}});
+  if(pulled>0)pulled--;
+
+  // stops: pull-off logic — near a stop's window & on shoulder & slow
+  world.forEach(w=>{
+    if(w.used||w.kind==='zone')return;
+    if(Math.abs(dist-w.mi)<0.5&&carX>ROAD_R-38&&speed<4){
+      w.used=true;
+      teach(w.listed?'listed':'unlisted',()=>visitStop(w));
+    }
+  });
+
+  // restroom need — fires once, mid-leg
+  if(!needStop&&dist>L.mi*0.42&&dist<L.mi*0.46){
+    needStop=true;speed=Math.min(speed,15);
+    teach('restroom',()=>{
+      showEvent('FROM THE BACK SEAT',false,
+        `Robbie has been quiet and squirming for ten miles, and Ruth gives you the look that means it can't wait for the next listing.`,
+        [{t:'FIND A FARM LANE',d:'Pull off behind the treeline. Ruth stands watch. Ten minutes.',
+          fn:()=>{clock+=10;morale=Math.min(100,morale+4);resume();fam('Robbie','“…okay. I\u2019m fine now.”');}},
+         {t:'PUSH TO THE NEXT LISTED STOP',d:'He can hold it. Probably.',
+          fn:()=>{morale=Math.max(0,morale-8);resume();fam('Ruth','(the look, intensified)');}}]);});}
+
+  // dusk logic
+  const dusk=19*60; // 7 pm
+  if(clock>=dusk&&!nightDrive){nightDrive=true;sundown();}
+
+  // leg complete
+  if(dist>=L.mi)legDone();
+
+  pfx.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.l--;});pfx=pfx.filter(p=>p.l>0);
+  if(msgT>0)msgT--;
+  if(famT>0)famT--;
+  if(radioOn){radioT++;if(radioT>560){radioT=0;tuneRadio();}}
+  famIdle++;
+  if(famIdle>2200&&famT===0&&speed>20){famIdle=0;
+    const pool=Math.random()<0.45?LEGIDLE[Math.min(leg,4)]:IDLE;
+    const q=pool[Math.floor(Math.random()*pool.length)];fam(q[0],q[1]);}
+  updHUD(mph);
+}
+function msg(t){gameMsg=t;msgT=140;}
+function burst(x,y,col){for(let i=0;i<8;i++)pfx.push({x,y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,l:22,col});}
+function updHUD(mph){
+  const h=Math.floor(clock/60)%24,m=Math.floor(clock%60);
+  const ampm=h>=12?'PM':'AM',hh=((h+11)%12)+1;
+  document.getElementById('clock').textContent=`${hh}:${String(m).padStart(2,'0')} ${ampm}`;
+  document.querySelector('#fBar i').style.width=fuel+'%';
+  document.querySelector('#mBar i').style.width=morale+'%';
+  document.getElementById('cash').textContent=Math.max(0,Math.round(cash));
+  document.getElementById('speedo').textContent=Math.round(mph)+' mph'+(zoneLimit?` · LIMIT ${zoneLimit}`:'');
+}
+
+/* ── first-encounter teaching notes ── */
+const NOTES={
+ listed:{h:'WHY THE GREEN DOT MATTERS',t:`This stop is listed in the guide — one of thousands of businesses Victor Hugo Green's annual directory certified as serving Black travelers. Hotels, gas stations, cafés, and private "tourist homes" earned a line in its pages, and families planned whole routes dot to dot. A green marker means what a road sign means to other travelers: you can stop here.`},
+ unlisted:{h:'THE UNLISTED GAMBLE',t:`No listing means no information — and information was the whole product. An unlisted business might serve you at the counter, at the back door, or not at all, and the refusal would come in front of your children. This is why families carried the shoebox lunch: fried chicken and pound cake packed at home were infrastructure, not picnic. Gamble only when the tank or the family truly needs it.`},
+ zone:{h:'THE SPEED ZONE',t:`Small towns funded themselves on speed traps, but the stakes were not the same for every driver. For a Black motorist, a roadside stop could mean invented fines, a searched car, or worse, with no courtroom worth appealing to. Travelers drove these counties rigidly under the limit — a discipline parents taught children alongside their letters. Watch the posted limit; the cruiser is behind the billboard.`},
+ restroom:{h:'THE RESTROOM PROBLEM',t:`Gas stations that would sell a Black family gasoline often still refused them the restroom — or offered a filthy 'colored' door around back. Parents timed the children's water like engineers and knew every safe stop by heart; many simply pulled onto farm lanes and stood watch. Of all Jim Crow's daily insults, travelers' memoirs return to this one again and again.`},
+ gascan:{h:'THE CAN IN THE TRUNK',t:`Experienced travelers never trusted the gaps between listings to the gauge alone — a filled gas can rode in the trunk beside the shoebox lunch, spare fan belt, and tire patch kit. Self-sufficiency was the discipline the road demanded: carry what the road refuses to sell you.`},
+ dusk:{h:'SUNDOWN',t:`Thousands of American towns — more outside the South than in it — excluded Black people after dark, by posted sign, siren, or a rule everyone knew without writing down. Historians call them sundown towns, and they turned nightfall itself into terrain. This is the game's one hard law, because it was the road's: know where you will be when the light goes.`}};
+const noteSeen={};
+let gasCans=2,canOffered=false;
+let needStop=false,needT=0,tipGiven=false;
+let moraleStrikes=0;
+function teach(key,then){
+  if(noteSeen[key]){then();return;}
+  noteSeen[key]=true;const n=NOTES[key];
+  showEvent("TRAVELER'S NOTE — "+n.h,true,
+    `<span class="notetag">FROM THE ALMANAC</span><br>`+n.t,
+    [{t:'UNDERSTOOD — BACK TO THE ROAD',fn:then}]);
+}
+
+/* ── events ── */
+function pause(){state='event';}
+function resume(){document.getElementById('ovEvent').classList.remove('on');state='drive';}
+function showEvent(head,ok,text,btns){
+  pause();
+  document.getElementById('evHead').textContent=head;
+  document.getElementById('evHead').className='eh'+(ok?' ok':'');
+  document.getElementById('evText').innerHTML=text;
+  const bx=document.getElementById('evBtns');bx.innerHTML='';
+  btns.forEach(b=>{
+    const e=document.createElement('button');e.className='evb';
+    e.innerHTML=`<b>${b.t}</b>${b.d||''}${b.cost?`<span class="cost"> ${b.cost}</span>`:''}`;
+    if(b.disabled)e.disabled=true;
+    e.onclick=()=>{b.fn();};
+    bx.appendChild(e);});
+  document.getElementById('ovEvent').classList.add('on');
+}
+function visitStop(w){
+  speed=0;
+  if(w.listed){
+    if(w.kind==='gas')showEvent('GUIDE-LISTED · SERVICE STATION',true,
+      `The attendant waves you to the pump and checks the oil without being asked. The children get the restroom key. Ordinary service — which is the whole point of the listing.`,
+      [{t:'FILL THE TANK',cost:'−$6',d:'Fuel to full.',disabled:cash<6,fn:()=>{cash-=6;fuel=100;clock+=15;resume();
+          if(!tipGiven){tipGiven=true;const z=world.find(w=>w.kind==='zone'&&w.mi>dist);
+            if(z)setTimeout(()=>fam('Attendant','“Trooper\u2019s working the '+z.limit+' zone up the road. Feather that pedal, now.”'),1200);}}},
+       {t:'HALF A TANK',cost:'−$3',disabled:cash<3,fn:()=>{cash-=3;fuel=Math.min(100,fuel+50);clock+=10;resume();}},
+       {t:'JUST DIRECTIONS',d:'No charge. The man marks your map.',fn:()=>{clock+=5;morale=Math.min(100,morale+2);resume();}}]);
+    else if(w.kind==='food')showEvent('GUIDE-LISTED · CAFÉ',true,
+      `A table, menus, sweet tea in real glasses. The family eats a hot meal sitting down — the plainest luxury on this road.`,
+      [{t:'FULL MEAL FOR EVERYONE',cost:'−$5',disabled:cash<5,fn:()=>{cash-=5;morale=Math.min(100,morale+22);clock+=40;resume();fam('Robbie','“Best pie in Tennessee. I\u2019m the judge of it.”');}},
+       {t:'COFFEE & PIE',cost:'−$2',disabled:cash<2,fn:()=>{cash-=2;morale=Math.min(100,morale+9);clock+=20;resume();}},
+       {t:'BACK TO THE ROAD',fn:()=>{resume();}}]);
+    else showEvent('GUIDE-LISTED · ROOMS',true,
+      `Clean rooms, a proprietor who shakes your hand, and a door that locks between your family and the night. If dusk is near, this is where the day should end.`,
+      [{t:'STAY THE NIGHT',cost:'−$8',d:'Sleep to 7:00 AM. Family fully rested. Ends the day safely.',disabled:cash<8,fn:()=>{cash-=8;morale=100;overnight();}},
+       {t:'REST AN HOUR',cost:'−$1',disabled:cash<1,fn:()=>{cash-=1;morale=Math.min(100,morale+10);clock+=60;resume();}},
+       {t:'PRESS ON',fn:()=>{resume();}}]);
+  }else if(w.kind==='stand'){
+    showEvent('ROADSIDE STAND',true,
+      `A farm family's table under an awning — peaches, boiled peanuts, cold melon from a washtub of ice. Roadside stands dealt in cash and didn't ask questions; travelers' memoirs remember them kindly.`,
+      [{t:'BUY A BAGFUL',cost:'−$1',d:'Fruit for the back seat. Robbie negotiates for the biggest peach.',disabled:cash<1,
+        fn:()=>{cash-=1;morale=Math.min(100,morale+8);clock+=8;resume();fam('Robbie','“I picked the best one. It\u2019s science.”');}},
+       {t:'WAVE AND ROLL ON',fn:()=>{resume();}}]);
+  }else if(w.kind==='picnic'){
+    showEvent('A SHADED PULL-OFF',true,
+      `A grove off the road — the kind of spot families marked in the guide's margins in pencil. Shade, quiet, and nobody to answer to. The shoebox lunch comes out.`,
+      [{t:'SPREAD THE BLANKET',cost:'+12 family · −30 min',
+        fn:()=>{clock+=30;morale=Math.min(100,morale+12);resume();fam('Ruth','“Now THIS is a vacation.”');}},
+       {t:'STRETCH LEGS ONLY',cost:'+4 family · −8 min',
+        fn:()=>{clock+=8;morale=Math.min(100,morale+4);resume();}},
+       {t:'KEEP DRIVING',fn:()=>{resume();}}]);
+  }else{
+    // unlisted gamble
+    showEvent('UNLISTED STOP',false,
+      `No green marker in the guide for this one. The lot is empty enough to read either way. Stopping here is a coin you don't control.`,
+      [{t:'TRY IT',d:'Maybe service. Maybe the door.',fn:()=>{
+          if(Math.random()<0.45){
+            showEvent('SERVED — QUIETLY',true,`The owner serves you at the back counter without a word. Gas and a sandwich, no trouble — this time. Some unlisted stops were kind; the problem was never knowing which.`,
+              [{t:'PAY AND GO',cost:'−$4',fn:()=>{cash-=4;fuel=Math.min(100,fuel+45);morale=Math.min(100,morale+5);clock+=15;resume();}}]);
+          }else{
+            showEvent('REFUSED',false,`"We don't serve you here." Said flat, in front of the children. You back the Buick out with your face composed, because composure is armor and the children are learning it from you.`,
+              [{t:'DRIVE ON',d:'The miles ahead just got longer.',fn:()=>{morale=Math.max(0,morale-16);clock+=10;resume();
+                 fam('June','“Why couldn\u2019t we eat there, Mama?”');setTimeout(()=>fam('Ruth','“We eat where we\u2019re wanted, baby. Better food there anyhow.”'),4500);}}]);
+          }},},
+       {t:'TRUST THE GUIDE — SKIP IT',d:'Save the gamble for real need.',fn:()=>{resume();}}]);
+  }
+}
+function pulledOver(w){
+  pulled=99999; // one stop per zone
+  speed=0;
+  showEvent('CRUISER LIGHTS — PULLED OVER',false,
+    `The trooper takes his time walking up. License, destination, whose car this is. The questions aren't about speed and you both know it. The fine is announced, not calculated.`,
+    [{t:'PAY THE "FINE"',cost:'−$10',d:'Yes sir. No sir. Eyes ahead.',disabled:cash<10,fn:()=>{cash-=10;morale=Math.max(0,morale-8);clock+=25;pulled=1;resume();}},
+     {t:cash<10?'YOU CANNOT PAY':'CONTEST IT',d:cash<10?'He "escorts" you to the county line the long way.':'A Black motorist, a Delta courtroom, 1954. You reconsider before the words leave your mouth — and pay.',
+      fn:()=>{if(cash<10){morale=Math.max(0,morale-14);clock+=50;}else{cash-=10;morale=Math.max(0,morale-10);clock+=30;}pulled=1;resume();}}]);
+}
+function flatTire(){
+  speed=0;
+  showEvent('FLAT TIRE',false,
+    `The right rear lets go on bad asphalt. You're on the shoulder with the jack out — a Black family stopped on an open highway, working fast for more reasons than the weather.`,
+    [{t:'CHANGE IT FAST',d:'Everyone helps. Twenty hard minutes.',fn:()=>{clock+=20;morale=Math.max(0,morale-6);resume();}}]);
+}
+function sundown(){
+  speed=0;
+  if(!noteSeen.dusk){teach('dusk',()=>{sundownEvent();});return;}
+  sundownEvent();
+}
+function sundownEvent(){
+  const nearMotel=world.some(w=>w.kind==='motel'&&w.listed&&!w.used&&w.mi>dist&&w.mi-dist<15);
+  showEvent('THE SUN IS DOWN',false,
+    `Dusk, and you are between towns. The next places on this road are the kind that empty of people like you by dark — some posted it on signs, most never needed to. The guide's nearest listed rooms are ${nearMotel?'close — a hard few miles ahead':'behind you or far ahead'}. The family goes quiet in a way you recognize.`,
+    [{t:'DRIVE ON IN THE DARK',d:'Headlights, low profile, no stops. The night costs the family dearly.',
+      fn:()=>{morale=Math.max(1,morale-24);msg('Night driving — nerves taut. Do not stop.');resume();fam('Ruth','(quietly) “Just drive, love. I\u2019ve got the map light.”');}},
+     {t:'PULL OFF & HIDE THE CAR',d:'A field lane behind a treeline. Sleep in the seats. Lose the night, keep your nerves.',
+      fn:()=>{morale=Math.max(15,morale-10);overnight();}}]);
+}
+function overnight(){
+  clock=7*60+ (24*60 - (clock%(24*60)) >0 ?0:0);
+  clock=7*60; nightDrive=false;fuel=fuel;resume();
+  msg('7:00 AM — a new day on the road.');
+}
+function legDone(){
+  state='between';
+  morale=Math.min(100,morale+8);
+  if(leg>=LEGS.length-1){endTrip(true);return;}
+  leg++;showLeg();
+}
+function grade(){
+  const sc=morale*0.6+Math.max(0,cash)*0.5+gasCans*8;
+  return sc>=95?'A — a navigator worthy of the guide':sc>=75?'B — steady hands, safe arrivals':sc>=55?'C — you made it, and made it count':'D — home, but the road took its toll';
+}
+function endTrip(won,head,text){
+  state='end';
+  document.getElementById('hud').classList.remove('on');
+  document.getElementById('ctrl').classList.remove('on');
+  document.getElementById('ovEvent').classList.remove('on');
+  document.getElementById('endTitle').textContent=won?'DRYADES STREET, NEW ORLEANS':head||'THE ROAD WINS THIS ONE';
+  document.getElementById('endText').innerHTML=(won?EPILOGUE_WIN:(text?`<p><em>${text}</em></p>`:'')+EPILOGUE_LOSE)+
+    (won?`<p style="margin-top:10px;font-family:'Courier New',monospace;font-size:12px;letter-spacing:.08em;color:#1E6E4E">
+      NAVIGATOR'S GRADE: <b style="font-size:1.5em">${grade()}</b><br>
+      FAMILY ${Math.round(morale)}% · CASH $${Math.max(0,Math.round(cash))} · GAS CANS LEFT ${gasCans} · LEGS 5/5</p>`
+    :`<p style="margin-top:10px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:.08em;color:#1E6E4E">FAMILY ${Math.round(morale)}% · CASH $${Math.max(0,Math.round(cash))} · LEGS ${leg+1}/5</p>`);
+  document.getElementById('ovEnd').classList.add('on');
+}
+
+let almPrev='title';
+function openAlm(){almPrev=state;if(state==='drive')state='event';
+  document.getElementById('ovAlm').classList.add('on');}
+function closeAlm(){document.getElementById('ovAlm').classList.remove('on');
+  if(almPrev==='drive')state='drive';}
+
+/* ── flow ── */
+const MAPCITY=[['CHICAGO',238,26],['ST. LOUIS',150,58],['MEMPHIS',162,104],['JACKSON',138,152],['HATTIESBURG',176,172],['NEW ORLEANS',148,196]];
+function drawMap(){
+  const done='#1E6E4E',now='#B54232',todo='#B8B098';
+  let h='';
+  // state hints
+  h+=`<g font-family="Courier New" font-size="8" fill="#B4AC94" letter-spacing="2">
+    <text x="256" y="60">ILL.</text><text x="96" y="82">MO.</text>
+    <text x="204" y="120">TENN.</text><text x="84" y="160">MISS.</text><text x="216" y="196">LA.</text></g>`;
+  // the Mississippi
+  h+=`<path d="M 132 20 C 120 50, 148 70, 138 100 C 130 126, 150 150, 128 176 C 120 186, 128 198, 122 208"
+       fill="none" stroke="#7FA8C9" stroke-width="4" stroke-linecap="round" opacity="0.7"/>`;
+  h+=`<text x="106" y="118" font-family="Courier New" font-size="7" fill="#7FA8C9" transform="rotate(78 106 118)">MISSISSIPPI R.</text>`;
+  // route segments
+  for(let i=0;i<MAPCITY.length-1;i++){
+    const a=MAPCITY[i],b=MAPCITY[i+1];
+    const col=i<leg?done:i===leg?now:todo;
+    const dash=i===leg?'stroke-dasharray="7 7" class="routeNow"':i>leg?'stroke-dasharray="2 5"':'';
+    h+=`<line x1="${a[1]}" y1="${a[2]}" x2="${b[1]}" y2="${b[2]}" stroke="${col}" stroke-width="3.5" stroke-linecap="round" ${dash}/>`;
+  }
+  // cities
+  MAPCITY.forEach((ct,i)=>{
+    const fill=i<=leg?'#B54232':'#8A8478';
+    h+=`<circle cx="${ct[1]}" cy="${ct[2]}" r="${i===0||i===5?5:4}" fill="${fill}" stroke="#F2EBD8" stroke-width="1.5"/>`;
+    h+=`<text x="${ct[1]+9}" y="${ct[2]+3}" font-family="Courier New" font-size="8.5" font-weight="bold" fill="#33382E">${ct[0]}</text>`;
+  });
+  // the family's car marker at current city
+  const cc=MAPCITY[leg];
+  h+=`<g transform="translate(${cc[1]-7},${cc[2]-16})">
+    <rect x="0" y="3" width="14" height="7" rx="3" fill="#7A2E28"/>
+    <rect x="3" y="1" width="8" height="5" rx="2" fill="#5A1E1A"/>
+    <circle cx="3.5" cy="10.5" r="1.8" fill="#181818"/><circle cx="10.5" cy="10.5" r="1.8" fill="#181818"/></g>`;
+  h+=`<text x="150" y="14" text-anchor="middle" font-family="Courier New" font-size="8" letter-spacing="3" fill="#1E6E4E">★ LEG ${leg+1} OF 5 ★</text>`;
+  document.getElementById('tripMap').innerHTML=h;
+}
+function showLeg(){
+  drawMap();
+  document.getElementById('ovTitle').classList.remove('on');
+  const L=LEGS[leg];
+  document.getElementById('pgNo').textContent='PAGE '+(leg+1)+' OF 5';
+  document.getElementById('legTitle').textContent=L.from+' → '+L.to;
+  document.getElementById('legRoute').textContent=L.mi+' MILES · DEPART '+(leg===3?'2:00 PM':'7:00 AM')+' · SUNDOWN 7:00 PM';
+  document.getElementById('legText').innerHTML=L.text;
+  document.getElementById('legList').innerHTML=L.list.map(([n,k,cl])=>
+    cl==='gap'?`<div class="lx">${n}</div>`:
+    `<div><b>${cl==='listed'?'● ':'○ '}</b>${n} <span class="lx">${k}</span></div>`).join('');
+  document.getElementById('ovLeg').classList.add('on');
+  state='brief';
+}
+let route='hwy';
+function beginLeg(r){
+  route=r||'hwy';
+  if(radioOn&&AC){hush(AC.currentTime,0.3,0.2,900);musNext=AC.currentTime+0.35;musStep=0;chorus=0;}
+  document.getElementById('ovLeg').classList.remove('on');
+  document.getElementById('hud').classList.add('on');
+  document.getElementById('ctrl').classList.add('on');
+  genLeg(leg);state='drive';
+}
+
+/* ════════════════════ RENDER ════════════════════ */
+let roadScroll=0,shDX=0,shLen=1;
+let props=[],propT=0;
+// regional prop kinds per leg
+const REGION=[
+ ['corn','barn','silo','billboard','corn','windmill'],            // Illinois → MO
+ ['corn','barn','billboard','watertower','field','windmill'],     // MO → Memphis
+ ['cotton','shack','church','billboard','cotton','cotton'],       // the Delta
+ ['pine','pine','church','billboard','pine','shack'],             // Jackson → Hattiesburg
+ ['cypress','cypress','billboard','shack','cypress','watertower'],// bayou
+];
+const BILLS=['ICE COLD\nCOLA — 5¢','TOURIST\nCOURT AHEAD','SEE THE\nCAVERNS','MOTOR OIL\nQUART 25¢','FIREWORKS\n2 MILES','CHEW\nKING PLUG'];
+function spawnProp(){
+  const kinds=REGION[Math.min(leg,REGION.length-1)];
+  const kind=kinds[Math.floor(Math.random()*kinds.length)];
+  const side=Math.random()<0.5?-1:1;
+  props.push({kind,side,y:-140,txt:kind==='billboard'?BILLS[Math.floor(Math.random()*BILLS.length)]:null,
+    v:0.9+Math.random()*0.25,seed:Math.floor(Math.random()*97)});
+}
+function render(){
+  if(state==='title'||state==='end')return;
+  const duskT=Math.max(0,Math.min(1,(clock-17.5*60)/120)); // 5:30→7:30 fade
+  const night=nightDrive;
+  // countryside
+  const g=c.createLinearGradient(0,0,0,VH);
+  if(night){g.addColorStop(0,'#0A0E1E');g.addColorStop(1,'#141A10');}
+  else{g.addColorStop(0,mix('#8FB3C9','#E88A4A',duskT));g.addColorStop(1,mix('#7FA36A','#3E4A2E',duskT*0.8));}
+  c.fillStyle=g;c.fillRect(0,0,VW,VH);
+  // ── THE SUN — the game's clock, hanging in the sky ──
+  if(!night){
+    const dayT=Math.max(0,Math.min(1,(clock-7*60)/(12*60)));       // 7am→7pm across the sky
+    const sunX=60+dayT*(VW-120);
+    const sunY=54+Math.pow(Math.abs(dayT-0.5)*2,1.6)*118;          // arc: high noon, low at ends
+    const late=Math.max(0,(dayT-0.72)/0.28);                       // reddening after ~3:30
+    const scol=`rgb(${255},${Math.round(236-late*130)},${Math.round(150-late*110)})`;
+    const glow=c.createRadialGradient(sunX,sunY,4,sunX,sunY,46+late*26);
+    glow.addColorStop(0,scol);glow.addColorStop(1,'rgba(255,200,120,0)');
+    c.fillStyle=glow;c.beginPath();c.arc(sunX,sunY,46+late*26,0,Math.PI*2);c.fill();
+    c.fillStyle=scol;c.beginPath();c.arc(sunX,sunY,15+late*7,0,Math.PI*2);c.fill();
+    if(late>0.55){c.fillStyle='rgba(242,235,216,0.85)';c.font='10px "Courier New"';c.textAlign='center';
+      c.fillText('SUNDOWN '+(clock>=18.5*60?'— MINUTES':'COMING'),sunX,sunY+34);c.textAlign='left';}
+  }else{
+    c.fillStyle='rgba(235,240,255,0.92)';c.beginPath();c.arc(VW-80,64,13,0,Math.PI*2);c.fill();
+    c.fillStyle='rgba(10,14,30,1)';c.beginPath();c.arc(VW-86,60,11,0,Math.PI*2);c.fill();
+    for(let i=0;i<26;i++){const sx2=(i*97)%VW,sy2=(i*53)%150;
+      c.fillStyle=`rgba(220,230,255,${0.3+0.4*Math.sin(tick*0.05+i)})`;
+      c.fillRect(sx2,sy2,2,2);}
+  }
+  roadScroll=(roadScroll+speed*0.14)%64;
+  // shadow direction follows the sun across the day
+  if(!night){
+    const dT=Math.max(0,Math.min(1,(clock-7*60)/(12*60)));
+    shDX=(0.5-dT)*26;                       // morning: west-cast · evening: long east-cast
+    shLen=1+Math.pow(Math.abs(dT-0.5)*2,1.5)*1.6;
+  }else{shDX=0;shLen=0.8;}
+  // fields
+  c.fillStyle=night?'#101608':mix('#6E9450','#2E3A20',duskT);
+  c.fillRect(0,0,ROAD_L-8,VH);c.fillRect(ROAD_R+8,0,VW-ROAD_R-8,VH);
+  // mottled field patches
+  for(let k=0;k<7;k++){
+    const fy=((k*173+roadScroll*2)%(VH+120))-60;
+    c.fillStyle=night?'rgba(255,255,255,0.015)':'rgba(255,240,180,0.05)';
+    c.beginPath();c.ellipse((k%2?40:ROAD_R+70),fy,52,26,0.4,0,Math.PI*2);c.fill();
+  }
+  // crop rows scrolling
+  c.strokeStyle='rgba(0,0,0,0.15)';c.lineWidth=2;
+  for(let y=-64+roadScroll;y<VH;y+=32){
+    c.beginPath();c.moveTo(0,y);c.lineTo(ROAD_L-8,y+14);c.moveTo(ROAD_R+8,y+14);c.lineTo(VW,y);c.stroke();}
+  // telephone poles
+  for(let y=-64+((roadScroll*2)%128);y<VH;y+=128){
+    c.fillStyle=night?'#0A0C08':'#4E3A26';
+    c.fillRect(ROAD_L-26,y,5,44);c.fillRect(ROAD_L-34,y+6,21,4);}
+  // regional scenery
+  props.forEach(pr=>drawProp(pr,night));
+  // fenceposts & the odd mailbox
+  for(let y2=-40+((roadScroll*1.4)%110);y2<VH;y2+=110){
+    c.fillStyle=night?'#141410':'#5A4A32';
+    c.fillRect(ROAD_R+16,y2,3,14);
+    if(Math.floor(y2/110)%4===2){c.fillStyle=night?'#1E1E1A':'#6E747C';c.fillRect(ROAD_R+13,y2-4,9,6);}
+  }
+  // shoulder + gravel speckle
+  c.fillStyle=night?'#1A1C16':'#8A7A56';
+  c.fillRect(ROAD_L-8,0,8,VH);c.fillRect(ROAD_R,0,8,VH);
+  c.fillStyle=night?'rgba(255,255,255,0.05)':'rgba(255,250,230,0.28)';
+  for(let k=0;k<26;k++){
+    const gy=((k*61+roadScroll*2.2)%(VH+20))-10;
+    c.fillRect(ROAD_L-7+(k*7)%6,gy,1.6,1.6);c.fillRect(ROAD_R+1+(k*11)%6,gy+8,1.6,1.6);
+  }
+  // road
+  c.fillStyle=night?'#23262B':'#3E4248';c.fillRect(ROAD_L,0,ROAD_R-ROAD_L,VH);
+  // tar seams across the road
+  c.strokeStyle='rgba(0,0,0,0.14)';c.lineWidth=2;
+  for(let y=-64+((roadScroll*1.0)%96);y<VH;y+=96){
+    c.beginPath();c.moveTo(ROAD_L+6,y);
+    c.quadraticCurveTo((ROAD_L+ROAD_R)/2,y+5,ROAD_R-6,y);c.stroke();}
+  // center dashes
+  c.fillStyle=night?'rgba(232,220,160,0.55)':'#E8DCA0';
+  for(let y=-64+roadScroll;y<VH;y+=64){if(Math.floor((y-roadScroll)/64+dist)%5!==2)c.fillRect((ROAD_L+ROAD_R)/2-3,y,6,30);}
+  c.fillStyle='#C9CDD4';c.fillRect(ROAD_L+2,0,3,VH);c.fillRect(ROAD_R-5,0,3,VH);
+
+  // world objects (stops & zones) placed by upcoming distance
+  world.forEach(w=>{
+    const dy=(w.mi-dist)*220;          // px per mile ahead
+    const y=VH-190-dy;
+    if(w.kind==='zone'){
+      // each piece of the trap checks its own visibility
+      const wy=VH-190-((w.mi-1.6-dist)*220);
+      if(wy>-70&&wy<VH+50)signWarn(ROAD_R+18,wy,night);              // yellow diamond, ahead of zone
+      if(y>-70&&y<VH+50)signLimit(ROAD_R+18,y,w.limit,night);        // white board at zone start
+      const cy2=VH-190-((w.mi+w.len*0.5-dist)*220);
+      if(cy2>-90&&cy2<VH+70)cruiser(ROAD_R+12,cy2,night);            // the law, behind the billboard
+      return;
+    }
+    if(y<-160||y>VH+80)return;
+    if(w.kind==='pass'){
+      drawPassing(ROAD_L-104,y,w.pk,night);
+      if(!w.seen&&Math.abs(dist-w.mi)<0.35){w.seen=true;passingLine(w.pk);}
+      return;
+    }
+    if(w.kind==='sign'){
+      if(w.st==='shield')signShield(ROAD_R+18,y,LEGHWY[Math.min(leg,4)],night);
+      else signDist(ROAD_R+16,y,LEGS[leg].to,Math.max(1,Math.round(LEGS[leg].mi-w.mi)),night);
+    }else{
+      const sy=VH-190-((w.mi-0.9-dist)*220);
+      if(sy>-70&&sy<VH+50)signGuide(ROAD_R+16,sy,w.listed,night);
+      building(ROAD_R+10,y,w,night);
+    }
+  });
+
+  // potholes & traffic
+  pot2.forEach(p=>{c.fillStyle='rgba(20,22,26,0.9)';
+    c.beginPath();c.ellipse(p.x,p.y,13,7,0,0,Math.PI*2);c.fill();
+    c.strokeStyle='rgba(0,0,0,0.4)';c.stroke();});
+  traffic.forEach(t=>car(t.x,t.y,t.c1||'#7A8A9A',t.c2||'#5A6A7A',night));
+
+  // player car — the Buick
+  car(carX,VH-170,'#7A2E28','#5A1E1A',night,true);
+
+  // dusk wash + night dark & headlights
+  if(!night&&duskT>0){c.fillStyle=`rgba(80,40,90,${duskT*0.25})`;c.fillRect(0,0,VW,VH);}
+  if(night){
+    c.fillStyle='rgba(4,6,14,0.55)';c.fillRect(0,0,VW,VH);
+    const hg=c.createRadialGradient(carX+19,VH-190,10,carX+19,VH-320,190);
+    hg.addColorStop(0,'rgba(255,240,190,0.30)');hg.addColorStop(1,'rgba(255,240,190,0)');
+    c.fillStyle=hg;c.beginPath();
+    c.moveTo(carX+2,VH-176);c.lineTo(carX-52,VH-380);c.lineTo(carX+92,VH-380);c.lineTo(carX+36,VH-176);c.closePath();c.fill();
+  }
+  // corner vignette
+  const vg2=c.createRadialGradient(VW/2,VH/2,VH*0.42,VW/2,VH/2,VH*0.86);
+  vg2.addColorStop(0,'rgba(0,0,0,0)');vg2.addColorStop(1,night?'rgba(0,0,8,0.34)':'rgba(20,14,4,0.16)');
+  c.fillStyle=vg2;c.fillRect(0,0,VW,VH);
+  // pfx & message
+  pfx.forEach(p=>{c.fillStyle=p.col;c.globalAlpha=Math.min(1,p.l/14);c.fillRect(p.x-1.5,p.y-1.5,3,3);c.globalAlpha=1;});
+  if(msgT>0){c.fillStyle='rgba(10,18,12,0.8)';
+    c.font='13px Georgia';c.fillRect(VW/2-140,44,280,30);
+    c.fillStyle='#F2EBD8';c.textAlign='center';c.fillText(gameMsg,VW/2,64);c.textAlign='left';}
+  if(famT>0){
+    const a=Math.min(1,famT/40);
+    c.globalAlpha=a;
+    c.fillStyle='rgba(242,235,216,0.94)';
+    c.beginPath();c.roundRect?c.roundRect(VW/2-180,84,360,48,8):c.rect(VW/2-180,84,360,48);c.fill();
+    c.fillStyle='#1E6E4E';c.font='bold 11px "Courier New"';c.textAlign='left';
+    c.fillText(famWho.toUpperCase(),VW/2-168,100);
+    c.fillStyle='#20241E';c.font='italic 12px Georgia';
+    c.fillText(famTxt.slice(0,64),VW/2-168,116);
+    if(famTxt.length>64)c.fillText(famTxt.slice(64,128),VW/2-168,128);
+    c.globalAlpha=1;c.textAlign='left';}
+  // miles-to-go strip
+  c.fillStyle='rgba(10,18,12,0.7)';c.fillRect(VW/2-90,VH-34,180,24);
+  c.fillStyle='#E8B84A';c.font='12px "Courier New"';c.textAlign='center';
+  c.fillText(`${LEGS[leg].to} · ${Math.max(0,Math.ceil(LEGS[leg].mi-dist))} MI`,VW/2,VH-18);c.textAlign='left';
+}
+function mix(a,b,t){const pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1),16);
+  const r=(pa>>16)+(((pb>>16)-(pa>>16))*t),g2=((pa>>8)&255)+((((pb>>8)&255)-((pa>>8)&255))*t),bl=(pa&255)+(((pb&255)-(pa&255))*t);
+  return `rgb(${r|0},${g2|0},${bl|0})`;}
+function car(x,y,col,col2,night,player){
+  // ── a rounded early-50s body: fenders, chrome, whitewalls ──
+  c.fillStyle='rgba(0,0,0,0.30)';
+  c.beginPath();c.ellipse(x+19+shDX*0.8,y+34,20*shLen*0.9+8,26*Math.min(shLen,1.25),0,0,Math.PI*2);c.fill();
+  c.save();
+  if(player){
+    const tilt=Math.max(-0.06,Math.min(0.06,carV*0.012));
+    const sway=Math.sin(tick*0.11)*(speed>4?0.8:0);
+    c.translate(x+19,y+32+sway);c.rotate(tilt);c.translate(-(x+19),-(y+32+sway));
+  }
+  // whitewall tires peeking
+  c.fillStyle='#181818';
+  c.fillRect(x-4,y+7,6,14);c.fillRect(x+36,y+7,6,14);c.fillRect(x-4,y+40,6,14);c.fillRect(x+36,y+40,6,14);
+  c.fillStyle='#E8E4D8';
+  c.fillRect(x-3,y+11,4,6);c.fillRect(x+37,y+11,4,6);c.fillRect(x-3,y+44,4,6);c.fillRect(x+37,y+44,4,6);
+  // body with bulged fenders
+  c.fillStyle=col;
+  c.beginPath();
+  c.moveTo(x+6,y+2);c.quadraticCurveTo(x+19,y-4,x+32,y+2);        // nose
+  c.quadraticCurveTo(x+42,y+10,x+40,y+22);                        // right front fender
+  c.lineTo(x+40,y+40);c.quadraticCurveTo(x+42,y+54,x+32,y+60);    // right rear
+  c.quadraticCurveTo(x+19,y+65,x+6,y+60);                         // tail
+  c.quadraticCurveTo(x-4,y+54,x-2,y+40);c.lineTo(x-2,y+22);       // left rear→front
+  c.quadraticCurveTo(x-4,y+10,x+6,y+2);c.closePath();c.fill();
+  // body highlight down the hood
+  c.fillStyle='rgba(255,255,255,0.16)';
+  c.beginPath();c.ellipse(x+19,y+12,11,8,0,0,Math.PI*2);c.fill();
+  // chrome bumpers
+  c.fillStyle=night?'#9AA0A8':'#D8DCE2';
+  c.fillRect(x+2,y-1,34,3);c.fillRect(x+2,y+60,34,3);
+  // greenhouse (roof + glass)
+  c.fillStyle=col2;
+  c.beginPath();c.moveTo(x+7,y+18);c.quadraticCurveTo(x+19,y+13,x+31,y+18);
+  c.lineTo(x+31,y+44);c.quadraticCurveTo(x+19,y+49,x+7,y+44);c.closePath();c.fill();
+  c.fillStyle=night?'rgba(180,205,235,0.28)':'rgba(190,215,240,0.6)';
+  c.beginPath();c.moveTo(x+9,y+19);c.quadraticCurveTo(x+19,y+15,x+29,y+19);
+  c.lineTo(x+28,y+27);c.lineTo(x+10,y+27);c.closePath();c.fill();     // windshield
+  c.fillRect(x+9,y+37,20,7);                                          // rear glass
+  // roof shine
+  c.fillStyle='rgba(255,255,255,0.10)';c.fillRect(x+10,y+29,18,6);
+  if(player){
+    c.fillStyle=night?'#FFF2C0':'#F2EBD8';c.fillRect(x+6,y-3,7,4);c.fillRect(x+25,y-3,7,4);   // headlamps
+    c.fillStyle='#D84A3A';c.fillRect(x+6,y+61,7,3);c.fillRect(x+25,y+61,7,3);                 // tails
+    // roof luggage — the family's cases strapped up top
+    c.fillStyle='#6E4E2E';c.fillRect(x+11,y+28,16,10);
+    c.fillStyle='#8A6A42';c.fillRect(x+12,y+29,14,3);
+    c.strokeStyle='#3A2C1A';c.lineWidth=1.5;
+    c.beginPath();c.moveTo(x+15,y+27);c.lineTo(x+15,y+39);c.moveTo(x+23,y+27);c.lineTo(x+23,y+39);c.stroke();
+    if(speed>4&&tick%5<3){c.fillStyle='rgba(200,200,190,0.25)';                                // exhaust
+      c.beginPath();c.arc(x+30+Math.sin(tick*0.4)*2,y+68,3+(tick%9)*0.4,0,Math.PI*2);c.fill();}
+  }
+  c.restore();
+}
+function drawProp(pr,night){
+  const px2=pr.side<0?ROAD_L-58-((pr.seed)%26):ROAD_R+34+((pr.seed)%26);
+  const y=pr.y,sd=pr.seed;
+  // sun-cast ground shadow
+  if(!night&&pr.kind!=='corn'&&pr.kind!=='field'&&pr.kind!=='cotton'){
+    c.fillStyle='rgba(0,0,0,0.16)';
+    c.beginPath();c.ellipse(px2+16+shDX,y+28,17*shLen,5,0,0,Math.PI*2);c.fill();}
+  const dim=night?0.42:1;
+  const col=(d,n)=>night?n:d;
+  c.save();
+  if(pr.kind==='corn'){
+    c.strokeStyle=col('#5A7A2E','#1E2A12');c.lineWidth=2;
+    for(let k=0;k<4;k++){const cx2=px2+k*9;
+      c.beginPath();c.moveTo(cx2,y+26);c.lineTo(cx2,y);c.moveTo(cx2,y+8);c.lineTo(cx2+5,y+2);
+      c.moveTo(cx2,y+14);c.lineTo(cx2-5,y+8);c.stroke();}}
+  else if(pr.kind==='cotton'){
+    c.fillStyle=col('#4E5E38','#1A2012');c.fillRect(px2,y+16,40,10);
+    c.fillStyle=col('#EFEAE0','#8A887E');
+    for(let k=0;k<7;k++)c.beginPath(),c.arc(px2+4+((sd+k*13)%36),y+14+((sd+k*7)%10),2.4,0,Math.PI*2),c.fill();}
+  else if(pr.kind==='barn'){
+    c.fillStyle=col('#8E3B2E','#2E1512');c.fillRect(px2,y,44,30);
+    c.fillStyle=col('#5A2820','#1A0C0A');
+    c.beginPath();c.moveTo(px2-4,y);c.lineTo(px2+22,y-16);c.lineTo(px2+48,y);c.closePath();c.fill();
+    c.fillStyle=col('#F2EBD8','#4A463C');c.fillRect(px2+17,y+12,10,18);
+    c.strokeStyle=col('#F2EBD8','#4A463C');c.strokeRect(px2+17.5,y+12.5,9,17);}
+  else if(pr.kind==='silo'){
+    c.fillStyle=col('#9AA0A8','#33363C');c.fillRect(px2+6,y-14,16,44);
+    c.fillStyle=col('#6E747C','#22252A');
+    c.beginPath();c.arc(px2+14,y-14,8,Math.PI,0);c.fill();}
+  else if(pr.kind==='windmill'){
+    c.strokeStyle=col('#5A5348','#22201C');c.lineWidth=2;
+    c.beginPath();c.moveTo(px2+10,y+30);c.lineTo(px2+16,y-6);c.moveTo(px2+22,y+30);c.lineTo(px2+16,y-6);c.stroke();
+    c.save();c.translate(px2+16,y-8);c.rotate(tick*0.04+sd);
+    for(let k=0;k<4;k++){c.rotate(Math.PI/2);c.fillStyle=col('#B8B4A8','#3E3C36');c.fillRect(-1,-12,2,12);}c.restore();}
+  else if(pr.kind==='watertower'){
+    c.strokeStyle=col('#5A5348','#22201C');c.lineWidth=2;
+    c.beginPath();c.moveTo(px2+4,y+34);c.lineTo(px2+10,y);c.moveTo(px2+28,y+34);c.lineTo(px2+22,y);c.stroke();
+    c.fillStyle=col('#8A8478','#2E2C28');
+    c.beginPath();c.ellipse(px2+16,y-4,15,11,0,0,Math.PI*2);c.fill();
+    c.fillStyle=col('#6E6A5E','#242220');c.beginPath();c.ellipse(px2+16,y-12,10,4,0,0,Math.PI*2);c.fill();}
+  else if(pr.kind==='shack'){
+    c.fillStyle=col('#7A6A4E','#26221A');c.fillRect(px2,y+4,34,22);
+    c.fillStyle=col('#4E4232','#161410');
+    c.beginPath();c.moveTo(px2-3,y+4);c.lineTo(px2+17,y-8);c.lineTo(px2+37,y+4);c.closePath();c.fill();
+    c.fillStyle=night?'rgba(255,220,150,0.75)':'#3A3226';c.fillRect(px2+6,y+10,7,8);
+    c.fillStyle=col('#3A3226','#100E0A');c.fillRect(px2+22,y+10,7,16);}
+  else if(pr.kind==='church'){
+    c.fillStyle=col('#F2EBD8','#4A463E');c.fillRect(px2,y,30,26);
+    c.fillStyle=col('#C9C2B0','#33302A');
+    c.beginPath();c.moveTo(px2-3,y);c.lineTo(px2+15,y-14);c.lineTo(px2+33,y);c.closePath();c.fill();
+    c.fillStyle=col('#F2EBD8','#4A463E');c.fillRect(px2+11,y-30,8,18);
+    c.beginPath();c.moveTo(px2+9,y-30);c.lineTo(px2+15,y-40);c.lineTo(px2+21,y-30);c.closePath();c.fill();
+    c.strokeStyle=col('#6E6A5E','#8A867A');c.lineWidth=2;
+    c.beginPath();c.moveTo(px2+15,y-46);c.lineTo(px2+15,y-38);c.moveTo(px2+11,y-43);c.lineTo(px2+19,y-43);c.stroke();
+    c.fillStyle=night?'rgba(255,220,150,0.8)':'#7A94B8';c.fillRect(px2+12,y+8,6,10);}
+  else if(pr.kind==='pine'){
+    c.fillStyle=col('#4E3A26','#1A140E');c.fillRect(px2+12,y+16,5,16);
+    c.fillStyle=col('#2E5230','#0E1C10');
+    for(let k=0;k<3;k++){c.beginPath();c.moveTo(px2+14.5,y-16+k*12);
+      c.lineTo(px2+30-k*3,y+6+k*12);c.lineTo(px2-1+k*3,y+6+k*12);c.closePath();c.fill();}}
+  else if(pr.kind==='cypress'){
+    c.fillStyle=col('#4E4232','#181510');c.fillRect(px2+12,y+8,6,26);
+    c.fillStyle=col('#3E5E3E','#121E14');
+    c.beginPath();c.ellipse(px2+15,y,17,13,0,0,Math.PI*2);c.fill();
+    c.strokeStyle=col('#7A8A6E','#2A3324');c.lineWidth=2;              // spanish moss
+    for(let k=0;k<4;k++){c.beginPath();c.moveTo(px2+4+k*8,y+4);
+      c.quadraticCurveTo(px2+4+k*8+2,y+14,px2+4+k*8-1,y+20);c.stroke();}}
+  else if(pr.kind==='field'){
+    c.strokeStyle=col('#7A8A4E','#242A16');c.lineWidth=2;
+    for(let k=0;k<5;k++){c.beginPath();c.moveTo(px2+k*8,y+22);c.lineTo(px2+k*8+3,y+6);c.stroke();}}
+  else if(pr.kind==='billboard'){
+    c.fillStyle=col('#4E3A26','#1A140E');c.fillRect(px2+8,y+14,4,22);c.fillRect(px2+30,y+14,4,22);
+    c.fillStyle=col('#F2EBD8','#3E3A30');c.fillRect(px2-2,y-16,46,32);
+    c.strokeStyle=col('#8E3B2E','#55231C');c.lineWidth=2;c.strokeRect(px2-1,y-15,44,30);
+    c.fillStyle=col('#8E3B2E','#8A5048');c.font='bold 8px "Courier New"';c.textAlign='center';
+    (pr.txt||'').split('\\n').forEach((ln,i)=>c.fillText(ln,px2+21,y-4+i*10));c.textAlign='left';}
+  c.restore();
+}
+function rr(x,y,w,h,r){c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h);c.fill();}
+const passSaid={};
+function passingLine(pk){
+  if(passSaid[pk])return;passSaid[pk]=true;
+  if(pk==='motorcourt'){fam('Robbie','“That motel\u2019s got a POOL. A real one.”');
+    setTimeout(()=>fam('Ruth','(a beat) “Count your plates, baby. Memphis has a river.”'),4500);}
+  else if(pk==='diner'){fam('June','“Their sign says AIR COOLED. Ours says roll the window down.”');}
+  else{fam('Robbie','“A drive-in! Can we— ”');
+    setTimeout(()=>fam('June','(quietly) “Not that one, Robbie.”'),3500);}
+}
+function drawPassing(x,y,pk,night){
+  const duskish=night||clock>17.5*60;
+  c.fillStyle='rgba(0,0,0,0.24)';c.fillRect(x+6,y+30,88,8);
+  if(pk==='motorcourt'){
+    c.fillStyle=night?'#242A26':'#7A8E86';c.fillRect(x,y-6,92,38);
+    c.fillStyle=night?'#161A18':'#5A6E66';
+    c.beginPath();c.moveTo(x-4,y-6);c.lineTo(x+46,y-20);c.lineTo(x+96,y-6);c.closePath();c.fill();
+    for(let k=0;k<4;k++){c.fillStyle=duskish?'rgba(255,235,170,0.85)':'#EDE8DA';
+      c.fillRect(x+8+k*22,y+2,12,11);}
+    // the pool
+    c.fillStyle=night?'#1E3A50':'#5FA8C9';
+    c.beginPath();c.ellipse(x+70,y+44,20,8,0,0,Math.PI*2);c.fill();
+    c.strokeStyle='rgba(255,255,255,0.4)';c.lineWidth=1;
+    c.beginPath();c.ellipse(x+70,y+44,20,8,0,0,Math.PI*2);c.stroke();
+    if(duskish){const nz=0.6+0.35*Math.sin(tick*0.13);
+      c.fillStyle=`rgba(120,220,255,${nz})`;c.font='bold 8px "Courier New"';c.textAlign='center';
+      c.fillText('MOTOR COURT',x+46,y-26);
+      c.fillStyle=`rgba(255,120,140,${nz})`;c.fillText('VACANCY · POOL',x+46,y-36);c.textAlign='left';}
+  }else if(pk==='diner'){
+    // chrome streamliner
+    c.fillStyle=night?'#3A3E44':'#C9CDD4';
+    c.beginPath();c.roundRect?c.roundRect(x+4,y-8,84,36,10):c.rect(x+4,y-8,84,36);c.fill();
+    c.fillStyle='rgba(255,255,255,0.22)';c.fillRect(x+6,y-5,80,4);
+    c.fillStyle=duskish?'rgba(255,235,170,0.85)':'#B9D2E0';
+    for(let k=0;k<5;k++)c.fillRect(x+10+k*16,y+2,10,9);
+    c.fillStyle='#B54232';c.fillRect(x+4,y+16,84,4);
+    if(duskish){const nz=0.6+0.35*Math.sin(tick*0.11+2);
+      c.fillStyle=`rgba(255,170,90,${nz})`;c.font='bold 8px "Courier New"';c.textAlign='center';
+      c.fillText('EAT · AIR COOLED',x+46,y-14);c.textAlign='left';}
+  }else{ // drive-in
+    c.fillStyle=night?'#2A2E34':'#B9BEC6';c.fillRect(x+8,y-30,76,44);
+    c.strokeStyle='#1E1E1E';c.lineWidth=2;c.strokeRect(x+9,y-29,74,42);
+    if(night){c.fillStyle='rgba(220,230,255,0.65)';c.fillRect(x+13,y-25,66,34);
+      c.fillStyle='rgba(40,60,90,0.5)';c.fillRect(x+22,y-16,20,14);}
+    c.fillStyle=night?'#141410':'#4E3A26';c.fillRect(x+40,y+14,10,18);
+    if(duskish){const nz=0.6+0.35*Math.sin(tick*0.12+4);
+      c.fillStyle=`rgba(255,120,200,${nz})`;c.font='bold 8px "Courier New"';c.textAlign='center';
+      c.fillText('STARLITE DRIVE-IN',x+46,y+40);c.textAlign='left';}
+  }
+}
+function cruiser(x,y,night){
+  c.save();
+  c.translate(x+20,y+30);c.rotate(-0.18);c.translate(-(x+20),-(y+30));
+  // shadow
+  c.fillStyle='rgba(0,0,0,0.3)';c.beginPath();c.ellipse(x+20+shDX*0.6,y+32,22,8,0,0,Math.PI*2);c.fill();
+  // black & white body
+  c.fillStyle='#1A1C20';
+  c.beginPath();
+  c.moveTo(x+7,y+2);c.quadraticCurveTo(x+20,y-3,x+33,y+2);
+  c.quadraticCurveTo(x+41,y+10,x+39,y+22);c.lineTo(x+39,y+40);
+  c.quadraticCurveTo(x+41,y+52,x+33,y+58);c.quadraticCurveTo(x+20,y+63,x+7,y+58);
+  c.quadraticCurveTo(x-1,y+52,x+1,y+40);c.lineTo(x+1,y+22);
+  c.quadraticCurveTo(x-1,y+10,x+7,y+2);c.closePath();c.fill();
+  c.fillStyle='#E8E8E4';c.fillRect(x+4,y+22,32,16);                 // white door band
+  c.fillStyle='#1A1C20';c.font='bold 6px "Courier New"';c.textAlign='center';
+  c.fillText('POLICE',x+20,y+32);c.textAlign='left';
+  // glass
+  c.fillStyle=night?'rgba(170,195,225,0.3)':'rgba(185,210,235,0.6)';
+  c.fillRect(x+8,y+8,24,9);c.fillRect(x+8,y+42,24,8);
+  // roof beacon — glows at dusk/night
+  const duskish=night||clock>17.5*60;
+  c.fillStyle=duskish?`rgba(255,60,60,${0.6+0.4*Math.sin(tick*0.3)})`:'#B54232';
+  c.beginPath();c.arc(x+20,y+28,3.4,0,Math.PI*2);c.fill();
+  if(duskish){c.fillStyle=`rgba(255,60,60,${0.12+0.1*Math.sin(tick*0.3)})`;
+    c.beginPath();c.arc(x+20,y+28,12,0,Math.PI*2);c.fill();}
+  c.restore();
+  // the billboard it hides behind
+  c.fillStyle=night?'#1A140E':'#4E3A26';c.fillRect(x+44,y+2,4,34);
+  c.fillStyle=night?'#3E3A30':'#F2EBD8';c.fillRect(x+36,y-22,52,26);
+  c.strokeStyle=night?'#55231C':'#8E3B2E';c.lineWidth=2;c.strokeRect(x+37,y-21,50,24);
+  c.fillStyle=night?'#8A5048':'#8E3B2E';c.font='bold 7px "Courier New"';c.textAlign='center';
+  c.fillText('DRIVE',x+62,y-12);c.fillText('SAFELY',x+62,y-3);c.textAlign='left';
+}
+function signPost(x,y,h,night){
+  c.fillStyle=night?'#33363C':'#8A8E96';c.fillRect(x+18,y,4,h);
+  c.fillStyle='rgba(0,0,0,0.25)';c.beginPath();c.ellipse(x+20+shDX*0.5,y+h+2,10*shLen,3,0,0,Math.PI*2);c.fill();
+}
+function signShield(x,y,num,night){
+  signPost(x,y,34,night);
+  // federal US route shield
+  c.fillStyle=night?'#B9BEC6':'#F2F2EE';
+  c.beginPath();
+  c.moveTo(x+4,y-24);c.quadraticCurveTo(x+20,y-30,x+36,y-24);
+  c.quadraticCurveTo(x+37,y-8,x+30,y+2);c.quadraticCurveTo(x+20,y+10,x+10,y+2);
+  c.quadraticCurveTo(x+3,y-8,x+4,y-24);c.closePath();c.fill();
+  c.strokeStyle='#1E1E1E';c.lineWidth=2;c.stroke();
+  c.fillStyle='#1E1E1E';c.font='bold 7px "Courier New"';c.textAlign='center';
+  c.fillText('U S',x+20,y-16);
+  c.font='bold 13px "Courier New"';c.fillText(num,x+20,y-3);c.textAlign='left';
+}
+function signDist(x,y,city,mi,night){
+  signPost(x,y,30,night);
+  c.fillStyle=night?'#B9BEC6':'#F6F6F0';
+  c.fillRect(x-14,y-24,68,24);
+  c.strokeStyle='#1E1E1E';c.lineWidth=2;c.strokeRect(x-13,y-23,66,22);
+  c.fillStyle='#1E1E1E';c.font='bold 9px "Courier New"';c.textAlign='center';
+  c.fillText(city,x+20,y-13);
+  c.fillText(mi+' MI',x+20,y-4);c.textAlign='left';
+}
+function signLimit(x,y,limit,night){
+  signPost(x,y,32,night);
+  c.fillStyle=night?'#C6CACF':'#FFFFFF';
+  c.fillRect(x+2,y-32,36,32);
+  c.strokeStyle='#1E1E1E';c.lineWidth=2;c.strokeRect(x+3,y-31,34,30);
+  c.fillStyle='#1E1E1E';c.font='bold 7px "Courier New"';c.textAlign='center';
+  c.fillText('SPEED',x+20,y-23);c.fillText('LIMIT',x+20,y-16);
+  c.font='bold 13px "Courier New"';c.fillText(limit,x+20,y-4);c.textAlign='left';
+}
+function signWarn(x,y,night){
+  signPost(x,y,30,night);
+  c.save();c.translate(x+20,y-16);c.rotate(Math.PI/4);
+  c.fillStyle=night?'#A8892E':'#E8B84A';c.fillRect(-14,-14,28,28);
+  c.strokeStyle='#1E1E1E';c.lineWidth=2;c.strokeRect(-13,-13,26,26);
+  c.restore();
+  c.fillStyle='#1E1E1E';c.font='bold 7px "Courier New"';c.textAlign='center';
+  c.fillText('SPEED',x+20,y-19);c.fillText('ZONE',x+20,y-11);c.textAlign='left';
+}
+function signGuide(x,y,listed,night){
+  signPost(x,y,32,night);
+  c.fillStyle=listed?(night?'#174A36':'#1E6E4E'):(night?'#3E3B34':'#6E6A5A');
+  c.fillRect(x-8,y-30,56,30);
+  c.strokeStyle=night?'#C9C0A0':'#F2EBD8';c.lineWidth=2;c.strokeRect(x-7,y-29,54,28);
+  c.fillStyle='#F2EBD8';c.font='bold 8px "Courier New"';c.textAlign='center';
+  if(listed){c.fillText('THE GUIDE',x+20,y-19);c.fillText('● LISTED',x+20,y-9);}
+  else{c.fillText('SERVICES',x+20,y-19);c.fillText('○ UNLISTED',x+20,y-9);}
+  c.textAlign='left';
+  if(listed&&(night||clock>17.5*60)){
+    const nz=0.5+0.3*Math.sin(tick*0.15);
+    c.fillStyle=`rgba(140,255,190,${nz*0.25})`;c.fillRect(x-10,y-32,60,34);
+  }
+}
+function building(x,y,w,night){
+  const lit=w.listed;
+  const duskish=night||clock>17.5*60;
+  c.fillStyle='rgba(0,0,0,0.3)';c.fillRect(x+4,y+34,86,8);
+  // walls
+  c.fillStyle=night?'#20261E':(lit?'#5A6E52':'#6E665A');
+  c.fillRect(x,y-8,88,44);
+  // pitched roof
+  c.fillStyle=night?'#141812':'#3E4638';
+  c.beginPath();c.moveTo(x-5,y-8);c.lineTo(x+44,y-26);c.lineTo(x+93,y-8);c.closePath();c.fill();
+  // porch shadow line
+  c.fillStyle='rgba(0,0,0,0.18)';c.fillRect(x,y-8,88,5);
+  // windows / door
+  c.fillStyle=lit?(duskish?'rgba(255,235,170,0.92)':'#F2EBD8'):(duskish?'rgba(120,120,110,0.35)':'#C9C2AE');
+  c.fillRect(x+8,y,18,14);c.fillRect(x+60,y,18,14);
+  c.fillStyle=night?'#100E0A':'#3A3226';c.fillRect(x+36,y,14,26);           // door
+  c.fillStyle='#B8912E';c.fillRect(x+47,y+12,2,3);                          // knob
+  if(w.kind==='stand'){
+    // little produce table under a striped awning instead of a full building — redraw over walls
+    c.fillStyle=night?'#10231B':'#7FA36A';c.fillRect(x-2,y-28,94,76); // grass patch covers building box
+    c.fillStyle='#6E4E2E';c.fillRect(x+18,y+8,52,16);                 // table
+    c.fillStyle='#4E3A26';c.fillRect(x+22,y+24,4,10);c.fillRect(x+62,y+24,4,10);
+    for(let k=0;k<6;k++){c.fillStyle=['#D97742','#E8C55A','#8E9E3E'][k%3];
+      c.beginPath();c.arc(x+26+k*7,y+6,3.4,0,Math.PI*2);c.fill();}
+    c.fillStyle='#4E3A26';c.fillRect(x+16,y-22,4,32);c.fillRect(x+68,y-22,4,32);
+    for(let k=0;k<6;k++){c.fillStyle=k%2?'#B54232':'#F2EBD8';
+      c.fillRect(x+12+k*11,y-28,11,10);}                              // awning stripes
+  }
+  else if(w.kind==='picnic'){
+    c.fillStyle=night?'#10231B':'#7FA36A';c.fillRect(x-2,y-28,94,76);
+    // two shade trees + a plank table
+    for(const tx of [x+12,x+66]){
+      c.fillStyle='#4E3A26';c.fillRect(tx+8,y+4,5,18);
+      c.fillStyle=night?'#12200F':'#3E6B2E';
+      c.beginPath();c.arc(tx+10,y-6,16,0,Math.PI*2);c.fill();
+      c.fillStyle=night?'rgba(255,255,255,0.03)':'rgba(255,240,150,0.18)';
+      c.beginPath();c.arc(tx+5,y-11,7,0,Math.PI*2);c.fill();}
+    c.fillStyle='#8A6A42';c.fillRect(x+32,y+12,26,7);
+    c.fillStyle='#6E4E2E';c.fillRect(x+34,y+19,4,8);c.fillRect(x+52,y+19,4,8);
+  }
+  // gas pumps
+  if(w.kind==='gas'){
+    for(let k=0;k<2;k++){const gx=x+62+k*14;
+      c.fillStyle='#B54232';c.fillRect(gx,y+20,9,18);
+      c.fillStyle='#F2EBD8';c.fillRect(gx+2,y+22,5,6);
+      c.fillStyle='#2A2018';c.fillRect(gx+3,y+16,3,4);}
+  }
+  // motel neon VACANCY at dusk/night
+  if(w.kind==='motel'&&lit&&duskish){
+    const nz=0.7+0.3*Math.sin(tick*0.12);
+    c.fillStyle=`rgba(255,80,120,${nz})`;c.font='bold 9px "Courier New"';c.textAlign='center';
+    c.fillText('VACANCY',x+44,y-30);
+    c.fillStyle=`rgba(255,80,120,${nz*0.2})`;c.fillRect(x+16,y-38,56,12);
+    c.textAlign='left';}
+  // sign pole with the stop's name
+  c.fillStyle='#4E3A26';c.fillRect(x+92,y-30,4,64);
+  c.fillStyle=lit?'#1E6E4E':'#6E6A5A';
+  c.beginPath();c.arc(x+94,y-36,8,0,Math.PI*2);c.fill();
+  c.fillStyle='#F2EBD8';c.font='9px "Courier New"';c.textAlign='center';
+  c.fillText(lit?'●':'○',x+94,y-33);
+  // name plate
+  c.fillStyle=night?'rgba(20,24,18,0.85)':'rgba(242,235,216,0.92)';
+  c.fillRect(x+2,y+40,84,12);
+  c.fillStyle=night?'#D8CFA8':'#33382E';
+  c.fillText(w.name,x+44,y+49);c.textAlign='left';
+  // pull-off pad with tire marks
+  c.fillStyle=night?'rgba(180,170,130,0.12)':'rgba(180,170,130,0.3)';
+  c.fillRect(ROAD_R-30,y+8,30,44);
+  c.strokeStyle='rgba(0,0,0,0.1)';c.lineWidth=3;
+  c.beginPath();c.moveTo(ROAD_R-26,y+50);c.quadraticCurveTo(ROAD_R-10,y+30,ROAD_R-8,y+12);c.stroke();
+}
+function loop(){step();render();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>
