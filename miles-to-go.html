@@ -454,7 +454,19 @@ function bt(id,k){const b=document.getElementById(id);
   b.addEventListener('touchstart',e=>{e.preventDefault();T[k]=true;},{passive:false});
   b.addEventListener('touchend',e=>{e.preventDefault();T[k]=false;},{passive:false});
   b.addEventListener('touchcancel',()=>T[k]=false);}
-bt('tL','l');bt('tR','r');bt('tGo','g');bt('tBr','b');
+bt('tL','l');bt('tR','r');
+// GAS = tap to toggle cruise (no holding); BRAKE tap cancels cruise
+(function(){
+  const g=document.getElementById('tGo'),b=document.getElementById('tBr');
+  g.addEventListener('touchstart',e=>{e.preventDefault();
+    T.g=!T.g;
+    g.textContent=T.g?'CRUISE ✓':'GAS';
+    g.style.background=T.g?'rgba(95,179,121,.3)':'rgba(10,18,12,.5)';},{passive:false});
+  b.addEventListener('touchstart',e=>{e.preventDefault();T.b=true;
+    if(T.g){T.g=false;g.textContent='GAS';g.style.background='rgba(10,18,12,.5)';}},{passive:false});
+  b.addEventListener('touchend',e=>{e.preventDefault();T.b=false;},{passive:false});
+  b.addEventListener('touchcancel',()=>T.b=false);
+})();
 
 /* ── leg generation ── */
 const LEGHWY=['66','61','51','49','11'];
@@ -643,7 +655,9 @@ function teach(key,then){
 }
 
 /* ── events ── */
-function pause(){state='event';}
+function pause(){state='event';
+  if(T.g){T.g=false;const g=document.getElementById('tGo');
+    if(g){g.textContent='GAS';g.style.background='rgba(10,18,12,.5)';}}}
 function resume(){document.getElementById('ovEvent').classList.remove('on');state='drive';}
 function showEvent(head,ok,text,btns){
   pause();
