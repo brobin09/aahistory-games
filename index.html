@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Card Catalog · Historical Games</title>
+<style>
+/* ════════════════════════════════════════════════════════════
+   THE CARD CATALOG — a reception desk for a suite of history games
+   Identity distinct from every game: oak drawers, index cards,
+   typewriter labels, the rubber date-stamp. Not any one game's
+   world — the room where all of them are checked out.
+   ════════════════════════════════════════════════════════════ */
+:root{
+  --oak:#5A3E24; --oak-dk:#3E2A18; --oak-lt:#6E4E2E;
+  --brass:#B8912E; --brass-lt:#D4AF37;
+  --card:#F4EDDD; --card-edge:#E0D5BC; --card-line:#B9C4C9;
+  --card-red:#B23A32;
+  --type:#2B2016; --type-soft:#5C4C38; --type-faint:#8B7A61;
+  --stamp:#3A6A6E;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}*{animation:none!important;transition:none!important;}}
+body{
+  font-family:'Courier New',Courier,monospace;color:var(--type);min-height:100dvh;
+  background:
+    repeating-linear-gradient(90deg,rgba(0,0,0,0.04) 0 2px,transparent 2px 5px),
+    linear-gradient(180deg,var(--oak-lt),var(--oak) 40%,var(--oak-dk));
+  background-attachment:fixed;
+}
+a{color:inherit;text-decoration:none;}
+
+.wrap{max-width:940px;margin:0 auto;padding:clamp(20px,5vw,44px) 16px 60px;}
+
+/* ── the drawer header plate ── */
+.plate{
+  background:linear-gradient(180deg,var(--oak-lt),var(--oak-dk));
+  border:1px solid #2a1c10;border-radius:5px;
+  box-shadow:0 2px 0 #7a5a38 inset,0 12px 30px rgba(0,0,0,.45);
+  padding:clamp(20px,5vw,34px) clamp(18px,5vw,40px);
+  position:relative;margin-bottom:34px;
+}
+.plate::after{ /* brass pull ring */
+  content:'';position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);
+  width:54px;height:26px;border:3px solid var(--brass);border-top:none;
+  border-radius:0 0 30px 30px;box-shadow:0 3px 8px rgba(0,0,0,.4);
+}
+.eyebrow{
+  color:var(--brass-lt);letter-spacing:.42em;font-size:clamp(9.5px,2.6vw,12px);
+  text-align:center;margin-bottom:14px;
+}
+.plate h1{
+  font-family:Georgia,serif;color:var(--card);font-weight:400;text-align:center;
+  font-size:clamp(30px,8vw,58px);line-height:1.0;letter-spacing:.02em;
+  text-shadow:0 2px 0 #2a1c10,0 6px 20px rgba(0,0,0,.5);
+}
+.plate .sub{
+  color:#D8C8A8;text-align:center;font-size:clamp(11.5px,3vw,14px);line-height:1.7;
+  max-width:560px;margin:16px auto 0;font-family:Georgia,serif;font-style:italic;
+}
+.plate .curator{
+  text-align:center;color:var(--brass-lt);font-size:clamp(9.5px,2.5vw,11px);
+  letter-spacing:.2em;margin-top:16px;
+}
+
+/* ── section divider ── */
+.railLabel{
+  display:flex;align-items:center;gap:12px;color:var(--card);
+  letter-spacing:.3em;font-size:clamp(10px,2.7vw,12px);margin:0 4px 16px;
+}
+.railLabel::before,.railLabel::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.25);}
+
+/* ── the cards ── */
+.cards{display:flex;flex-direction:column;gap:20px;}
+.card{
+  display:block;position:relative;background:var(--card);
+  border:1px solid var(--card-edge);border-radius:2px;
+  box-shadow:0 1px 0 #fff8 inset,0 10px 24px rgba(0,0,0,.4);
+  padding:0;overflow:hidden;transition:transform .16s ease,box-shadow .16s ease;
+  /* ruled index-card lines */
+  background-image:
+    linear-gradient(var(--card),var(--card)),
+    repeating-linear-gradient(180deg,transparent 0 33px,var(--card-line) 33px 34px);
+}
+.card:hover{transform:translateY(-3px) rotate(-.25deg);box-shadow:0 16px 34px rgba(0,0,0,.5);}
+.card:focus-visible{outline:3px solid var(--brass-lt);outline-offset:3px;}
+.card .redline{position:absolute;top:0;bottom:0;left:52px;width:1px;background:var(--card-red);opacity:.5;}
+.card .inner{padding:20px 22px 22px 66px;position:relative;}
+.callno{
+  position:absolute;top:16px;left:0;width:52px;text-align:center;
+  color:var(--card-red);font-size:11px;letter-spacing:.05em;line-height:1.4;
+}
+.card h2{
+  font-family:Georgia,serif;font-weight:400;font-size:clamp(19px,5vw,27px);
+  line-height:1.12;letter-spacing:.01em;margin-bottom:3px;
+}
+.card .era{color:var(--stamp);font-size:clamp(10px,2.7vw,12px);letter-spacing:.14em;margin-bottom:12px;}
+.card .desc{
+  font-family:Georgia,serif;font-size:clamp(13px,3.4vw,15px);line-height:1.62;
+  color:var(--type-soft);max-width:60ch;
+}
+.card .meta{
+  display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:14px;
+}
+.tag{
+  border:1px solid var(--card-edge);background:#fff6;border-radius:2px;
+  padding:4px 9px;font-size:clamp(9px,2.4vw,10.5px);letter-spacing:.08em;color:var(--type-faint);
+}
+.card .pull{
+  display:inline-flex;align-items:center;gap:8px;margin-top:16px;
+  color:var(--type);font-size:clamp(11px,3vw,13px);letter-spacing:.14em;font-weight:700;
+}
+.card .pull .arrow{transition:transform .16s ease;}
+.card:hover .pull .arrow{transform:translateX(5px);}
+
+/* rubber date-stamp on each card */
+.stamp{
+  position:absolute;bottom:16px;right:18px;transform:rotate(-7deg);
+  color:var(--stamp);border:2px solid var(--stamp);border-radius:3px;
+  padding:3px 9px;font-size:clamp(9px,2.3vw,10.5px);letter-spacing:.12em;opacity:.62;
+  text-align:center;line-height:1.3;pointer-events:none;
+}
+@media(max-width:520px){.stamp{position:static;display:inline-block;transform:rotate(-2deg);margin-top:14px;}}
+
+/* ── footer / colophon ── */
+.colophon{
+  margin-top:38px;padding:18px 20px;border:1px dashed rgba(255,255,255,.3);border-radius:3px;
+  color:#E4D6BB;font-size:clamp(10.5px,2.8vw,12.5px);line-height:1.8;text-align:center;
+}
+.colophon b{color:var(--brass-lt);letter-spacing:.1em;}
+.colophon a{text-decoration:underline;text-underline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="plate">
+    <div class="eyebrow">DEPARTMENT OF HISTORY · GAMES COLLECTION</div>
+    <h1>The Card Catalog</h1>
+    <p class="sub">A working collection of playable history — each title puts the mechanics in service of the past, so that understanding comes from doing rather than being told. Pull a card to begin.</p>
+    <div class="curator">CURATED BY BRIAN A. ROBINSON</div>
+  </header>
+
+  <div class="railLabel">TITLES IN CIRCULATION</div>
+
+  <nav class="cards">
+
+    <a class="card" href="grain.html">
+      <span class="redline"></span>
+      <div class="inner">
+        <div class="callno">D 973<br>.G7</div>
+        <h2>Against the Grain</h2>
+        <div class="era">THE HISTORIAN'S CRAFT · 1849–1994</div>
+        <p class="desc">Four archive boxes, twelve documents, and a method: source the record, corroborate the claim, read the hostile document against its own purpose, and publish only what the evidence can carry. A puzzle game about how history is actually made.</p>
+        <div class="meta">
+          <span class="tag">SOURCE ANALYSIS</span>
+          <span class="tag">4 CASES</span>
+          <span class="tag">METHODS COURSE</span>
+        </div>
+        <div class="pull">OPEN THE BOX <span class="arrow">→</span></div>
+        <div class="stamp">SOURCE<br>CORROBORATE<br>PUBLISH</div>
+      </div>
+    </a>
+
+    <a class="card" href="parrish.html">
+      <span class="redline"></span>
+      <div class="inner">
+        <div class="callno">F 264<br>.D9</div>
+        <h2>Parrish Street</h2>
+        <div class="era">BUILDING BLACK WALL STREET · 1898–1970</div>
+        <p class="desc">A ledger-book simulation of Durham's Hayti district. Charter the insurance company, capitalize the bank, extend the credit no white lender would — and hold it all together against a system built to stop you. Every decision is written into the ledger, and history's own record waits at the end.</p>
+        <div class="meta">
+          <span class="tag">SIMULATION</span>
+          <span class="tag">23 TURNS</span>
+          <span class="tag">DURHAM HISTORY</span>
+        </div>
+        <div class="pull">OPEN THE LEDGER <span class="arrow">→</span></div>
+        <div class="stamp">1898<br>——<br>1970</div>
+      </div>
+    </a>
+
+    <a class="card" href="freedom-quest.html">
+      <span class="redline"></span>
+      <div class="inner">
+        <div class="callno">E 450<br>.F8</div>
+        <h2>Freedom Quest</h2>
+        <div class="era">A JOURNEY THROUGH BLACK HISTORY · ACTION-RPG</div>
+        <p class="desc">Move through six eras from the plantation to a liberation nexus, meeting the ancestors, answering the knowledge quizzes that open each portal, and facing what stands in the way of freedom. Includes the Hall of Ancestors — an encyclopedia of seventy-seven figures, from Phillis Wheatley to the present.</p>
+        <div class="meta">
+          <span class="tag">ACTION-RPG</span>
+          <span class="tag">6 ZONES</span>
+          <span class="tag">77 IN THE HALL</span>
+          <span class="tag">3 DIFFICULTIES</span>
+        </div>
+        <div class="pull">BEGIN THE JOURNEY <span class="arrow">→</span></div>
+        <div class="stamp">HALL OF<br>ANCESTORS</div>
+      </div>
+    </a>
+
+  </nav>
+
+  <div class="colophon">
+    <b>ON THE SOURCES —</b> These games teach with historical materials. Where documents are invented to model archival patterns, they are labeled as composites within the game; where they reproduce the historical record, that too is noted. Built to be played in classrooms and beyond.
+  </div>
+
+</div>
+</body>
+</html>

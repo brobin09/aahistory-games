@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PARRISH STREET · Building Black Wall Street</title>
+<style>
+/* ════════════════════════════════════════════════════════════
+   PARRISH STREET — Durham, North Carolina · 1898–1970
+   A ledger-book simulation of Black Wall Street
+   Palette: banker's green felt, ledger cream, oxblood, brass
+   ════════════════════════════════════════════════════════════ */
+:root{
+  --felt:#123B2D; --felt-dk:#0B291F; --felt-lt:#1B4A39;
+  --paper:#F2E9D5; --paper-dk:#E4D7BC; --paper-shade:#D8C9A8;
+  --ink:#1C1712; --ink-soft:#4A3F33; --ink-faint:#7A6B57;
+  --oxblood:#7A2E2E; --oxblood-dk:#5C2222;
+  --brass:#C9A227; --brass-dk:#9A7A18;
+  --teal:#3E6B5B;
+  --red-entry:#8E3B2E; --green-entry:#2E5D42;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:Georgia,'Times New Roman',serif;color:var(--ink);
+  background:
+    radial-gradient(ellipse at 50% -10%, var(--felt-lt), transparent 60%),
+    linear-gradient(180deg,var(--felt),var(--felt-dk));
+  min-height:100%;
+}
+button{font-family:Georgia,serif;cursor:pointer;}
+button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+
+/* ── shared paper panel ── */
+.panel{
+  background:var(--paper);
+  border:1px solid #B9A67F;
+  box-shadow:0 1px 0 #fff inset, 0 8px 24px rgba(0,0,0,.45);
+  border-radius:3px;
+}
+
+/* ════════ TITLE SCREEN ════════ */
+#title{
+  position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:24px;
+  background:
+    radial-gradient(ellipse at 50% 20%, var(--felt-lt), transparent 65%),
+    linear-gradient(180deg,var(--felt),var(--felt-dk));
+  overflow-y:auto;
+}
+.marquee{
+  color:var(--brass);letter-spacing:.35em;font-size:clamp(11px,3vw,14px);
+  border-top:1px solid var(--brass-dk);border-bottom:1px solid var(--brass-dk);
+  padding:6px 14px;margin-bottom:18px;
+}
+#title h1{
+  font-size:clamp(38px,11vw,84px);color:var(--paper);font-weight:400;
+  letter-spacing:.06em;line-height:.95;
+  text-shadow:0 2px 0 var(--brass-dk),0 4px 0 rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.6);
+}
+#title h1 span{color:var(--brass);}
+.tsub{color:#BFD3C6;font-style:italic;font-size:clamp(13px,3.4vw,17px);margin:14px 0 4px;max-width:520px;line-height:1.7;}
+.tdates{color:var(--brass);letter-spacing:.4em;font-size:clamp(11px,2.8vw,13px);margin-bottom:26px;font-family:'Courier New',monospace;}
+.tstart{
+  background:linear-gradient(180deg,var(--brass),var(--brass-dk));color:#211A05;border:1px solid #6d5610;
+  font-weight:700;letter-spacing:.2em;font-size:clamp(14px,3.8vw,17px);
+  padding:15px 46px;border-radius:2px;min-height:52px;
+  box-shadow:0 3px 0 #5c470d,0 10px 26px rgba(0,0,0,.5);
+}
+.tstart:active{transform:translateY(2px);box-shadow:0 1px 0 #5c470d;}
+.tnote{color:#7FA18E;font-size:clamp(11px,2.8vw,12.5px);margin-top:22px;max-width:440px;line-height:1.75;font-style:italic;}
+
+/* ── BRIEFING ── */
+#brief{position:fixed;inset:0;z-index:55;display:none;align-items:center;justify-content:center;
+  background:rgba(6,20,15,.92);padding:16px;overflow-y:auto;}
+#brief.on{display:flex;}
+.briefCard{max-width:560px;width:100%;padding:0;overflow:hidden;}
+.briefCard .docket{background:var(--oxblood);}
+.briefBody{padding:16px 20px 20px;font-size:clamp(13.5px,3.5vw,15px);line-height:1.75;color:var(--ink-soft);}
+.briefBody h4{color:var(--oxblood);letter-spacing:.18em;font-size:12px;margin:14px 0 4px;}
+.briefBody h4:first-child{margin-top:0;}
+.briefBody .bres{font-family:'Courier New',monospace;color:var(--teal);font-size:.92em;}
+.briefBody .goal{background:#FBF6E9;border:1px solid #C9B98F;border-left:4px solid var(--brass);
+  padding:10px 12px;margin-top:14px;font-style:italic;}
+
+/* ── YEAR TRACK ── */
+#track{height:14px;position:relative;margin:2px 2px 0;border-radius:7px;overflow:hidden;
+  background:var(--felt-lt);border:1px solid rgba(201,162,39,.4);}
+#trackFill{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,var(--teal),var(--brass));
+  transition:width .5s ease;}
+#trackLbl{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:center;
+  padding:0 8px;font-family:'Courier New',monospace;font-size:9px;color:var(--paper);letter-spacing:.15em;}
+
+/* ── SEASON REPORT ── */
+.season{margin:12px 18px 0;padding:9px 12px;background:#EDF2E8;border:1px solid #A8BCA0;
+  border-left:4px solid var(--green-entry);font-family:'Courier New',monospace;
+  font-size:clamp(11px,2.9vw,12.5px);line-height:1.7;color:var(--green-entry);}
+.season b{letter-spacing:.2em;font-size:.9em;color:var(--ink-soft);display:block;}
+
+/* ── RESOURCE PULSE ── */
+@keyframes pulseUp{0%{transform:scale(1);color:#9BE3B4}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes pulseDn{0%{transform:scale(1);color:#F0937A}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+.rv.up{animation:pulseUp .7s ease;}
+.rv.dn{animation:pulseDn .7s ease;}
+
+/* ════════ GAME LAYOUT ════════ */
+#game{display:none;min-height:100dvh;flex-direction:column;max-width:1060px;margin:0 auto;padding:10px 10px 24px;gap:10px;}
+#game.on{display:flex;}
+
+/* era banner */
+#eraBar{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  color:var(--paper);padding:6px 4px 0;flex-wrap:wrap;
+}
+#eraName{font-size:clamp(15px,4.2vw,21px);letter-spacing:.12em;}
+#eraName b{color:var(--brass);font-weight:400;}
+#yearBox{font-family:'Courier New',monospace;color:var(--brass);font-size:clamp(15px,4.4vw,22px);letter-spacing:.1em;}
+
+/* resource strip — brass plaques */
+#res{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.plaque{
+  background:linear-gradient(180deg,#20514000,#00000030),var(--felt-lt);
+  border:1px solid rgba(201,162,39,.5);border-radius:3px;
+  padding:8px 10px;color:var(--paper);text-align:center;
+}
+.plaque .rl{font-size:clamp(8.5px,2.2vw,10px);letter-spacing:.22em;color:#9FC0AE;}
+.plaque .rv{font-family:'Courier New',monospace;font-size:clamp(15px,4.4vw,21px);color:var(--brass);margin-top:2px;font-weight:700;}
+.plaque .rv small{font-size:.6em;color:#9FC0AE;font-weight:400;}
+.plaque.warn .rv{color:#E08A6D;}
+
+/* main stage */
+#stage{display:grid;grid-template-columns:1fr 300px;gap:10px;align-items:start;}
+@media(max-width:820px){#stage{grid-template-columns:1fr;}}
+
+/* event / action card area */
+#main{padding:0;overflow:hidden;}
+.docket{
+  background:var(--oxblood);color:var(--paper);padding:8px 14px;
+  letter-spacing:.25em;font-size:clamp(10px,2.6vw,11.5px);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.docket .stamp{font-family:'Courier New',monospace;letter-spacing:.05em;opacity:.85;}
+#evTitle{font-size:clamp(17px,4.8vw,24px);padding:16px 18px 4px;line-height:1.25;}
+#evText{padding:8px 18px 6px;font-size:clamp(13.5px,3.5vw,15.5px);line-height:1.75;color:var(--ink-soft);}
+#evText em{color:var(--oxblood);}
+/* document exhibit */
+.exhibit{
+  margin:12px 18px 4px;padding:14px 16px;background:#FBF6E9;
+  border:1px solid #C9B98F;border-left:4px solid var(--brass);
+  font-size:clamp(12.5px,3.2vw,14px);line-height:1.8;color:var(--ink);
+  position:relative;
+}
+.exhibit .exlabel{
+  position:absolute;top:-9px;left:10px;background:var(--brass);color:#211A05;
+  font-size:9.5px;letter-spacing:.2em;padding:2px 8px;font-weight:700;
+}
+.exhibit .exsrc{display:block;margin-top:8px;font-style:italic;color:var(--ink-faint);font-size:.88em;text-align:right;}
+/* choices */
+#choices{display:flex;flex-direction:column;gap:9px;padding:14px 18px 18px;}
+.chc{
+  text-align:left;background:var(--paper-dk);border:1px solid #B29E74;border-radius:3px;
+  padding:12px 14px;font-size:clamp(13px,3.4vw,14.5px);line-height:1.55;color:var(--ink);
+  min-height:50px;transition:background .12s;
+}
+.chc:hover{background:#EADDBE;}
+.chc b{display:block;letter-spacing:.12em;font-size:.86em;color:var(--oxblood);margin-bottom:3px;}
+.chc .fx{display:block;margin-top:5px;font-family:'Courier New',monospace;font-size:.82em;color:var(--teal);}
+.chc.correct{background:#DEE8D6;border-color:var(--green-entry);}
+.chc.wrong{background:#EBD6CE;border-color:var(--red-entry);}
+.chc:disabled{cursor:default;opacity:.75;}
+.contbtn{
+  margin:0 18px 18px;background:linear-gradient(180deg,var(--brass),var(--brass-dk));
+  border:1px solid #6d5610;color:#211A05;font-weight:700;letter-spacing:.2em;
+  padding:13px;border-radius:2px;font-size:clamp(13px,3.6vw,15px);min-height:50px;
+  box-shadow:0 2px 0 #5c470d;
+}
+.contbtn:active{transform:translateY(2px);box-shadow:none;}
+
+/* institutions */
+#instWrap{padding:12px 14px 14px;}
+.secLabel{letter-spacing:.28em;font-size:10.5px;color:var(--oxblood);border-bottom:1px solid #C9B98F;padding-bottom:6px;margin-bottom:10px;display:flex;justify-content:space-between;}
+#instGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;}
+.inst{
+  border:1px solid #B29E74;background:#FBF6E9;border-radius:2px;padding:8px 9px;
+  font-size:12px;line-height:1.45;position:relative;
+}
+.inst .iname{font-weight:700;font-size:12.5px;}
+.inst .iyr{font-family:'Courier New',monospace;color:var(--ink-faint);font-size:10.5px;}
+.inst .ifx{color:var(--teal);font-size:11px;font-style:italic;}
+.inst.gone{background:#E8DDD2;border-style:dashed;}
+.inst.gone .iname{text-decoration:line-through;color:var(--red-entry);}
+.inst.gone::after{
+  content:'DEMOLISHED';position:absolute;top:6px;right:-14px;transform:rotate(12deg);
+  color:var(--red-entry);border:2px solid var(--red-entry);font-size:8.5px;letter-spacing:.15em;
+  padding:1px 5px;font-weight:700;opacity:.85;background:#fff8;
+}
+.inst.moved::after{
+  content:'RELOCATED';position:absolute;top:6px;right:-12px;transform:rotate(12deg);
+  color:var(--teal);border:2px solid var(--teal);font-size:8.5px;letter-spacing:.15em;
+  padding:1px 5px;font-weight:700;opacity:.9;background:#fff8;
+}
+
+/* ════════ THE LEDGER (signature element) ════════ */
+#ledger{
+  padding:0;overflow:hidden;position:sticky;top:10px;
+  background:
+    repeating-linear-gradient(180deg,transparent 0 25px,rgba(62,107,91,.18) 25px 26px),
+    var(--paper);
+}
+#ledger .docket{background:var(--felt);letter-spacing:.3em;}
+#ledEntries{
+  max-height:52dvh;overflow-y:auto;padding:10px 14px 14px 40px;position:relative;
+  font-family:'Courier New',monospace;font-size:12px;line-height:26px;color:var(--ink);
+}
+#ledEntries::before{
+  content:'';position:absolute;left:28px;top:0;bottom:0;width:1px;background:var(--red-entry);opacity:.55;
+}
+.led{display:block;}
+.led .lyr{color:var(--oxblood);font-weight:700;margin-right:6px;}
+.led.gain{color:var(--green-entry);}
+.led.loss{color:var(--red-entry);}
+@media(max-width:820px){
+  #ledger{position:static;}
+  #ledEntries{max-height:180px;}
+}
+
+/* ════════ EPILOGUE ════════ */
+#epi{display:none;position:fixed;inset:0;z-index:60;overflow-y:auto;
+  background:linear-gradient(180deg,var(--felt),var(--felt-dk));padding:26px 14px 60px;}
+#epi.on{display:block;}
+.epiWrap{max-width:720px;margin:0 auto;}
+.epiWrap h2{color:var(--paper);text-align:center;letter-spacing:.15em;font-size:clamp(22px,6vw,34px);font-weight:400;margin-bottom:4px;}
+.epiWrap .esub{color:var(--brass);text-align:center;font-family:'Courier New',monospace;letter-spacing:.3em;font-size:12px;margin-bottom:20px;}
+.scoreCard{padding:16px 18px;margin-bottom:14px;}
+.scoreRow{display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:clamp(12px,3.2vw,14px);padding:5px 0;border-bottom:1px dashed #C9B98F;}
+.scoreRow:last-child{border-bottom:2px solid var(--ink);font-weight:700;}
+.verdict{padding:16px 18px;margin-bottom:14px;font-size:clamp(13.5px,3.5vw,15px);line-height:1.8;color:var(--ink-soft);}
+.verdict h3{color:var(--oxblood);letter-spacing:.15em;font-size:clamp(13px,3.4vw,15px);margin-bottom:8px;}
+.verdict p+p{margin-top:10px;}
+.replay{display:block;margin:22px auto 0;}
+</style>
+</head>
+<body>
+
+<!-- ════════ TITLE ════════ -->
+<div id="title">
+  <div class="marquee">DURHAM · NORTH CAROLINA</div>
+  <h1>PARRISH<br><span>STREET</span></h1>
+  <div class="tsub">Insurance built the bank. The bank built the credit. The credit built Hayti. You will build Black Wall Street — inside a system designed to stop you.</div>
+  <div class="tdates">1898 ——— 1970</div>
+  <button class="tstart" onclick="startGame()">OPEN THE LEDGER</button>
+  <div class="tnote">A historical simulation. Every decision you make is written into the ledger — and at the end, your record is set beside the one history actually wrote.</div>
+</div>
+
+<!-- ════════ BRIEFING ════════ -->
+<div id="brief">
+  <div class="panel briefCard">
+    <div class="docket"><span>YOUR CHARGE</span><span class="stamp">READ ONCE</span></div>
+    <div class="briefBody">
+      <h4>WHO YOU ARE</h4>
+      You sit on the boards of Black Durham's institutions across seventy-two years, from the founding of N.C. Mutual in 1898 to the closing of the books in 1970.
+      <h4>HOW A SEASON PLAYS</h4>
+      History moves first — an event arrives, sometimes with a decision, sometimes with a document to read like a historian. Then the board acts — you pick <em>one</em> initiative. Everything is written into the Ledger on the right.
+      <h4>WHAT THE NUMBERS MEAN</h4>
+      <span class="bres">CAPITAL</span> — money to build with. Institutions earn it every season.<br>
+      <span class="bres">TRUST</span> — the community's faith in the Mile. It drains a little every season; institutions and good choices refill it.<br>
+      <span class="bres">DEPENDENCE</span> — how much you owe white Durham's goodwill. Cheap now, expensive later.<br>
+      <span class="bres">ARCHIVE</span> — the historical record you build by reading documents well.
+      <div class="goal">THE GOAL — reach 1970 with the highest <b>Legacy</b>: institutions standing, trust held, archive full, dependence low. Build early. The final act is coming, and it cannot be stopped — only answered.</div>
+    </div>
+    <button class="contbtn" style="margin:0 20px 20px;width:calc(100% - 40px);" onclick="closeBrief()">TO THE FIRST MEETING · 1898</button>
+  </div>
+</div>
+
+<!-- ════════ GAME ════════ -->
+<div id="game">
+  <div id="eraBar">
+    <div id="eraName">ERA I · <b>FOUNDATIONS</b></div>
+    <div id="yearBox">1898</div>
+  </div>
+
+  <div id="track"><div id="trackFill"></div><div id="trackLbl"><span>1898</span><span>1970</span></div></div>
+
+  <div id="res">
+    <div class="plaque"><div class="rl">CAPITAL</div><div class="rv" id="rCap">$8<small>K</small></div></div>
+    <div class="plaque"><div class="rl">TRUST</div><div class="rv" id="rTrust">40</div></div>
+    <div class="plaque" id="pDep"><div class="rl">DEPENDENCE</div><div class="rv" id="rDep">0</div></div>
+    <div class="plaque"><div class="rl">ARCHIVE</div><div class="rv" id="rArch">0</div></div>
+  </div>
+
+  <div id="stage">
+    <div>
+      <div class="panel" id="main">
+        <div class="docket"><span id="dockLabel">MINUTES OF THE MEETING</span><span class="stamp" id="dockStamp">No. 1</span></div>
+        <div id="evTitle"></div>
+        <div id="evText"></div>
+        <div id="exhibitBox"></div>
+        <div id="choices"></div>
+      </div>
+
+      <div class="panel" id="instWrap" style="margin-top:10px;">
+        <div class="secLabel"><span>INSTITUTIONS OF THE MILE</span><span id="instCount"></span></div>
+        <div id="instGrid"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="ledger">
+      <div class="docket"><span>THE LEDGER</span><span class="stamp">DBL ENTRY</span></div>
+      <div id="ledEntries"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ EPILOGUE ════════ -->
+<div id="epi">
+  <div class="epiWrap">
+    <h2>THE RECORD CLOSES</h2>
+    <div class="esub">DURHAM · 1970</div>
+    <div class="panel scoreCard" id="scoreCard"></div>
+    <div class="panel verdict" id="verdict"></div>
+    <div class="panel verdict" id="history"></div>
+    <button class="tstart replay" onclick="location.reload()">REOPEN THE LEDGER · 1898</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════════════════════ */
+const S={
+  cap:8, trust:40, dep:0, arch:0,
+  turn:0, aggressive:false, reserve:false, mortgages:false,
+  activism:0, savedByBank:false, docsRight:0,
+  inst:{}, // id -> {level, gone, moved}
+};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ════════════════════════════════════════════════════════════
+   INSTITUTIONS
+   inHayti: destroyed in Act V unless relocated by player choice
+   ════════════════════════════════════════════════════════════ */
+const INST={
+  mutual:  {name:'N.C. Mutual Life Insurance', yr:1898, fx:'+$3K per season', inHayti:false},
+  whiterock:{name:'White Rock Baptist Church', yr:1866, fx:'+2 Trust per season', inHayti:true},
+  stjoseph:{name:"St. Joseph's A.M.E.", yr:1869, fx:'+2 Trust per season', inHayti:true},
+  hospital:{name:'Lincoln Hospital', yr:1901, fx:'+2 Trust per season', inHayti:true},
+  bank:    {name:'Mechanics & Farmers Bank', yr:1908, fx:'Capital circulates · +15% interest', inHayti:false},
+  school:  {name:'National Religious Training School', yr:1910, fx:'+1 Trust · +Archive on documents', inHayti:false},
+  library: {name:'Durham Colored Library', yr:1913, fx:'+1 Trust · sharpens documents', inHayti:true},
+  times:   {name:'The Carolina Times', yr:1921, fx:'+1 Trust · unlocks organizing', inHayti:true},
+  biltmore:{name:'Biltmore Hotel & Hayti businesses', yr:1923, fx:'+$2K per season', inHayti:true},
+  housing: {name:'Homeownership Program', yr:0, fx:'+1 Trust · +$1K per season', inHayti:true},
+};
+function found(id,yr){ if(!S.inst[id]){ S.inst[id]={}; if(yr)INST[id].yr=yr; renderInst(); } }
+S.inst.mutual={}; S.inst.whiterock={}; S.inst.stjoseph={};
+
+/* ════════════════════════════════════════════════════════════
+   EFFECTS + LEDGER
+   ════════════════════════════════════════════════════════════ */
+function fx(o){
+  if(o.cap)  S.cap=Math.max(0,S.cap+o.cap);
+  if(o.trust)S.trust=clamp(S.trust+o.trust,0,100);
+  if(o.dep)  S.dep=clamp(S.dep+o.dep,0,100);
+  if(o.arch) S.arch=clamp(S.arch+o.arch,0,12);
+  if(o.found)found(o.found,o.yr);
+  if(o.flag) S[o.flag]=true;
+  renderRes();
+}
+function ledger(yr,text,tone){
+  const d=document.createElement('span');
+  d.className='led'+(tone?' '+tone:'');
+  d.innerHTML=`<span class="lyr">${yr}</span>${text}`;
+  const box=document.getElementById('ledEntries');
+  box.appendChild(d); box.scrollTop=box.scrollHeight;
+}
+function fxLabel(o){
+  const p=[];
+  if(o.cap)p.push((o.cap>0?'+':'')+'$'+o.cap+'K');
+  if(o.trust)p.push((o.trust>0?'+':'')+o.trust+' Trust');
+  if(o.dep)p.push((o.dep>0?'+':'')+o.dep+' Dependence');
+  if(o.arch)p.push('+'+o.arch+' Archive');
+  return p.join(' · ');
+}
+
+/* ════════════════════════════════════════════════════════════
+   PLAYER ACTION POOLS (drawn 3 per turn, era-gated)
+   ════════════════════════════════════════════════════════════ */
+const ACTIONS=[
+  {id:'agents',eras:[1,2,3,4],name:'Hire more Mutual agents',
+   d:'Door to door across the tobacco belt — a policy is a promise, and a premium is capital white banks will never lend us.',
+   e:{cap:3},led:'Agent force expanded — premium income rises.'},
+  {id:'bank',eras:[1,2],once:true,req:s=>!s.inst.bank&&s.cap>=6,name:'Charter Mechanics & Farmers Bank — $6K',
+   d:'Merrick, Moore, and the Mutual men pool capital for a bank of our own. Insurance premiums become deposits. Deposits become credit.',
+   e:{cap:-6,found:'bank',yr:1908},led:'MECHANICS & FARMERS BANK chartered on Parrish Street.',tone:'gain'},
+  {id:'school',eras:[1,2],once:true,req:s=>!s.inst.school&&s.cap>=5,name:"Back Dr. Shepard's Training School — $5K",
+   d:'James E. Shepard wants a school for the training of the race — teachers, ministers, leaders. It will outlive every one of us.',
+   e:{cap:-5,trust:6,found:'school',yr:1910},led:'National Religious Training School opens — Dr. Shepard presiding.',tone:'gain'},
+  {id:'library',eras:[2,3],once:true,req:s=>!s.inst.library&&s.cap>=3,name:'Fund the Durham Colored Library — $3K',
+   d:'Dr. Moore has been running a reading room out of White Rock\'s basement. A people that documents itself cannot be erased.',
+   e:{cap:-3,trust:4,found:'library',yr:1913},led:'Durham Colored Library opens its doors.',tone:'gain'},
+  {id:'times',eras:[2,3],once:true,req:s=>!s.inst.times&&s.cap>=4,name:'Bankroll The Carolina Times — $4K',
+   d:'Louis Austin wants a newspaper that will not bow. "The truth unbridled." It will make enemies. It will make a people.',
+   e:{cap:-4,trust:5,found:'times',yr:1921},led:'THE CAROLINA TIMES begins publication — Austin at the desk.',tone:'gain'},
+  {id:'hayti',eras:[2,3,4],once:true,req:s=>!s.inst.biltmore&&s.cap>=7,name:'Build out Hayti — hotel, theaters, shops — $7K',
+   d:'The Biltmore Hotel, the Regal Theater, groceries, tailors, funeral homes. A city within a city, where a Black dollar can circle all day without leaving.',
+   e:{cap:-7,trust:5,found:'biltmore',yr:1923},led:'Hayti district built out — the Biltmore lights come on.',tone:'gain'},
+  {id:'housing',eras:[2,3,4],once:true,req:s=>s.inst.bank&&!s.inst.housing&&s.cap>=6,name:'Launch a homeownership program — $6K',
+   d:'M&F writes mortgages no white bank will. Ownership is the only wall a family can put between itself and the whims of a landlord.',
+   e:{cap:-6,trust:6,found:'housing',yr:0,flag:'mortgages'},led:'Mortgage program launched — Hayti families begin to own.',tone:'gain'},
+  {id:'reserve',eras:[1,2],once:true,req:s=>s.cap>=4&&!s.reserve,name:'Build a cash reserve — $4K',
+   d:'Spaulding\'s rule: never lend long what you hold short. Boring money is money that survives.',
+   e:{cap:-4,flag:'reserve'},led:'Reserve fund established — conservative books.'},
+  {id:'youth',eras:[2,3,4],name:'Invest in schools and youth programs',
+   d:'Scholarships, teachers\' salaries, a business course at the Training School. The Mile is only as strong as the generation learning to run it.',
+   e:{cap:-2,trust:4},led:'Youth and schools funded.'},
+  {id:'circulate',eras:[3,4],req:s=>s.inst.bank,name:'Double-down on Black credit',
+   d:'Loans to barbers, builders, and burial societies. Each loan is a wager that white Durham refuses to make — and the margins prove them wrong.',
+   e:{cap:3,trust:2},led:'Credit extended along the Mile — repaid with interest.'},
+  {id:'conference',eras:[2,3,4],name:'Host a national Negro business conference',
+   d:'Let Chicago and Atlanta and Tulsa see what Durham has built. Prestige draws deposits — and scrutiny.',
+   e:{cap:2,trust:2,dep:0},led:'National conference hosted — Durham\'s name travels.'},
+  {id:'organize',eras:[4,5],req:s=>s.inst.times,name:'Fund the Durham Committee on Negro Affairs',
+   d:'Austin and the DCNA register voters and press the city. Not charity — power.',
+   e:{cap:-2,trust:5,dep:-4},led:'DCNA organizing funded — voter rolls grow.',tone:'gain'},
+];
+function drawActions(){
+  const era=TIMELINE[S.turn].era;
+  const pool=ACTIONS.filter(a=>a.eras.includes(era)&&(!a.req||a.req(S))&&!(a.once&&a.used));
+  // priority: foundational once-actions first, then shuffle rest
+  const once=pool.filter(a=>a.once), rest=pool.filter(a=>!a.once).sort(()=>Math.random()-.5);
+  return [...once.slice(0,2),...rest].slice(0,3);
+}
+
+/* ════════════════════════════════════════════════════════════
+   TIMELINE — one scripted historical beat per turn
+   type: 'note' (continue) | 'choice' | 'doc'
+   ════════════════════════════════════════════════════════════ */
+const TIMELINE=[
+ {yr:1898,era:1,title:'A Company Is Born',type:'note',
+  text:`John Merrick, barber and businessman. Dr. Aaron Moore, Durham's first Black physician. Seven founders in the back of a drugstore charter the <em>North Carolina Mutual and Provident Association</em>. The same year, white supremacists overthrow the elected government of Wilmington. The message is unmistakable — politics can be taken from you. The founders bet on something harder to seize: an institution. Premiums will come in nickels and dimes, and they will be <em>ours</em>.`,
+  led:['N.C. MUTUAL chartered — Merrick, Moore & partners.']},
+ {yr:1901,era:1,title:'The Duke Offer',type:'choice',
+  text:`Dr. Moore wants a hospital — Black Durham has nowhere to be treated with dignity. Washington Duke's family, grown rich on tobacco worked by Black hands, offers to fund it. Julian Carr calls it the duty of "the better class of whites." The money is real. So are the strings you cannot see yet.`,
+  choices:[
+   {t:'ACCEPT THE GIFT',d:'Take Duke money and open Lincoln Hospital now, in their name.',e:{found:'hospital',trust:3,dep:14},led:'Lincoln Hospital opens — built with Duke money.',tone:'gain'},
+   {t:'BUILD IT OURSELVES — $8K',d:'Slower and dearer, but every brick answers to Hayti alone.',req:s=>s.cap>=8,e:{cap:-8,found:'hospital',trust:8},led:'Lincoln Hospital opens — paid for by the Mile itself.',tone:'gain'},
+   {t:'WAIT',d:'Neither. The sick will keep traveling to Raleigh.',e:{trust:-6},led:'No hospital — Hayti\'s sick travel or suffer.',tone:'loss'}]},
+ {yr:1904,era:1,title:'How to Underwrite',type:'choice',
+  text:`The Mutual survives its first lean years on discipline. Now growth tempts. Spaulding, the young general manager, argues for caution — collect small, pay every claim, keep the books clean. Others want aggressive expansion into new states.`,
+  choices:[
+   {t:'SPAULDING\'S DISCIPLINE',d:'Grow slowly. Pay every claim on time, every time.',e:{trust:6},led:'Conservative underwriting — every claim paid.',tone:'gain'},
+   {t:'AGGRESSIVE EXPANSION',d:'Push into Georgia and Virginia. Risk buys reach.',e:{cap:5,flag:'aggressive'},led:'Aggressive expansion across state lines.'}]},
+ {yr:1907,era:1,title:'The Panic of 1907',type:'note',
+  dyn:s=>s.aggressive
+   ?{text:`A financial panic sweeps the country. Overextended, the Mutual takes losses in its new territories and claims come due at the worst hour. The lesson is carved into the books in red ink: <em>an institution that Black Durham cannot afford to lose cannot afford to gamble.</em>`,e:{cap:-5,trust:-4},led:'Panic of 1907 — expansion losses, claims strained.',tone:'loss'}
+   :{text:`A financial panic sweeps the country and white banks fail by the dozen. The Mutual, small and disciplined, pays every claim. Word travels through every church in the state: <em>the Company held.</em> Policies double.`,e:{cap:3,trust:6},led:'Panic of 1907 — the Mutual holds. Policies double.',tone:'gain'}},
+ {yr:1910,era:1,title:'Mr. Washington Comes to Durham',type:'doc',
+  text:`Booker T. Washington tours the Mile and publishes his impressions of "the City of Negro Enterprises." Read the exhibit as a historian would — what is he <em>using</em> Durham to prove?`,
+  ex:{label:'EXHIBIT A — 1910',src:'B.T. Washington, "Durham, North Carolina, a City of Negro Enterprises," The Independent, 1911',
+      body:`"I never saw in a city of this size so many prosperous carpenters, brick masons, tinners... shoemakers, colored contractors and haulers... I was informed the Negroes of Durham are more and more taking on the industrial habits of the community... and that friendly relations exist between the two races."`},
+  q:'Washington emphasizes industry and "friendly relations." As evidence, what does this account do?',
+  choices:[
+   {t:'IT VINDICATES HIS PROGRAM',d:'Durham becomes proof that economic self-help within segregation succeeds — exactly the argument he built Tuskegee on.',ok:true},
+   {t:'IT IS A NEUTRAL DESCRIPTION',d:'A visitor simply recording what he saw, with no argument attached.'},
+   {t:'IT ATTACKS SEGREGATION',d:'A veiled demand for immediate civil and political rights.'}],
+  expl:'Correct reading — Washington selects the details that prove his thesis. Durham is his evidence that patient enterprise, not protest, uplifts the race. Note what the account leaves out: disenfranchisement, Jim Crow law, the ceiling overhead. Sources argue.',
+  led:['Washington visits — Durham held up as proof of enterprise.']},
+ {yr:1912,era:2,title:'Dr. Du Bois Reads the Same City',type:'doc',
+  text:`Two years later W.E.B. Du Bois — Washington's great rival — visits the same streets and publishes his own account. Same city. Different argument. Weigh them against each other.`,
+  ex:{label:'EXHIBIT B — 1912',src:'W.E.B. Du Bois, "The Upbuilding of Black Durham," World\'s Work, 1912',
+      body:`"There is in this small city a group of five thousand or more colored people, whose social and economic development is perhaps more striking than that of any similar group in the nation... men who have built up their businesses by their own efforts... a singularly encouraging thing that white Durham has, on the whole, not hindered."`},
+  q:'Du Bois — the champion of protest and higher aims — also praises Durham. What is the sharpest historical reading of this?',
+  choices:[
+   {t:'HE CONCEDES TO WASHINGTON',d:'Du Bois admits Washington was right all along about economics over politics.'},
+   {t:'BOTH CLAIM THE SAME EVIDENCE',d:'Each man reads Durham as proof of his own program — the city becomes a contested symbol, and neither account is simply "what happened."',ok:true},
+   {t:'THE ACCOUNTS CANCEL OUT',d:'Since they disagree, neither is usable as evidence.'}],
+  expl:'Exactly — Durham was strong enough that both titans claimed it. Washington saw industrial patience rewarded; Du Bois saw proof of Black capacity that made segregation indefensible. Holding both readings at once, without collapsing either, is the historian\'s discipline.',
+  led:['Du Bois publishes "The Upbuilding of Black Durham."']},
+ {yr:1915,era:2,title:'Fire in the Warehouse District',type:'note',
+  text:`Fire tears through frame buildings at the edge of Hayti. White insurers had redlined these blocks for years — but Mutual policies cover them. Adjusters pay claims within the week, in person, in full. Nothing sells insurance like a check that arrives. <em>This is what it means to have institutions of your own.</em>`,
+  e:{cap:-2,trust:8},led:['Hayti fire — Mutual pays every claim in full.'],tone:'gain'},
+ {yr:1919,era:2,title:'Red Summer',type:'choice',
+  text:`Chicago. Washington. Elaine, Arkansas. White mobs attack Black communities across the nation, and Tulsa's turn is two years away. Durham holds its breath. The Mutual's leaders must decide what a Black institution says when the country burns.`,
+  choices:[
+   {t:'SPEAK PLAINLY',d:'Public statement condemning the violence, printed for the record. White clients and politicians will notice.',e:{trust:8,dep:-5,cap:-1},led:'The Mile speaks against the terror — on the record.',tone:'gain'},
+   {t:'HEADS DOWN',d:'Say nothing. Protect the institutions. Survival is also a strategy.',e:{trust:-5,dep:4},led:'Silence kept through Red Summer.',tone:'loss'}]},
+ {yr:1923,era:2,title:'The Tallest Building on the Street',type:'note',
+  text:`N.C. Mutual is now called the largest Black-owned business in the world. Its new six-story headquarters rises over Parrish Street — steel, marble, and audacity in the middle of a Jim Crow downtown. White Durham walks past it every day. That is the point.`,
+  e:{cap:4,trust:5},led:['Mutual HQ rises six stories over Parrish Street.'],tone:'gain'},
+ {yr:1926,era:2,title:'What the Bank Is For',type:'choice',
+  dynreq:s=>s.inst.bank,
+  text:`M&F Bank has grown fat on deposits. The board argues. Safe bonds earn quietly and risk nothing. Mortgages for Hayti families earn less and risk more — but no other bank in North Carolina will write them.`,
+  choices:[
+   {t:'WRITE THE MORTGAGES',d:'Ownership for families who have only ever rented.',e:{trust:8,cap:-2,flag:'mortgages'},led:'M&F writes mortgages white banks refuse.',tone:'gain'},
+   {t:'BUY SAFE BONDS',d:'Steady yield, no defaults, no neighbors owned.',e:{cap:4,trust:-3},led:'Deposits parked in bonds — safe and distant.'}],
+  alt:{title:'A Bank-Shaped Hole',type:'note',
+   text:`Deposits that should be circulating through Hayti sit in white banks downtown — where not one dollar returns as credit to a Black borrower. Without a bank of its own, the Mile's money works for someone else. The founders' generation is aging; the window for a charter narrows.`,
+   e:{trust:-4},led:['No Black bank — Hayti\'s deposits enrich white Durham.'],tone:'loss'}},
+ {yr:1929,era:2,title:'The Crash',type:'note',
+  text:`October. The market collapses and takes the nation's banks with it, one by one, like lights going out down a long street. The Depression will test every institution on the Mile against the question that has no rehearsal: <em>when the panic comes, do the books hold?</em>`,
+  e:{cap:-3},led:['The Crash — a long winter begins.'],tone:'loss'},
+ {yr:1933,era:3,title:'The Bank Holiday',type:'note',
+  dyn:s=>s.inst.bank
+   ?(s.reserve||!s.aggressive
+     ?{text:`Roosevelt closes every bank in America. Thousands never reopen. When the examiners finish with Mechanics & Farmers, the verdict stuns the state: <em>sound</em>. M&F reopens without losing a depositor's dollar — one of the few banks in the country, of any color, to do so. Farmers who lost everything at white banks walk to Parrish Street carrying what remains.`,e:{cap:5,trust:12},led:'BANK HOLIDAY — M&F reopens sound. Not one depositor loses a dollar.',tone:'gain',flag:'savedByBank'}
+     :{text:`Roosevelt closes every bank in America. M&F reopens — barely. The aggressive years left thin reserves, and the examiners impose conditions. Depositors are shaken but stay. The old men mutter Spaulding's rule about boring money.`,e:{cap:-2,trust:3},led:'Bank holiday — M&F survives with scars.'})
+   :{text:`Roosevelt closes every bank in America. Hayti's savings, held in white banks downtown, are frozen with everyone else's — and some of those banks never reopen. There is no Black bank to walk to. The Mile learns in the hardest currency what a charter would have been worth.`,e:{cap:-5,trust:-6},led:'Bank holiday — Hayti\'s deposits frozen in failing white banks.',tone:'loss'}},
+ {yr:1937,era:3,title:'The Map With the Red Lines',type:'doc',
+  text:`Washington's new Home Owners' Loan Corporation drafts "residential security maps" of Durham for federal mortgage insurance. A surveyor's pen moves over Hayti. Read the exhibit — this is a primary source that will govern credit for thirty years.`,
+  ex:{label:'EXHIBIT C — 1937',src:'HOLC Area Description, Durham, N.C. — Grade D ("hazardous"), shaded red',
+      body:`"Negro concentration... age and obsolescence of properties... This area is accorded a 'D' rating. Detrimental influences: infiltration of lower grade population. Mortgage funds should not be made available."`},
+  q:'Hayti contains a hospital, a college, a bank, and the world\'s largest Black business. The map grades it "hazardous." What is the map actually measuring?',
+  choices:[
+   {t:'PROPERTY CONDITION',d:'An honest engineering assessment of building age and quality.'},
+   {t:'RACE, ENCODED AS RISK',d:'The grade is assigned to Blackness itself — "Negro concentration" is listed as the hazard. Federal policy is laundering segregation into finance.',ok:true},
+   {t:'MARKET DEMAND',d:'A neutral prediction of future property values.'}],
+  expl:'Correct — read the criteria, not the conclusion. The "detrimental influence" named is the residents. This is how structure works: no mob, no statute naming race, just a map that quietly forbids capital to flow — and shapes wealth for generations. Your bank is now the only mortgage lender Hayti has.',
+  led:['HOLC grades Hayti "D" — redlined. Federal credit forbidden.']},
+ {yr:1941,era:3,title:'War Economy',type:'note',
+  text:`War orders flood the tobacco factories and Camp Butner rises north of town. Wages climb; migrants arrive weekly from the countryside looking for work and a room in Hayti — which was crowded before they came. Money moves fast. Housing does not.`,
+  e:{cap:5,trust:-3},led:['War boom — wages up, Hayti overcrowded.']},
+ {yr:1945,era:3,title:'The G.I. Bill, in Practice',type:'choice',
+  text:`Black veterans come home with the same benefits printed on the same paper as white veterans — and find the local V.A. lenders and white banks will not honor them. The bill is race-neutral in law and segregated in execution.`,
+  choices:[
+   {t:'M&F HONORS THE BENEFIT',d:'The bank writes veterans\' mortgages and business loans at bill terms itself.',req:s=>!!s.inst.bank,e:{cap:-3,trust:10},led:'M&F honors G.I. benefits white lenders refuse.',tone:'gain'},
+   {t:'PETITION WASHINGTON',d:'Document the denials, file complaints, wait for enforcement.',e:{trust:2,arch:1},led:'V.A. denials documented and filed.'},
+   {t:'NOTHING CAN BE DONE',d:'The veterans will manage as the Mile always has.',e:{trust:-6},led:'Veterans\' benefits go unhonored in Durham.',tone:'loss'}]},
+ {yr:1948,era:4,title:'The College on the Hill',type:'note',
+  text:`Dr. Shepard is gone — dead the year before, mourned like a head of state. His Training School has become <em>North Carolina College at Durham</em>, the state's flagship for Black scholars. Its graduates staff Lincoln Hospital, the Mutual's offices, and the law practice suing Jim Crow. Institutions raise the people who defend institutions.`,
+  e:{trust:6},led:['N.C. College thrives — Shepard\'s legacy compounds.'],tone:'gain'},
+ {yr:1952,era:4,title:'The Old Guard and the Editor',type:'choice',
+  text:`Louis Austin's Carolina Times grows sharper each year — naming police beatings, demanding the vote, embarrassing the polite arrangements. Some Mutual men wince; their standing with white Durham was expensive to build. Austin answers that standing which cannot be spent is not standing.`,
+  choices:[
+   {t:'FUND THE FIGHT',d:'Back Austin, the DCNA, and the NAACP lawyers openly.',e:{cap:-3,trust:9,dep:-8},led:'The Mile funds the movement openly.',tone:'gain'},
+   {t:'QUIET MONEY',d:'Support the cause through back channels; keep the letterhead clean.',e:{cap:-1,trust:3},led:'Movement funded quietly, deniably.'},
+   {t:'DISTANCE',d:'Business is the Mile\'s lane. Agitation is bad for it.',e:{dep:8,trust:-7},led:'The Mile keeps its distance from agitation.',tone:'loss'}]},
+ {yr:1957,era:4,title:'The Royal Ice Cream Sit-In',type:'choice',
+  text:`June. Three years before Greensboro makes the tactic famous, Rev. Douglas Moore and six young people sit down in the white section of Durham's Royal Ice Cream Parlor and are arrested for trespass. The old guard calls it reckless. The students call it Tuesday.`,
+  choices:[
+   {t:'POST BAIL, TAKE THE CASE',d:'The Mile\'s lawyers and money stand behind the seven, through every appeal.',e:{cap:-2,trust:10,dep:-6},led:'ROYAL SEVEN defended by the Mile — appeals funded.',tone:'gain'},
+   {t:'PRIVATE SYMPATHY',d:'Help the families quietly; sign nothing.',e:{trust:2},led:'Quiet help for the Royal Seven.'},
+   {t:'PUBLIC DISAPPROVAL',d:'Order matters. The Mile was built on it.',e:{dep:8,trust:-9},led:'The Mile disowns the sit-in.',tone:'loss'}]},
+ {yr:1958,era:5,title:'A Word Arrives: "Renewal"',type:'doc',
+  text:`City planners publish a study of Hayti under the federal Housing Act. The brochure is glossy. The language deserves a historian's full attention — read it the way you read the redlining map.`,
+  ex:{label:'EXHIBIT D — 1958',src:'City of Durham urban renewal brochure, Hayti–Elizabeth Street project area',
+      body:`"Slum clearance will remove blighted structures and obsolete land uses... a modern expressway will improve access to the central business district... residents will be relocated to decent, safe and sanitary housing. Progress requires bold action."`},
+  q:'"Blight," "clearance," "relocation," "progress." What should a careful reader conclude this document is preparing the public to accept?',
+  choices:[
+   {t:'A HOUSING IMPROVEMENT PLAN',d:'Take it at face value — better homes for Hayti residents.'},
+   {t:'THE DESTRUCTION OF HAYTI',d:'The vocabulary defines a living district as a disease, making demolition sound like medicine. Whose "access" the expressway improves is left carefully unsaid.',ok:true},
+   {t:'A ROUTINE ZONING NOTICE',d:'Technical planning language with no larger consequence.'}],
+  expl:'Correct — and note the craft of it. Nobody votes to destroy a community; they vote for "clearance" and "progress." The Mutual\'s own leaders were assured renewal meant reinvestment. The promised replacement housing and reinvestment largely never came. Language is where the demolition began.',
+  led:['City publishes "renewal" study of Hayti.']},
+ {yr:1962,era:5,title:'The Referendum',type:'choice',
+  text:`Urban renewal passes at the ballot box — sold to Black Durham, in part, with promises of new housing and a rebuilt Hayti, promises some of the Mile's own leaders repeated in good faith. Federal money is committed. The bulldozers are now a matter of scheduling. What remains is how the Mile spends the time it has.`,
+  choices:[
+   {t:'ORGANIZE RESISTANCE',d:'The Times, the DCNA, the churches — fight the route, demand hearings, slow everything.',e:{trust:8,dep:-5,cap:-2,flag:'resisted'},led:'Hayti organizes — hearings forced, route contested.',tone:'gain'},
+   {t:'NEGOTIATE HARD',d:'Accept the inevitable; extract binding relocation terms and top-dollar appraisals.',e:{cap:3,trust:2,flag:'negotiated'},led:'Relocation terms negotiated — appraisals contested parcel by parcel.'},
+   {t:'DOCUMENT EVERYTHING',d:'Photograph every storefront, record every deed, interview every elder. If Hayti falls, its record will not.',e:{arch:3,trust:3,flag:'documented'},led:'Hayti documented — deeds, photographs, testimony.',tone:'gain'}]},
+ {yr:1965,era:5,title:'The Bulldozers Reach Hayti',type:'choice',
+  text:`Demolition begins. Over the coming years the project will level more than a hundred acres and hundreds of Black-owned businesses; thousands of families will be moved. Compensation runs below replacement value — a legal price for an illegal-to-rebuild life. The Mile can concentrate its remaining leverage on <em>one</em> salvage effort.`,
+  choices:[
+   {t:'SAVE THE CONGREGATIONS',d:'Fight for the churches — and where demolition wins, fund rebuilding in brick elsewhere.',e:{cap:-3,flag:'savedChurch'},led:'The Mile\'s leverage spent on its churches.'},
+   {t:'SAVE THE BUSINESSES',d:'Relocation grants and M&F credit to re-establish merchants beyond the project line.',req:s=>!!s.inst.bank,e:{cap:-4,flag:'savedBiz'},led:'Merchant relocation fund — businesses re-established where possible.'},
+   {t:'SAVE THE PEOPLE\'S EQUITY',d:'Lawyers on every appraisal; squeeze full value from the state for every family.',e:{cap:-2,trust:4,flag:'savedEquity'},led:'Every appraisal contested — families paid closer to worth.'}]},
+ {yr:1967,era:5,title:'The Expressway',type:'note',
+  text:`The route is confirmed and graded: the East–West Expressway — Highway 147 — is driven straight through the body of Hayti, severing what demolition spared from the district it once belonged to. St. Joseph's A.M.E. stands beside the roadway like a witness. The traffic overhead is bound for a downtown that Hayti's dollars once circled past on foot.`,
+  led:['HIGHWAY 147 cut through Hayti.'],tone:'loss'},
+ {yr:1970,era:5,title:'Taking Stock',type:'note',
+  text:`The renewal authority's promised rebuilding of Hayti has not come, and for the most part it never will. What survives, survives because it was built to — or because someone fought for it. The ledger you have kept since 1898 is now itself a historical document. Close the books.`,
+  led:['The books close on seventy-two years.']},
+];
+
+/* ════════════════════════════════════════════════════════════
+   ERAS
+   ════════════════════════════════════════════════════════════ */
+const ERAS={1:'FOUNDATIONS',2:'THE MAGIC CITY',3:'DEPRESSION & WAR',4:'ZENITH',5:'RENEWAL'};
+
+/* ════════════════════════════════════════════════════════════
+   RENDER
+   ════════════════════════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+let _prev={cap:S.cap,trust:S.trust,dep:S.dep,arch:S.arch};
+function pulse(el,now,before,inverted){
+  if(now===before)return;
+  el.classList.remove('up','dn');void el.offsetWidth;
+  const good=inverted?now<before:now>before;
+  el.classList.add(good?'up':'dn');
+}
+function renderRes(){
+  pulse($('rCap'),S.cap,_prev.cap);pulse($('rTrust'),S.trust,_prev.trust);
+  pulse($('rDep'),S.dep,_prev.dep,true);pulse($('rArch'),S.arch,_prev.arch);
+  _prev={cap:S.cap,trust:S.trust,dep:S.dep,arch:S.arch};
+  $('rCap').innerHTML='$'+S.cap+'<small>K</small>';
+  $('rTrust').textContent=S.trust;
+  $('rDep').textContent=S.dep;
+  $('rArch').textContent=S.arch;
+  $('pDep').classList.toggle('warn',S.dep>=40);
+}
+function renderInst(){
+  const g=$('instGrid');let h='',n=0;
+  for(const id in S.inst){
+    const st=S.inst[id],m=INST[id];n+= st.gone?0:1;
+    h+=`<div class="inst ${st.gone?'gone':''}${st.moved?' moved':''}">
+      <div class="iname">${m.name}</div>
+      <div class="iyr">est. ${m.yr||'—'}${m.inHayti?' · HAYTI':''}</div>
+      <div class="ifx">${st.gone?'lost to renewal':m.fx}</div></div>`;
+  }
+  g.innerHTML=h;$('instCount').textContent=n+' STANDING';
+}
+function setEra(){
+  const t=TIMELINE[S.turn];
+  $('eraName').innerHTML=`ERA ${'I II III IV V'.split(' ')[t.era-1]} · <b>${ERAS[t.era]}</b>`;
+  $('yearBox').textContent=t.yr;
+  $('dockStamp').textContent='No. '+(S.turn+1)+' of '+TIMELINE.length;
+  $('trackFill').style.width=Math.round((t.yr-1898)/(1970-1898)*100)+'%';
+}
+
+/* ════════════════════════════════════════════════════════════
+   INCOME PHASE (start of each turn after the first)
+   ════════════════════════════════════════════════════════════ */
+function income(){
+  let cap=0,trust=0;const rep=[];
+  if(S.inst.mutual&&!S.inst.mutual.gone){cap+=3;rep.push('+$3K Mutual premiums');}
+  if(S.inst.bank&&!S.inst.bank.gone){const i=Math.min(5,Math.max(1,Math.round(S.cap*0.1)));cap+=i;rep.push('+$'+i+'K M&F circulation');}
+  if(S.inst.biltmore&&!S.inst.biltmore.gone){cap+=2;rep.push('+$2K Hayti commerce');}
+  if(S.inst.housing&&!S.inst.housing.gone){cap+=1;trust+=1;rep.push('+$1K, +1 Trust homeowners');}
+  let ct=0;
+  for(const id of['whiterock','stjoseph'])if(S.inst[id]&&!S.inst[id].gone)ct+=1;
+  if(S.inst.hospital&&!S.inst.hospital.gone)ct+=2;
+  for(const id of['school','library','times'])if(S.inst[id]&&!S.inst[id].gone)ct+=1;
+  if(ct){trust+=ct;rep.push('+'+ct+' Trust from churches & civic institutions');}
+  // trust decays each season — harder eras bleed faster; dependence quietly costs
+  const decay=(TIMELINE[S.turn].era>=3?4:3)+(S.dep>=50?2:0);
+  trust-=decay;rep.push('−'+decay+' Trust seasonal drift'+(S.dep>=50?' (dependence weighs)':''));
+  S.cap+=cap;S.trust=clamp(S.trust+trust,0,100);
+  renderRes();
+  return rep;
+}
+
+/* ════════════════════════════════════════════════════════════
+   TURN FLOW:  scripted event  →  player action  →  next turn
+   ════════════════════════════════════════════════════════════ */
+function startGame(){
+  $('title').style.display='none';
+  $('brief').classList.add('on');
+}
+function closeBrief(){
+  $('brief').classList.remove('on');
+  $('game').classList.add('on');
+  renderRes();renderInst();
+  ledger(1898,'THE LEDGER IS OPENED.');
+  showEvent();
+}
+function resolveEvent(t){
+  // normalize a timeline entry (handles dyn / alt variants)
+  let ev=Object.assign({},t);
+  if(t.dyn){Object.assign(ev,t.dyn(S));ev.type='note';}
+  if(t.dynreq&&!t.dynreq(S)){Object.assign(ev,t.alt);}
+  return ev;
+}
+function showEvent(){
+  setEra();
+  const rep=S.turn>0?income():null;
+  const ev=resolveEvent(TIMELINE[S.turn]);
+  $('dockLabel').textContent= ev.type==='doc'?'ENTERED INTO EVIDENCE':'MINUTES OF THE MEETING';
+  $('evTitle').textContent=ev.title;
+  $('evText').innerHTML=ev.text||'';
+  const old=document.getElementById('seasonBox');if(old)old.remove();
+  if(rep){
+    const sb=document.createElement('div');sb.className='season';sb.id='seasonBox';
+    sb.innerHTML='<b>SEASON REPORT · '+TIMELINE[S.turn].yr+'</b>'+rep.join('<br>');
+    $('evTitle').before(sb);
+  }
+  $('exhibitBox').innerHTML= ev.ex?`<div class="exhibit"><span class="exlabel">${ev.ex.label}</span>${ev.ex.body}<span class="exsrc">— ${ev.ex.src}</span></div>`:'';
+  const ch=$('choices');ch.innerHTML='';
+
+  if(ev.type==='note'){
+    if(ev.e)fx(ev.e);
+    if(ev.flag)S[ev.flag]=true;
+    const leds=Array.isArray(ev.led)?ev.led:[ev.led];
+    leds.filter(Boolean).forEach(l=>ledger(TIMELINE[S.turn].yr,l,ev.tone));
+    const b=document.createElement('button');b.className='contbtn';
+    b.textContent='RECORD & CONTINUE';b.onclick=()=>afterEvent();
+    $('main').appendChild(b);
+  }
+  else if(ev.type==='choice'){
+    if(ev.ex===undefined)$('exhibitBox').innerHTML='';
+    ev.choices.forEach(c=>{
+      const dis=c.req&&!c.req(S);
+      const b=document.createElement('button');b.className='chc';b.disabled=!!dis;
+      b.innerHTML=`<b>${c.t}${dis?' — (requires more capital or the bank)':''}</b>${c.d}<span class="fx">${fxLabel(c.e||{})}</span>`;
+      b.onclick=()=>{fx(c.e||{});if(c.e&&c.e.flag)S[c.e.flag]=true;
+        ledger(TIMELINE[S.turn].yr,c.led,c.tone);afterEvent();};
+      ch.appendChild(b);
+    });
+  }
+  else if(ev.type==='doc'){
+    ev.choices.forEach(c=>{
+      const b=document.createElement('button');b.className='chc';
+      b.innerHTML=`<b>${c.t}</b>${c.d}`;
+      b.onclick=()=>{
+        [...ch.children].forEach(x=>x.disabled=true);
+        b.classList.add(c.ok?'correct':'wrong');
+        if(!c.ok)[...ch.children].find((x,i)=>ev.choices[i].ok)?.classList.add('correct');
+        const gain= c.ok?(S.inst.library?3:2):1;
+        if(c.ok)S.docsRight++;
+        fx({arch:gain});
+        const p=document.createElement('div');
+        p.style.cssText='padding:10px 18px 0;font-size:13.5px;line-height:1.7;color:var(--ink-soft);font-style:italic;';
+        p.textContent=(c.ok?'✓ ':'The stronger reading: ')+ev.expl+`  (+${gain} Archive${S.inst.library&&c.ok?' — the Library sharpens the work':''})`;
+        ch.appendChild(p);
+        const leds=Array.isArray(ev.led)?ev.led:[ev.led];
+        leds.filter(Boolean).forEach(l=>ledger(TIMELINE[S.turn].yr,l));
+        const cb=document.createElement('button');cb.className='contbtn';cb.style.margin='12px 0 4px';
+        cb.textContent='RECORD & CONTINUE';cb.onclick=()=>afterEvent();
+        ch.appendChild(cb);
+      };
+      ch.appendChild(b);
+    });
+  }
+}
+function afterEvent(){
+  document.querySelectorAll('#main .contbtn').forEach(b=>b.remove());
+  // Act V demolition happens at 1965 resolution
+  if(TIMELINE[S.turn].yr===1965)demolish();
+  showActions();
+}
+function showActions(){
+  const t=TIMELINE[S.turn];
+  $('dockLabel').textContent='YOUR MOVE — CHOOSE ONE INITIATIVE';
+  $('evTitle').textContent='The Board Acts';
+  $('evText').innerHTML='History has moved. Now the Mile answers — capital and attention allow <em>one</em> initiative this season.';
+  $('exhibitBox').innerHTML='';
+  const ch=$('choices');ch.innerHTML='';
+  drawActions().forEach(a=>{
+    const b=document.createElement('button');b.className='chc';
+    b.innerHTML=`<b>${a.name}</b>${a.d}<span class="fx">${fxLabel(a.e)}</span>`;
+    b.onclick=()=>{a.used=true;fx(a.e);ledger(t.yr,a.led,a.tone);nextTurn();};
+    ch.appendChild(b);
+  });
+  // always allow passing
+  const p=document.createElement('button');p.className='chc';
+  p.innerHTML=`<b>HOLD IN RESERVE</b>No initiative this season — let the books rest.<span class="fx">+$1K</span>`;
+  p.onclick=()=>{fx({cap:1});nextTurn();};
+  ch.appendChild(p);
+}
+function nextTurn(){
+  S.turn++;
+  if(S.turn>=TIMELINE.length){epilogue();return;}
+  showEvent();
+}
+
+/* ════════════════════════════════════════════════════════════
+   ACT V — DEMOLITION
+   ════════════════════════════════════════════════════════════ */
+function demolish(){
+  const yr=1965;
+  for(const id in S.inst){
+    if(!INST[id].inHayti)continue;
+    const st=S.inst[id];
+    if(id==='whiterock'||id==='stjoseph'){
+      if(S.savedChurch&&id==='stjoseph'){st.moved=true;ledger(yr,"St. Joseph's saved — it will become the Hayti Heritage Center.",'gain');}
+      else if(S.savedChurch&&id==='whiterock'){st.gone=true;ledger(yr,'White Rock demolished — but the congregation rebuilds in brick nearby.','loss');S.trust=clamp(S.trust+3,0,100);}
+      else{ if(id==='stjoseph'){st.moved=true;ledger(yr,"St. Joseph's spared beside the roadway — later the Hayti Heritage Center.");} else {st.gone=true;ledger(yr,'White Rock Baptist demolished.','loss');S.trust=clamp(S.trust-4,0,100);} }
+    }
+    else if(id==='biltmore'||id==='housing'){
+      if(S.savedBiz&&id==='biltmore'){st.moved=true;ledger(yr,'Some Hayti merchants re-established beyond the project line.','gain');}
+      else{st.gone=true;ledger(yr,(id==='biltmore'?'The Biltmore and the Hayti business blocks leveled.':'The owned homes of Hayti taken and cleared.'),'loss');S.trust=clamp(S.trust-4,0,100);}
+    }
+    else if(id==='hospital'){ledger(yr,'Lincoln Hospital stands — for now — amid the clearing.');}
+    else if(id==='library'){st.moved=true;ledger(yr,'The Library\'s collection moved out ahead of the bulldozers.');}
+    else if(id==='times'){st.moved=true;ledger(yr,'The Carolina Times presses relocated — publication never stops.');}
+  }
+  if(S.savedEquity)ledger(yr,'Contested appraisals win families fuller payment.','gain');
+  renderInst();renderRes();
+}
+
+/* ════════════════════════════════════════════════════════════
+   EPILOGUE
+   ════════════════════════════════════════════════════════════ */
+function epilogue(){
+  $('game').classList.remove('on');$('epi').classList.add('on');
+  const standing=Object.keys(S.inst).filter(id=>!S.inst[id].gone).length;
+  const instPts=standing*6, trustPts=Math.round(S.trust*0.6), archPts=S.arch*5;
+  const depPen=Math.round(S.dep*0.4);
+  const capPts=Math.min(20,Math.round(S.cap*0.2));
+  const total=instPts+trustPts+archPts-depPen+capPts;
+  $('scoreCard').innerHTML=`
+    <div class="scoreRow"><span>Institutions standing (${standing})</span><span>+${instPts}</span></div>
+    <div class="scoreRow"><span>Community trust (${S.trust})</span><span>+${trustPts}</span></div>
+    <div class="scoreRow"><span>The Archive (${S.arch})</span><span>+${archPts}</span></div>
+    <div class="scoreRow"><span>Capital remaining ($${S.cap}K)</span><span>+${capPts}</span></div>
+    <div class="scoreRow"><span>Dependence (${S.dep})</span><span>−${depPen}</span></div>
+    <div class="scoreRow"><span>LEGACY</span><span>${total}</span></div>`;
+  let v;
+  if(total>=135)v=`<h3>THE MILE ENDURES</h3><p>You built deep and you built connected — the insurance fed the bank, the bank fed the credit, the credit fed the people, and when the bulldozers came, what could be saved was saved and what could not was recorded. No score erases Hayti. But your Durham enters 1970 with its institutions intact, its archive full, and its own account of what was done to it.</p>`;
+  else if(total>=90)v=`<h3>A STRONG HAND, A STACKED DECK</h3><p>You built real institutions and they mostly held. Some choices cost you — trust spent, or dependence accumulated, or documents misread — and the final act took more than it had to. That is not failure. That is what playing against structure feels like.</p>`;
+  else v=`<h3>THE LESSON IN THE RED INK</h3><p>The Mile struggled — thin institutions, low trust, or a dependence that proved worthless exactly when it was needed. Notice <em>when</em> things went wrong: rarely in the moment of decision, usually two eras later. That lag is the hardest thing about history, and the truest thing in this game.</p>`;
+  if(S.docsRight>=3)v+=`<p><em>You read all the documents like a historian — Washington's argument, Du Bois's counter-claim, the red-lined map, the language of "renewal." That skill is the real win condition.</em></p>`;
+  $('verdict').innerHTML=v;
+  $('history').innerHTML=`<h3>WHAT HISTORY'S LEDGER SAYS</h3>
+    <p>N.C. Mutual and Mechanics & Farmers Bank survived it all — the Panic, the Depression, and urban renewal — and both still operate today. M&F came through the 1933 bank holiday without losing depositors' money, a feat almost no bank in America matched. Dr. Shepard's school became North Carolina Central University.</p>
+    <p>Hayti did not survive. Urban renewal and the East–West Expressway (Highway 147) demolished well over a hundred acres — hundreds of Black-owned businesses, thousands of families displaced — on promises of rebuilding that largely never came. White Rock Baptist was demolished in 1967; its congregation rebuilt. St. Joseph's A.M.E. was spared and stands today as the Hayti Heritage Center.</p>
+    <p>And the Royal Ice Cream Seven of 1957? Durham's sit-in came three years before Greensboro's. The students lost every appeal — and won the future anyway.</p>`;
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
