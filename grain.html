@@ -3,225 +3,473 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>AGAINST THE GRAIN · The Historian's Craft</title>
+<title>AGAINST THE GRAIN · The Historian's Casebook</title>
 <style>
 /* ════════════════════════════════════════════════════════════
-   AGAINST THE GRAIN — a source-analysis puzzle game
-   Aesthetic: the archive reading room. Walnut desk, manila
-   folders, ivory documents, the red grading pencil.
+   AGAINST THE GRAIN — a historical detective game
+   Aesthetic: the archive reading room after hours. Walnut desk,
+   manila folders, ivory documents, red case thread, brass pins.
    ════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
 :root{
-  --desk:#241708; --desk-lt:#33210e; --desk-dk:#170e04;
-  --manila:#E3D3A3; --manila-dk:#CDBB88; --tab:#D8C48B;
-  --ivory:#F8F2E2; --ivory-dk:#EFE6CE;
-  --ink:#221A10; --ink-soft:#4E4130; --ink-faint:#84765E;
-  --pencil:#B5342C; --pencil-dk:#8E241E;
-  --stamp:#2E5F63; --stamp-lt:#3E7A80;
-  --sound:#2E6B45; --over:#A66B14; --unsup:#9E2F27;
+  --walnut:#241708;
+  --walnut2:#33220e;
+  --manila:#e3d3a3;
+  --manila2:#d4c28c;
+  --ivory:#f5eedb;
+  --ivory2:#efe5cc;
+  --ink:#2b2115;
+  --faded:#6b5d47;
+  --thread:#b0342a;
+  --stampred:#8e2b1f;
+  --brass:#a9884a;
+  --green:#4a6741;
+  --shadow:rgba(20,12,4,.45);
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
 body{
-  font-family:Georgia,'Times New Roman',serif;color:var(--ink);
-  background:
-    radial-gradient(ellipse at 50% -20%,var(--desk-lt),transparent 55%),
-    linear-gradient(180deg,var(--desk),var(--desk-dk));
-  min-height:100%;
+  background:var(--walnut);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255,220,150,.07), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.10) 0 2px, transparent 2px 90px);
+  color:var(--ink);
+  font-family:'Crimson Text',Georgia,serif;
+  font-size:17px;line-height:1.55;
+  min-height:100vh;
+  overscroll-behavior:none;
 }
-button{font-family:Georgia,serif;cursor:pointer;}
-button:focus-visible{outline:3px solid var(--manila);outline-offset:2px;}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
 
-.paper,.folder{border-radius:2px;box-shadow:0 1px 0 #fff6 inset,0 10px 26px rgba(0,0,0,.5);}
-.paper{background:var(--ivory);border:1px solid #C9BC9C;}
-.folder{background:var(--manila);border:1px solid #B4A375;}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 90px}
 
-/* ════════ TITLE ════════ */
-#title{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;text-align:center;padding:24px;overflow-y:auto;
-  background:radial-gradient(ellipse at 50% 15%,var(--desk-lt),transparent 60%),
-             linear-gradient(180deg,var(--desk),var(--desk-dk));}
-.tstamp{color:var(--manila);border:2px solid var(--manila);padding:5px 16px;letter-spacing:.4em;
-  font-size:clamp(10px,2.8vw,12px);transform:rotate(-2deg);margin-bottom:20px;opacity:.85;}
-#title h1{font-size:clamp(34px,10vw,76px);color:var(--ivory);font-weight:400;line-height:1.02;
-  letter-spacing:.04em;text-shadow:0 3px 0 rgba(0,0,0,.5),0 14px 44px rgba(0,0,0,.6);}
-#title h1 em{font-style:italic;color:var(--manila);}
-.tsub{color:#C9B892;font-style:italic;font-size:clamp(13px,3.4vw,16.5px);margin:16px auto 6px;
-  max-width:560px;line-height:1.75;}
-.tmethod{font-family:'Courier New',monospace;color:#8f7f5f;letter-spacing:.25em;
-  font-size:clamp(9.5px,2.6vw,11px);margin-bottom:26px;}
-.tstart{background:linear-gradient(180deg,var(--pencil),var(--pencil-dk));color:var(--ivory);
-  border:1px solid #5e1712;font-weight:700;letter-spacing:.2em;font-size:clamp(14px,3.8vw,17px);
-  padding:15px 44px;border-radius:2px;min-height:52px;box-shadow:0 3px 0 #4c110d,0 10px 24px rgba(0,0,0,.5);}
-.tstart:active{transform:translateY(2px);box-shadow:0 1px 0 #4c110d;}
-.tnote{color:#7d6f54;font-size:clamp(10.5px,2.7vw,12px);margin-top:24px;max-width:520px;line-height:1.8;font-style:italic;}
+/* ── stamps, labels, small type ── */
+.mono{font-family:'IBM Plex Mono',monospace}
+.elite{font-family:'Special Elite',monospace}
+.stamp{
+  display:inline-block;font-family:'Special Elite',monospace;
+  color:var(--stampred);border:3px double var(--stampred);
+  padding:4px 14px;letter-spacing:2px;transform:rotate(-2deg);
+  text-transform:uppercase;font-size:15px;
+}
 
-/* ════════ LAYOUT ════════ */
-#game{display:none;min-height:100dvh;max-width:1020px;margin:0 auto;padding:12px 10px 40px;}
-#game.on{display:block;}
-#hud{display:flex;justify-content:space-between;align-items:center;color:var(--manila);
-  padding:2px 4px 10px;flex-wrap:wrap;gap:6px;}
-#hud .hl{letter-spacing:.2em;font-size:clamp(11px,3vw,13px);}
-#hud .hr{font-family:'Courier New',monospace;font-size:clamp(12px,3.2vw,14px);letter-spacing:.1em;}
-#rigor{color:var(--ivory);}
+/* ════════ TITLE SCREEN ════════ */
+#title{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:28px 18px;
+}
+.tfolder{
+  background:var(--manila);border-radius:4px 14px 4px 4px;
+  max-width:640px;width:100%;
+  box-shadow:0 24px 60px var(--shadow), inset 0 0 60px rgba(120,90,40,.18);
+  padding:34px 26px 30px;position:relative;
+}
+.tfolder::before{
+  content:'';position:absolute;top:-16px;left:26px;width:150px;height:18px;
+  background:var(--manila);border-radius:8px 8px 0 0;
+}
+.ttab{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--faded);text-transform:uppercase;margin-bottom:14px}
+h1.tname{
+  font-family:'Special Elite',monospace;font-size:clamp(30px,7vw,52px);
+  line-height:1.05;letter-spacing:1px;color:var(--ink);margin-bottom:6px;
+}
+.tsub{font-style:italic;color:var(--faded);font-size:clamp(15px,3.4vw,19px);margin-bottom:20px}
+.tpitch{
+  background:var(--ivory);border:1px solid var(--manila2);padding:16px 18px;text-align:left;
+  box-shadow:0 2px 0 rgba(0,0,0,.06);margin-bottom:14px;
+}
+.tmethod{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:2px;color:var(--stampred);
+  margin:16px 0 18px;text-transform:uppercase;
+}
+.tstart{
+  font-family:'Special Elite',monospace;font-size:19px;letter-spacing:1px;
+  background:var(--ink);color:var(--ivory);padding:14px 30px;border-radius:3px;
+  box-shadow:0 5px 0 rgba(0,0,0,.35);transition:transform .08s;
+}
+.tstart:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.tnote{font-size:13.5px;color:var(--faded);font-style:italic;margin-top:16px;text-align:left}
 
-/* case select */
-#shelf{display:none;}
-#shelf.on{display:block;}
-.shelfTitle{color:var(--ivory);letter-spacing:.18em;font-size:clamp(16px,4.6vw,22px);margin:8px 2px 14px;}
-.caseRow{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
-.caseFolder{position:relative;text-align:left;padding:0;border:none;background:none;}
-.caseFolder .ftab{position:absolute;top:-10px;left:14px;background:var(--tab);border:1px solid #B4A375;
-  border-bottom:none;border-radius:4px 4px 0 0;padding:2px 12px;font-family:'Courier New',monospace;
-  font-size:10px;letter-spacing:.2em;color:var(--ink-soft);}
-.caseFolder .fbody{padding:18px 15px 14px;min-height:150px;}
-.caseFolder h3{font-size:clamp(14.5px,3.8vw,17px);line-height:1.3;margin-bottom:5px;}
-.caseFolder .fera{font-family:'Courier New',monospace;color:var(--pencil);font-size:11px;letter-spacing:.12em;margin-bottom:7px;}
-.caseFolder .fdesc{font-size:12.5px;line-height:1.6;color:var(--ink-soft);}
-.caseFolder .fstat{margin-top:9px;font-family:'Courier New',monospace;font-size:10.5px;letter-spacing:.15em;color:var(--stamp);}
-.caseFolder .fstat.done{color:var(--sound);}
-.caseFolder:hover .fbody{outline:2px solid var(--pencil);outline-offset:-2px;}
-.caseFolder:disabled{opacity:.45;cursor:default;}
-.caseFolder:disabled:hover .fbody{outline:none;}
+/* ════════ HUD ════════ */
+#hud{
+  position:sticky;top:0;z-index:40;display:none;
+  background:linear-gradient(180deg,#1c1206,#241708 90%);
+  border-bottom:2px solid var(--brass);
+  padding:8px 14px;
+}
+#hud.on{display:block}
+.hudrow{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hl{font-family:'Special Elite',monospace;color:var(--manila);font-size:15px;letter-spacing:1px;flex:1;white-space:nowrap}
+.hstat{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--manila);letter-spacing:1px;display:flex;align-items:center;gap:6px}
+#leadPips{letter-spacing:2px;color:var(--brass);font-size:13px}
+#leadPips .spent{color:#5a4423}
+.csbar{width:110px;height:9px;background:#120b03;border:1px solid var(--brass);border-radius:5px;overflow:hidden}
+#csFill{height:100%;width:0%;background:linear-gradient(90deg,#7a5a22,var(--brass));transition:width .4s}
+.hbtn{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;
+  color:var(--manila);border:1px solid var(--brass);padding:4px 10px;border-radius:3px;
+}
+
+/* ════════ CASE SHELF ════════ */
+#shelf{display:none}
+#shelf.on{display:block}
+.shelfTitle{
+  font-family:'Special Elite',monospace;color:var(--manila);text-align:center;
+  font-size:clamp(20px,5vw,30px);margin:26px 0 6px;letter-spacing:2px;
+}
+.shelfSub{text-align:center;color:#c9b98d;font-style:italic;font-size:14.5px;margin-bottom:22px}
+.caseRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.box{
+  background:var(--manila);border-radius:3px;padding:18px 16px 16px;position:relative;
+  box-shadow:0 10px 24px var(--shadow), inset 0 0 40px rgba(120,90,40,.15);
+  border-top:10px solid var(--manila2);
+  text-align:left;transition:transform .1s;
+}
+.box:not(.locked):hover{transform:translateY(-3px)}
+.box .bnum{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:2px;color:var(--faded);text-transform:uppercase}
+.box h3{font-family:'Special Elite',monospace;font-size:19px;line-height:1.2;margin:6px 0 8px;color:var(--ink)}
+.box .bdesc{font-size:14.5px;color:var(--ink);opacity:.85;font-style:italic}
+.box .bgrade{margin-top:12px;min-height:30px}
+.box.locked{filter:saturate(.4) brightness(.75);cursor:not-allowed}
+.box.locked .lockmsg{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--stampred);
+  margin-top:12px;letter-spacing:1px;
+}
+.gstamp{font-size:13px;padding:2px 10px}
+.gstamp.AIRTIGHT{color:var(--green);border-color:var(--green)}
+.gstamp.STRONG{color:#7a5a22;border-color:#7a5a22}
+.gstamp.CIRCUMSTANTIAL{color:var(--stampred);border-color:var(--stampred)}
+.gstamp.DISMISSED{color:#555;border-color:#555}
+#commendRow{margin:26px auto 0;max-width:640px;text-align:center}
+#commendRow .ct{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:#c9b98d;margin-bottom:8px}
+.medal{
+  display:inline-block;background:var(--walnut2);border:1px solid var(--brass);color:var(--manila);
+  font-family:'IBM Plex Mono',monospace;font-size:11px;padding:5px 10px;border-radius:20px;margin:3px;
+}
 
 /* ════════ CASE VIEW ════════ */
-#case{display:none;}
-#case.on{display:block;}
-.caseHead{color:var(--ivory);margin:2px 2px 12px;}
-.caseHead .chEra{font-family:'Courier New',monospace;color:var(--manila);letter-spacing:.25em;font-size:clamp(10px,2.7vw,12px);}
-.caseHead h2{font-size:clamp(19px,5.4vw,28px);font-weight:400;letter-spacing:.03em;margin-top:3px;}
-.brief{padding:14px 16px;margin-bottom:12px;font-size:clamp(13px,3.4vw,14.5px);line-height:1.75;color:var(--ink-soft);}
-.brief b{color:var(--pencil);letter-spacing:.12em;font-size:.88em;}
+#case{display:none}
+#case.on{display:block}
+.caseHead{margin:20px 0 4px}
+.chEra{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:#c9b98d;text-transform:uppercase}
+#case h2{font-family:'Special Elite',monospace;color:var(--manila);font-size:clamp(22px,5.5vw,32px);line-height:1.15;margin:4px 0 14px}
 
-/* document tabs */
-.dtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:-1px;position:relative;z-index:2;}
-.dtab{background:var(--manila-dk);border:1px solid #B4A375;border-bottom:none;border-radius:6px 6px 0 0;
-  padding:9px 14px;font-family:'Courier New',monospace;font-size:clamp(10px,2.7vw,11.5px);
-  letter-spacing:.1em;color:var(--ink-soft);min-height:40px;}
-.dtab.sel{background:var(--ivory);font-weight:700;color:var(--ink);}
-.docwrap{padding:0;overflow:hidden;margin-bottom:12px;}
-.dochead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline;
-  background:var(--ivory-dk);border-bottom:1px solid #D6C9A8;padding:9px 16px;}
-.dochead .dtype{font-family:'Courier New',monospace;color:var(--stamp);letter-spacing:.18em;font-size:clamp(9.5px,2.5vw,10.5px);font-weight:700;}
-.dochead .dmeta{font-size:clamp(11px,2.9vw,12px);font-style:italic;color:var(--ink-faint);}
-.docbody{padding:16px 18px 18px;font-size:clamp(13px,3.4vw,14.5px);line-height:1.9;color:var(--ink);}
-.docbody.type-print{font-family:Georgia,serif;}
-.docbody.type-script{font-style:italic;}
-.docbody.type-type{font-family:'Courier New',monospace;font-size:clamp(12px,3.1vw,13px);line-height:1.8;}
-.docbody p+p{margin-top:10px;}
-.composite{background:#efe3c2;border-top:1px solid #D6C9A8;padding:7px 16px;
-  font-size:10.5px;letter-spacing:.08em;color:var(--ink-faint);font-family:'Courier New',monospace;}
+.paper{
+  background:var(--ivory);border:1px solid var(--manila2);
+  box-shadow:0 6px 18px var(--shadow);
+  padding:16px 18px;margin-bottom:14px;border-radius:2px;
+}
+.brief b{color:var(--stampred)}
 
-/* ════════ PHASE PANEL ════════ */
-.phase{padding:0;overflow:hidden;margin-bottom:14px;}
-.pbar{background:var(--stamp);color:var(--ivory);padding:9px 15px;display:flex;
-  justify-content:space-between;letter-spacing:.22em;font-size:clamp(10px,2.7vw,11.5px);flex-wrap:wrap;gap:4px;}
-.pbar .pn{font-family:'Courier New',monospace;letter-spacing:.08em;}
-.pq{padding:15px 17px 4px;font-size:clamp(14px,3.7vw,16px);line-height:1.55;}
-.pexp{padding:6px 17px 4px;font-size:clamp(12px,3.2vw,13.5px);line-height:1.7;color:var(--ink-faint);font-style:italic;}
-.popts{display:flex;flex-direction:column;gap:8px;padding:13px 17px 17px;}
-.popt{text-align:left;background:var(--ivory-dk);border:1px solid #C9BC9C;border-radius:2px;
-  padding:12px 14px;font-size:clamp(13px,3.4vw,14.5px);line-height:1.55;min-height:48px;transition:background .12s;}
-.popt:hover{background:#EADFC2;}
-.popt.right{background:#DCE8DA;border-color:var(--sound);}
-.popt.wrong{background:#EDD8D3;border-color:var(--unsup);}
-.popt.picked{outline:2px solid var(--stamp);outline-offset:-2px;}
-.popt:disabled{cursor:default;opacity:.85;}
-.pwhy{margin:2px 17px 14px;padding:11px 13px;background:#F2ECD8;border-left:4px solid var(--pencil);
-  font-size:clamp(12.5px,3.2vw,14px);line-height:1.75;color:var(--ink-soft);}
-.pwhy b{color:var(--pencil);}
-.pnext{margin:0 17px 17px;background:linear-gradient(180deg,var(--pencil),var(--pencil-dk));
-  border:1px solid #5e1712;color:var(--ivory);font-weight:700;letter-spacing:.2em;
-  padding:13px;border-radius:2px;font-size:clamp(13px,3.5vw,15px);min-height:50px;width:calc(100% - 34px);}
-.pnext:disabled{opacity:.45;cursor:default;}
+/* phase tabs */
+.ptabs{display:flex;gap:6px;margin:14px 0 12px;flex-wrap:wrap}
+.ptab{
+  font-family:'Special Elite',monospace;font-size:14px;letter-spacing:1px;
+  background:var(--walnut2);color:#c9b98d;border:1px solid var(--brass);
+  padding:8px 14px;border-radius:3px 3px 0 0;position:relative;
+}
+.ptab.on{background:var(--ivory);color:var(--ink);border-bottom-color:var(--ivory)}
+.ptab .badge{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;background:var(--stampred);color:var(--ivory);
+  border-radius:9px;padding:1px 6px;margin-left:6px;
+}
 
-/* corroboration grid */
-.claim{padding:13px 17px 5px;border-top:1px dashed #D6C9A8;}
-.claim:first-of-type{border-top:none;}
-.claim .ctext{font-size:clamp(13.5px,3.5vw,15px);line-height:1.55;margin-bottom:9px;}
-.cbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
-@media(max-width:560px){.cbtns{grid-template-columns:repeat(2,1fr);}}
-.cbtn{border:1px solid #C9BC9C;background:var(--ivory-dk);border-radius:2px;padding:9px 4px;
-  font-family:'Courier New',monospace;font-size:clamp(9px,2.4vw,10.5px);letter-spacing:.06em;
-  line-height:1.35;min-height:46px;color:var(--ink-soft);}
-.cbtn.sel{background:var(--stamp);color:var(--ivory);border-color:var(--stamp);}
-.cbtn.right{background:#DCE8DA;border-color:var(--sound);color:var(--sound);font-weight:700;}
-.cbtn.wrong{background:#EDD8D3;border-color:var(--unsup);color:var(--unsup);}
-.cwhy{margin:9px 0 10px;padding:9px 12px;background:#F2ECD8;border-left:4px solid var(--stamp);
-  font-size:clamp(12px,3.1vw,13.5px);line-height:1.7;color:var(--ink-soft);display:none;}
+/* document tabs + body */
+.dtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.dtab{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;
+  background:var(--manila);color:var(--ink);padding:7px 12px;border-radius:3px;
+  border:1px solid var(--manila2);
+}
+.dtab.on{background:var(--ink);color:var(--ivory)}
+.dochead{border-bottom:2px solid var(--manila2);padding-bottom:8px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.dtype{font-family:'Special Elite',monospace;font-size:14px;color:var(--stampred);letter-spacing:1px}
+.dmeta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faded)}
+.docbody p{margin-bottom:12px}
+.docbody .print{font-family:'Special Elite',monospace;font-size:15.5px;line-height:1.6}
+.docbody .hand{font-style:italic}
+.composite{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--faded);letter-spacing:.5px;margin-top:10px;border-top:1px dashed var(--manila2);padding-top:8px}
 
-/* against the grain (multi-select) */
-.gopt{text-align:left;background:var(--ivory-dk);border:1px solid #C9BC9C;border-radius:2px;
-  padding:12px 14px;font-size:clamp(13px,3.4vw,14.5px);line-height:1.55;min-height:48px;position:relative;}
-.gopt.sel{outline:2px solid var(--stamp);outline-offset:-2px;background:#E7E9DC;}
-.gopt.right{background:#DCE8DA;border-color:var(--sound);}
-.gopt.missed{background:#F4EBCF;border-color:var(--over);}
-.gopt.wrong{background:#EDD8D3;border-color:var(--unsup);}
-.gopt .gmark{position:absolute;top:8px;right:10px;font-family:'Courier New',monospace;font-size:11px;font-weight:700;}
+/* redactions */
+.redact{
+  background:var(--ink);color:var(--ink);border-radius:2px;padding:0 4px;
+  cursor:help;user-select:none;position:relative;
+}
+.redact::after{
+  content:attr(data-teaser);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--brass);
+  position:absolute;left:0;top:100%;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.redact:hover::after{opacity:1}
+.unredacted{
+  background:#f3e6b8;color:var(--ink);padding:0 4px;border-radius:2px;
+  box-shadow:inset 0 0 0 1px var(--brass);
+  animation:reveal .8s;
+}
+@keyframes reveal{from{background:var(--ink);color:var(--ink)}to{background:#f3e6b8;color:var(--ink)}}
 
-/* the account */
-.aopt{text-align:left;background:var(--ivory-dk);border:1px solid #C9BC9C;border-radius:2px;
-  padding:12px 40px 12px 14px;font-size:clamp(13px,3.4vw,14.5px);line-height:1.55;min-height:48px;position:relative;}
-.aopt.sel{outline:2px solid var(--pencil);outline-offset:-2px;background:#F0E4D2;}
-.aopt .astamp{position:absolute;top:50%;right:8px;transform:translateY(-50%) rotate(6deg);
-  font-family:'Courier New',monospace;font-size:9px;font-weight:700;letter-spacing:.08em;
-  border:2px solid;padding:2px 5px;display:none;}
-.aopt.sound .astamp{display:block;color:var(--sound);border-color:var(--sound);}
-.aopt.over .astamp{display:block;color:var(--over);border-color:var(--over);}
-.aopt.unsup .astamp{display:block;color:var(--unsup);border-color:var(--unsup);}
-.acount{padding:0 17px 8px;font-family:'Courier New',monospace;font-size:11.5px;color:var(--ink-faint);letter-spacing:.1em;}
+/* interrogation */
+.iqdoc{margin-bottom:6px}
+.iq{
+  display:block;width:100%;text-align:left;background:var(--ivory2);border:1px solid var(--manila2);
+  padding:11px 13px;margin-bottom:8px;border-radius:3px;font-size:15.5px;transition:transform .06s;
+}
+.iq:not(:disabled):hover{transform:translateX(3px)}
+.iq:disabled{opacity:.85;cursor:default}
+.iq .qcost{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--brass);letter-spacing:1px;float:right}
+.iq.hit{border-left:5px solid var(--green)}
+.iq.dead{border-left:5px solid #888}
+.iresp{font-size:14.5px;font-style:italic;color:var(--ink);margin:8px 2px 2px;padding-left:10px;border-left:2px solid var(--manila2)}
+.icard{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--ivory);
+  background:var(--green);display:inline-block;padding:3px 9px;border-radius:2px;margin-top:8px;
+}
+.icard.deadend{background:#777}
+.noleads{font-family:'Special Elite',monospace;color:var(--stampred);text-align:center;padding:10px}
 
-/* case verdict + final */
-.verdictCard{padding:16px 18px;margin-bottom:12px;font-size:clamp(13.5px,3.5vw,15px);line-height:1.8;color:var(--ink-soft);}
-.verdictCard h3{color:var(--pencil);letter-spacing:.15em;font-size:clamp(13px,3.4vw,15px);margin-bottom:8px;}
-.verdictCard p+p{margin-top:10px;}
-.scoreLine{display:flex;justify-content:space-between;font-family:'Courier New',monospace;
-  font-size:clamp(12px,3.2vw,14px);padding:5px 0;border-bottom:1px dashed #C9BC9C;}
-.scoreLine:last-child{border-bottom:2px solid var(--ink);font-weight:700;}
-.backBtn{background:transparent;border:2px solid var(--manila);color:var(--manila);
-  letter-spacing:.18em;font-weight:700;padding:12px 30px;border-radius:2px;min-height:48px;
-  font-size:clamp(12px,3.3vw,14px);margin-top:4px;}
+/* evidence board */
+#board{
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,235,190,.08), transparent 50%),
+    #3d2c14;
+  border:10px solid #2a1c0a;border-radius:4px;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.5), 0 8px 24px var(--shadow);
+  padding:16px 12px;min-height:200px;margin-bottom:14px;
+}
+.boardHint{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#c9b98d;letter-spacing:1px;text-align:center;margin-bottom:12px}
+.cardGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.ecard{
+  background:var(--ivory);padding:10px 10px 9px;border-radius:2px;text-align:left;
+  box-shadow:0 4px 8px rgba(0,0,0,.4);position:relative;transition:transform .1s;
+  border-top:3px solid var(--manila2);
+}
+.ecard::before{
+  content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  width:10px;height:10px;border-radius:50%;background:var(--brass);
+  box-shadow:0 1px 2px rgba(0,0,0,.5);
+}
+.ecard .en{font-family:'Special Elite',monospace;font-size:13px;line-height:1.2;color:var(--ink)}
+.ecard .ed{font-size:12px;color:var(--faded);margin-top:4px;line-height:1.35}
+.ecard .esrc{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--stampred);letter-spacing:1px;margin-top:6px}
+.ecard.sel{transform:scale(1.05) rotate(-1deg);box-shadow:0 0 0 3px var(--thread),0 6px 12px rgba(0,0,0,.5)}
+.ecard.linkedcard{border-top-color:var(--thread)}
+.ecard:disabled{cursor:default}
+.threadlist{margin-top:16px}
+.thread{
+  background:var(--ivory);border-left:6px solid var(--brass);padding:10px 12px;margin-bottom:8px;border-radius:2px;
+}
+.thread.contra{border-left-color:var(--thread)}
+.thread .tn{font-family:'Special Elite',monospace;font-size:14px}
+.thread.contra .tn{color:var(--thread)}
+.thread .td{font-size:13.5px;color:var(--ink);margin-top:2px}
+.thread .tk{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:2px;color:var(--faded)}
+.shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* verdict */
+.vfind{margin-bottom:18px}
+.vq{font-family:'Special Elite',monospace;font-size:16.5px;margin-bottom:8px;color:var(--ink)}
+.vopt{
+  display:block;width:100%;text-align:left;background:var(--ivory2);border:1px solid var(--manila2);
+  padding:10px 12px;margin-bottom:6px;border-radius:3px;font-size:15px;
+}
+.vopt.on{background:var(--ink);color:var(--ivory)}
+.vcite{margin-top:8px}
+.vcite .cl{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:1px;color:var(--faded);margin-bottom:6px}
+.citebtn{
+  font-family:'Special Elite',monospace;font-size:12px;background:var(--manila);border:1px solid var(--manila2);
+  padding:5px 10px;margin:0 5px 5px 0;border-radius:2px;
+}
+.citebtn.on{background:var(--stampred);color:var(--ivory)}
+.vsubmit{
+  display:block;margin:10px auto 0;font-family:'Special Elite',monospace;font-size:18px;
+  background:var(--stampred);color:var(--ivory);padding:13px 30px;border-radius:3px;letter-spacing:1px;
+  box-shadow:0 5px 0 rgba(0,0,0,.3);
+}
+.vsubmit:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
+.vwarn{font-size:13.5px;font-style:italic;color:var(--stampred);text-align:center;margin-top:8px}
+
+/* result */
+#result{display:none}
+#result.on{display:block}
+.gradeWrap{text-align:center;padding:30px 0 10px}
+.bigstamp{
+  display:inline-block;font-family:'Special Elite',monospace;
+  font-size:clamp(30px,8vw,52px);letter-spacing:4px;padding:10px 30px;
+  border:5px double currentColor;transform:rotate(-4deg);
+  animation:stampIn .5s cubic-bezier(.2,2,.4,1);
+}
+@keyframes stampIn{from{transform:rotate(-4deg) scale(2.4);opacity:0}to{transform:rotate(-4deg) scale(1);opacity:1}}
+.bigstamp.AIRTIGHT{color:var(--green)}
+.bigstamp.STRONG{color:#7a5a22}
+.bigstamp.CIRCUMSTANTIAL{color:var(--stampred)}
+.bigstamp.DISMISSED{color:#666}
+.scoreline{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#c9b98d;text-align:center;margin:14px 0;letter-spacing:1px}
+.debrief{font-size:14.5px}
+.debrief li{margin:0 0 6px 20px}
+.epi h4{font-family:'Special Elite',monospace;color:var(--stampred);letter-spacing:1px;margin-bottom:8px}
+.rbtns{text-align:center;margin-top:18px}
+.rbtn{
+  font-family:'Special Elite',monospace;font-size:16px;background:var(--ink);color:var(--ivory);
+  padding:12px 24px;border-radius:3px;margin:0 6px 8px;box-shadow:0 4px 0 rgba(0,0,0,.3);
+}
+
+/* tutorial — the Archivist's notes */
+#tut{
+  position:fixed;left:50%;bottom:14px;transform:translateX(-50%) translateY(140%);
+  width:min(560px,94vw);z-index:70;transition:transform .35s;
+}
+#tut.on{transform:translateX(-50%) translateY(0)}
+.tutnote{
+  background:var(--manila);border-radius:2px;padding:14px 16px 12px;position:relative;
+  box-shadow:0 10px 30px rgba(0,0,0,.55);border-top:3px solid var(--manila2);
+}
+.tutnote::before{
+  content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);
+  width:12px;height:12px;border-radius:50%;background:var(--thread);
+  box-shadow:0 1px 3px rgba(0,0,0,.5);
+}
+.tuthead{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--stampred);margin-bottom:6px}
+.tutbody{font-size:15px;line-height:1.45;color:var(--ink)}
+.tutbody b{color:var(--stampred)}
+.tutrow{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px}
+.tutok{
+  font-family:'Special Elite',monospace;font-size:14px;background:var(--ink);color:var(--ivory);
+  padding:7px 16px;border-radius:2px;box-shadow:0 3px 0 rgba(0,0,0,.3);
+}
+.tutskip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--faded);text-decoration:underline}
+
+/* method reference modal */
+#method{
+  position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
+  background:rgba(15,9,2,.75);padding:16px;
+}
+#method.on{display:flex}
+.methodcard{
+  background:var(--ivory);max-width:560px;width:100%;max-height:86vh;overflow-y:auto;
+  border-radius:2px;padding:20px 20px 16px;box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.methodcard h3{font-family:'Special Elite',monospace;color:var(--stampred);letter-spacing:2px;margin-bottom:12px}
+.methodcard dt{font-family:'Special Elite',monospace;font-size:14.5px;margin-top:12px;color:var(--ink)}
+.methodcard dd{font-size:14.5px;margin-left:0;color:var(--ink)}
+.methodclose{
+  display:block;margin:16px auto 0;font-family:'Special Elite',monospace;font-size:15px;
+  background:var(--ink);color:var(--ivory);padding:9px 22px;border-radius:2px;
+}
+
+/* toast */
+#toast{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:var(--manila);border:1px solid var(--brass);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:1px;
+  padding:10px 18px;border-radius:4px;z-index:60;transition:transform .3s;max-width:90vw;text-align:center;
+}
+#toast.on{transform:translateX(-50%) translateY(0)}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+@media (max-width:520px){
+  body{font-size:16px}
+  .wrap{padding:12px 10px 80px}
+  .ptab{padding:8px 10px;font-size:13px}
+}
 </style>
 </head>
 <body>
 
 <!-- ════════ TITLE ════════ -->
 <div id="title">
-  <div class="tstamp">DEPARTMENT OF HISTORY · READING ROOM</div>
-  <h1>AGAINST<br><em>the</em> GRAIN</h1>
-  <div class="tsub">Four cases. Twelve documents. Every source in this archive is arguing with you — the petition has interests, the advertisement has blind spots, the memoir has forty years of distance. Your job is not to find the source that tells the truth. It is to make the sources tell on each other.</div>
-  <div class="tmethod">SOURCE · CORROBORATE · READ AGAINST · PUBLISH</div>
-  <button class="tstart" onclick="openShelf()">REQUEST THE FIRST BOX</button>
-  <div class="tnote">Documents in Cases I, II, and IV are composites — invented texts built faithfully from the patterns of real archival records, so noted on each. Case III presents the published words of two famous visitors, exactly as history left them.</div>
+  <div class="tfolder">
+    <div class="ttab">CASE FILES · DO NOT REMOVE FROM READING ROOM</div>
+    <h1 class="tname">AGAINST THE GRAIN</h1>
+    <div class="tsub">The Historian's Casebook</div>
+    <div class="tpitch">
+      Four cold cases. Eleven documents. Every source in this archive is arguing with you
+      — the advertisement has interests, the petition has fears, the memoir has
+      eighty-eight years of distance. Your job is not to find the source that tells the
+      truth. It is to interrogate each one, connect what they let slip, and make the
+      sources tell on each other. Leads are limited. Spend them where the record is
+      hiding something.
+    </div>
+    <div class="tmethod">READ · INTERROGATE · CONNECT · VERDICT</div>
+    <button class="tstart" onclick="openShelf()">REQUEST THE FIRST BOX</button>
+    <div class="tnote">
+      Documents in Cases I, II, and IV are composites — invented texts built faithfully
+      from the patterns of real archival records, so noted on each. Case III condenses
+      the published accounts of two famous visitors, abridged for play and so labeled.
+    </div>
+  </div>
 </div>
 
-<!-- ════════ GAME ════════ -->
-<div id="game">
-  <div id="hud">
-    <div class="hl">AGAINST THE GRAIN</div>
-    <div class="hr">RIGOR <span id="rigor">0</span></div>
+<!-- ════════ HUD ════════ -->
+<div id="hud">
+  <div class="hudrow">
+    <div class="hl" id="hudTitle">AGAINST THE GRAIN</div>
+    <div class="hstat">LEADS <span id="leadPips"></span></div>
+    <div class="hstat">CASE STRENGTH <span class="csbar"><span id="csFill"></span></span></div>
+    <button class="hbtn" onclick="openMethod()">METHOD</button>
+    <button class="hbtn" onclick="backToShelf()">SHELF</button>
   </div>
+</div>
 
-  <!-- case shelf -->
+<div class="wrap">
+  <!-- ════════ SHELF ════════ -->
   <div id="shelf">
     <div class="shelfTitle">THE ARCHIVE BOXES</div>
+    <div class="shelfSub">Grades are earned, not given. AIRTIGHT verdicts require nearly every shred of evidence in the box.</div>
     <div class="caseRow" id="caseRow"></div>
+    <div id="commendRow"></div>
   </div>
 
-  <!-- active case -->
+  <!-- ════════ CASE ════════ -->
   <div id="case">
     <div class="caseHead">
       <div class="chEra" id="chEra"></div>
       <h2 id="chTitle"></h2>
     </div>
     <div class="paper brief" id="chBrief"></div>
-    <div class="dtabs" id="dtabs"></div>
-    <div class="paper docwrap">
-      <div class="dochead"><span class="dtype" id="dType"></span><span class="dmeta" id="dMeta"></span></div>
-      <div class="docbody" id="dBody"></div>
-      <div class="composite" id="dComp"></div>
+    <div class="ptabs" id="ptabs"></div>
+    <div id="phaseBody"></div>
+  </div>
+
+  <!-- ════════ RESULT ════════ -->
+  <div id="result"></div>
+</div>
+
+<div id="toast" class="mono"></div>
+
+<!-- ════════ THE ARCHIVIST (tutorial) ════════ -->
+<div id="tut" role="dialog" aria-label="Tutorial note">
+  <div class="tutnote">
+    <div class="tuthead">A NOTE FROM THE ARCHIVIST</div>
+    <div class="tutbody" id="tutBody"></div>
+    <div class="tutrow">
+      <button class="tutskip" onclick="tutSkipAll()">dismiss the archivist for good</button>
+      <button class="tutok" onclick="tutClose()">NOTED</button>
     </div>
-    <div class="paper phase" id="phase"></div>
+  </div>
+</div>
+
+<!-- ════════ METHOD REFERENCE ════════ -->
+<div id="method" onclick="if(event.target===this)closeMethod()">
+  <div class="methodcard">
+    <h3>THE METHOD</h3>
+    <dl>
+      <dt>READ</dt>
+      <dd>Study every document tab. Blacked-out passages are unexamined — the right interrogation opens them. Notice what each document says, and what it refuses to say.</dd>
+      <dt>INTERROGATE — leads are limited</dt>
+      <dd>Every question costs one lead, and there are more questions than leads. Good questions secure evidence cards and open sealed passages. Dead ends teach a source's limits — and cost the same.</dd>
+      <dt>CONNECT — the evidence board</dt>
+      <dd>Tap two cards to tie a thread. True connections become new evidence — corroborations and contradictions — and some findings can only be carried by connection evidence. False threads weaken the case by 2.</dd>
+      <dt>VERDICT — claim and citation</dt>
+      <dd>Each finding needs the right claim <i>and</i> the right evidence cited beneath it. A true claim with a weak citation only half holds. The verdict, once stamped, closes the attempt.</dd>
+      <dt>GRADES</dt>
+      <dd>AIRTIGHT · STRONG · CIRCUMSTANTIAL · DISMISSED. AIRTIGHT demands nearly every shred in the box. Two verdicts at STRONG or better break the seal on Box IV. Reopen any case to argue it better.</dd>
+    </dl>
+    <button class="methodclose" onclick="closeMethod()">RETURN TO THE CASE</button>
   </div>
 </div>
 
@@ -229,471 +477,798 @@ button:focus-visible{outline:3px solid var(--manila);outline-offset:2px;}
 'use strict';
 /* ════════════════════════════════════════════════════════════
    CASE DATA
-   phases: {k:'mc'} sourcing question · {k:'grid'} corroboration
-           {k:'grain'} against-the-grain multi-select
-           {k:'account'} publish four statements
+   Each case: docs (with redactions), interrogations (leads),
+   links (evidence-board connections), verdict (findings), epilogue.
+   Card ids are strings; connection cards are earned by linking.
    ════════════════════════════════════════════════════════════ */
 const CASES=[
 /* ═══════════ CASE I — THE NOTICE IN THE GAZETTE ═══════════ */
-{era:'CASE I · EDGEFIELD DISTRICT, SOUTH CAROLINA · 1849–1937',
+{
+ era:'CASE I · EDGEFIELD DISTRICT, SOUTH CAROLINA · 1849–1937',
  title:'The Notice in the Gazette',
- brief:`<b>THE PROBLEM —</b> A man named Cato escaped slavery in the South Carolina upcountry in the summer of 1849. Three documents survive. One was written to catch him, one to account for him, and one to remember him — eighty-eight years later. None was written to tell you the truth. Read all three tabs before beginning; the analysis will test what each document can and cannot know.`,
+ short:'A man named Cato escapes in the summer of 1849. Three documents survive. None was written to tell you the truth.',
+ leads:10,
+ brief:`<b>THE PROBLEM —</b> A man named Cato escaped slavery in the South Carolina upcountry in the summer of 1849. Three documents survive. One was written to catch him, one to account for him, and one to remember him — eighty-eight years later. Establish why he ran, what the published record concealed, who he was, and what became of him. Every finding must be backed by evidence you have earned. You hold <b>ten leads</b>. Not every question deserves one.`,
  docs:[
-  {tab:'DOC A · THE AD',type:'RUNAWAY ADVERTISEMENT — NEWSPAPER',style:'print',
-   meta:'Edgefield Gazette, July 12, 1849 · placed and paid for by the enslaver',comp:'COMPOSITE DOCUMENT — built from the language and conventions of surviving runaway advertisements.',
-   text:`<p>FIFTY DOLLARS REWARD. — RANAWAY from the subscriber, on the night of the 3d instant, my Negro Man CATO, about thirty years of age, five feet ten inches high, of dark complexion and proud carriage. Cato is a first-rate carpenter and cooper, and has been hired out in the district these six years past. He reads and writes a tolerable hand, and will no doubt have furnished himself with forged papers. He took with him his wife DINAH, the property of the Widow Harper, and it is supposed they will make for Charleston, where Cato has a sister living free.</p><p>He is artful and plausible, and may attempt to pass as a free man. Masters of vessels are warned against harboring or carrying off said Negroes under penalty of the law.</p><p>— JAS. TILLMAN, Edgefield District.</p>`},
-  {tab:'DOC B · THE DAYBOOK',type:'PLANTATION DAYBOOK — MANUSCRIPT LEDGER',style:'type',
-   meta:'Tillman plantation accounts, 1849–1850 · private record, not meant for other eyes',comp:'COMPOSITE DOCUMENT — modeled on surviving plantation account books.',
-   text:`<p>July 4 — Cato gone in the night. Dinah likewise from Harper's.</p><p>July 12 — pd. Gazette for notice, $1.50.</p><p>July 19 — pd. Sims & Colcock, slave catchers, retainer $25.</p><p>Aug. 30 — Sims returned from Charleston. no result. pd. balance $25, protest'd.</p><p>Oct. 2 — Hired Yancey's Bob for carpenter work on the gin house, $8/mo. Work inferior to Cato's. Loss on Simmons contract for want of a cooper, est. $60.</p><p>Jan. 1, 1850 — Struck Cato & value ($900) from inventory. Total loss w. expenses $986.50.</p>`},
-  {tab:'DOC C · THE MEMORY',type:'ORAL HISTORY — FEDERAL WRITERS\' PROJECT',style:'script',
-   meta:'Interview with Rev. Alfred Simkins, age 96, near Trenton, S.C., 1937 · white interviewer, taken down by hand',comp:'COMPOSITE DOCUMENT — modeled on the WPA ex-slave narratives, including the circumstances of their taking.',
-   text:`<p>"You asking about old times. I was a boy on the Tillman place. I remember a man they called Cato — a carpenter, could build anything with hands. He learned his letters from the white children's primer, secret. One July he took his wife and was gone like smoke. Patrollers rode three weeks and never got him. Folks said he wrote his own pass better than the clerk of court could.</p><p>"The old people would name him low, like a church word. That's all I know about that. We was treated tolerable on that place, mostly. You can put that down too, sir."</p>`}],
- phases:[
-  {k:'mc',ph:'PHASE 1 · SOURCING',q:'Document A exists for exactly one purpose: to recapture Cato. Why does that purpose make it unusually trustworthy about his skills, literacy, and family ties?',
-   exp:'Think about what the author gains or loses by lying in this particular document.',
-   opts:[
-    {t:'It was published in a newspaper, and newspapers were fact-checked.'},
-    {t:'Tillman paid by the word, so he included only what mattered.'},
-    {t:'Every detail is a declaration against interest — admitting Cato\'s literacy, skill, and forgery ability embarrasses the enslaver and undercuts proslavery claims, so he would only include it because it was true and useful for the capture.',ok:true},
-    {t:'Enslavers were legally required to describe runaways accurately.'}],
-   why:'<b>The craft:</b> a hostile source is most reliable precisely where honesty costs its author something. Tillman has every reason to hide that an enslaved man read, wrote, and out-crafted the district — except that hiding it would help Cato escape. Historians call these admissions against interest, and runaway ads are full of them.'},
-  {k:'mc',ph:'PHASE 1 · SOURCING',q:'Document C was recorded in 1937 — a Black man in his nineties, speaking to a white interviewer in Jim Crow South Carolina. Which detail most clearly shows the interview\'s conditions shaping its content?',
-   exp:'Every source is produced under conditions. Find where the conditions leave fingerprints.',
-   opts:[
-    {t:'His memory of Cato\'s carpentry — old men forget trades.'},
-    {t:'"We was treated tolerable on that place, mostly. You can put that down too, sir." — a protective closing addressed to the white interviewer, exactly the hedge the WPA narratives are known for.',ok:true},
-    {t:'The phrase "gone like smoke," which is too poetic to be authentic.'},
-    {t:'His age — nobody at 96 remembers anything reliably.'}],
-   why:'<b>The craft:</b> the hedge is not a flaw to discard; it is evidence. Rev. Simkins speaks freely about Cato — a story of Black triumph safely long past — then armors the interview with a compliment his safety may depend on. The WPA narratives must be read with that double register in mind: what could be said, to whom, in 1937.'},
-  {k:'grid',ph:'PHASE 2 · THE CORROBORATION GRID',
-   intro:'Judge each claim against ALL THREE documents. CORROBORATED = two or more independent sources support it. CONTESTED = sources conflict. SINGLE SOURCE = only one document speaks. SILENCE = no document can answer.',
-   claims:[
-    {c:'Cato was a skilled carpenter.',a:0,why:'Corroborated three ways — the ad advertises the skill, the daybook bleeds money for the lack of it ("work inferior to Cato\'s"), and Simkins remembers it. The daybook is the strongest: it concedes his value by accounting the loss.'},
-    {c:'Cato could read and write.',a:0,why:'Corroborated: the ad admits it against interest, and Simkins independently recalls both the secret learning and the forged pass. Two sources, opposite sides, same fact — the gold standard.'},
-    {c:'Cato and Dinah were never recaptured.',a:0,why:'Corroborated: the daybook records "no result," the struck inventory value, and no recapture entry; Simkins says the patrollers "never got him." Absence in the ledger here is affirmative evidence — Tillman recorded every dollar, and recapture would have been a dollar event.'},
-    {c:'Cato and Dinah reached Charleston and his free sister.',a:2,why:'Single source — and not even a claim, only the ad\'s supposition of a destination. The catchers searched Charleston and found nothing, which cuts both ways. Where they actually went, only the ad guesses.'},
-    {c:'Cato escaped because Tillman treated him with unusual cruelty.',a:3,why:'Silence. No document speaks to Cato\'s motive — the ad won\'t, the ledger doesn\'t care, and Simkins doesn\'t say. Slavery itself is motive enough for the historian to note, but a specific triggering cruelty is not in this record. Resist the urge to write what the archive does not contain.'},
-    {c:'Life on the Tillman place was "tolerable."',a:1,why:'Contested — and subtle. Simkins says it, but under conditions that compromise exactly this kind of statement, and the record around it (patrollers, forged passes, a man fleeing with his wife "like smoke") pushes the other way. When a claim conflicts with its own document\'s context, mark the conflict.'}]},
-  {k:'grain',ph:'PHASE 3 · READING AGAINST THE GRAIN',
-   q:'Document A was written to capture a man. Read it against its own purpose: which of the following can a historian defensibly extract from the ad about Cato and his world? Select every sound inference — and no unsound ones.',
-   exp:'The test for each: does the ad\'s own text support it, even though the author never meant to say it?',
-   opts:[
-    {t:'Enslaved artisans hired out for years built skills, networks, and geographic knowledge that made escape more feasible.',ok:true,why:'Six years hired out across the district = mobility, contacts, and cash economy exposure. The ad admits all of it.'},
-    {t:'Literacy circulated among the enslaved despite the law, and enslavers knew it.',ok:true,why:'"Reads and writes a tolerable hand... will no doubt have furnished himself with forged papers" — stated as an expected hazard, not a shock.'},
-    {t:'Escape was often a family act, coordinated across plantations.',ok:true,why:'Cato and Dinah were held by different enslavers and left the same night. That is planning across property lines, in the ad\'s own words.'},
-    {t:'Free Black communities functioned as knowledge and destination networks for freedom seekers.',ok:true,why:'The ad\'s guess — Charleston, where "Cato has a sister living free" — concedes that enslavers themselves mapped escape routes through free Black kin.'},
-    {t:'Cato was planning an armed uprising in Charleston.',ok:false,why:'Nothing in any document supports this. Against-the-grain reading extracts what the text implies despite itself — it does not license invention.'},
-    {t:'Tillman secretly admired Cato and let him go.',ok:false,why:'The daybook refutes it: $50 in catchers\' fees, a protest over the bill, and a $986.50 loss carefully totaled. Sentiment is not in this ledger.'}]},
-  {k:'account',ph:'PHASE 4 · PUBLISH THE ACCOUNT',
-   q:'Write the case up. Choose exactly FOUR sentences for publication. Sound inferences earn rigor; overreach and unsupported claims cost it.',
-   opts:[
-    {t:'In July 1849, Cato, a hired-out carpenter and cooper, escaped Edgefield District with his wife Dinah, who was enslaved on a neighboring place.',v:'sound',why:'Every element corroborated across A and B.'},
-    {t:'Cato\'s literacy — acquired covertly and acknowledged by his enslaver — was an instrument of his escape.',v:'sound',why:'A admits it against interest; C independently corroborates the covert learning and the forged pass.'},
-    {t:'The escape succeeded: Tillman\'s own accounts record the search\'s failure and write Cato off as a total loss.',v:'sound',why:'The ledger is decisive, and Simkins corroborates. Note the craft of citing the enslaver\'s books to prove the freedom seeker\'s victory.'},
-    {t:'The memory of successful escape survived among Edgefield\'s Black community for nearly a century, carried in oral tradition.',v:'sound',why:'That is precisely what Document C is — the evidence and the claim are the same artifact.'},
-    {t:'Cato and Dinah settled in Charleston with his sister and lived out their lives there.',v:'unsup',why:'The only source for Charleston is the ad\'s guess, and the catchers came back empty from there. Publishing this converts an enslaver\'s supposition into biography.'},
-    {t:'Conditions on the Tillman plantation were comparatively humane, as a formerly enslaved resident himself attested.',v:'over',why:'This launders a coerced hedge into a finding. The statement exists; treating it as settled fact ignores everything known about the conditions of its production.'},
-    {t:'Cato\'s escape was probably typical — most enslaved people who fled succeeded.',v:'unsup',why:'One case supports no rate. Most escape attempts failed; that is why Cato was remembered "like a church word." Never generalize a single file.'}],
-   epi:'<h3>CASE CLOSED — WHAT THE FILE TEACHES</h3><p>Three documents, none written to inform you, and yet: a skilled, literate man; a marriage defended across property lines; a network reaching to Charleston; an escape that held; a memory kept low and safe for eighty-eight years. The enslaver\'s advertisement — the most hostile document in the box — turned out to be the richest source on Black capability, because every admission in it worked against its author. That is reading against the grain, and you will use it in every case that follows.</p>'}]},
-
-/* ═══════════ CASE II — THE QUESTION OF SCHOOLS ═══════════ */
-{era:'CASE II · SOUTH CAROLINA UPCOUNTRY · 1811–1836',
- title:'The Question of Schools',
- brief:`<b>THE PROBLEM —</b> In 1811 South Carolina passed a Free School Act — then spent decades letting it starve. Was the failure of public education an accident of poverty, or a policy wearing the costume of neglect? Three documents from the same district: a petition against the schools, an editorial for them (read it carefully), and a schoolmaster's private letter. The answer is in how they disagree — and in what all three refuse to say.`,
+  {tab:'DOC A · THE AD',type:'RUNAWAY ADVERTISEMENT',style:'print',
+   meta:'Edgefield Gazette, July 12, 1849 · placed and paid for by the enslaver',
+   comp:'COMPOSITE DOCUMENT — built from the language and conventions of surviving runaway advertisements.',
+   text:`<p>FIFTY DOLLARS REWARD. — RANAWAY from the subscriber, on the night of the 3d instant, my Negro Man CATO, about thirty years of age, five feet ten inches high, of dark complexion and proud carriage. Had on when he left a suit of white plains.</p>
+<p>He is a first-rate carpenter, and can read a little, though he will deny it. He is artful, and will no doubt endeavor to pass himself as a free man. It is supposed he will make for the Savannah River, and thence to Augusta or below.</p>
+<p>The above reward will be paid for his delivery to me, or his confinement in any jail so that I get him again. Masters of vessels and boat-owners are cautioned against harboring or carrying off said fellow under penalty of the law.</p>
+<p>WM. B. HARRINGTON. Edgefield District, July 12, 1849.</p>`},
+  {tab:'DOC B · THE DAYBOOK',type:'PLANTATION DAYBOOK',style:'hand',
+   meta:'Harrington plantation, June–July 1849 · the enslaver\u2019s private record',
+   comp:'COMPOSITE DOCUMENT — built from the form and idiom of surviving plantation daybooks and ledgers.',
+   text:`<p><i>June 24.</i> — Corn laid by in the creek field. Hands turned to the fodder.</p>
+<p><i>June 28.</i> — {{R:r1}}</p>
+<p><i>July 1.</i> — {{R:r2}}</p>
+<p><i>July 4.</i> — Cato missing since night before last. Set the patrol on notice.</p>
+<p><i>July 9.</i> — No word of Cato. He is the best carpenter in the district and I am out $900 if he is not taken.</p>
+<p><i>July 11.</i> — Paid $2.50 to the Gazette for a notice.</p>
+<p><i>July 14.</i> — Boy Peter says Cato spoke of the river. Told the patrol.</p>`,
+   redactions:{
+     r1:{teaser:'UNEXAMINED ENTRY — discipline', text:'Cato whipped by Ruggles the overseer for insolence. He would not beg pardon.'},
+     r2:{teaser:'UNEXAMINED ENTRY — a sale', text:'Settled with Solomon the trader for the woman Dilcey, $650. She goes down to Hamburg Tuesday.'}
+   }},
+  {tab:'DOC C · THE MEMORY',type:'INTERVIEW TRANSCRIPT',style:'hand',
+   meta:'Federal Writers\u2019 Project interview near Trenton, S.C., July 1937 · Phoebe Glover, aged about 96',
+   comp:'COMPOSITE DOCUMENT — built from the conventions of the WPA ex-slave narratives, including the white interviewer\u2019s transcription habits.',
+   text:`<p>\u201cYou ask about Cato. I was a girl mindin\u2019 the yard chillun when he lef\u2019. He were a proud man, a carpenter. They sol\u2019 his wife off that spring, down to Hamburg, an\u2019 after that he weren\u2019t studyin\u2019 about stayin\u2019.</p>
+<p>\u201cHe follow the river. Folks say he cross at night an\u2019 kep\u2019 north. I always heared he made it clean to Ohio an\u2019 lived free. That\u2019s what the old folks tol\u2019 it, an\u2019 I tells it the same.\u201d</p>
+<p>{{R:r3}}</p>`,
+   redactions:{
+     r3:{teaser:'INTERVIEWER\u2019S NOTE — withheld', text:'[Interviewer\u2019s note: The subject grew quiet when asked about the patrols, and said some things \u201cain\u2019t for puttin\u2019 down.\u201d]'}
+   }}
+ ],
+ cards:{
+  VALUED:{n:'A High Price',d:'Fifty dollars was serious money. The reward itself testifies to Cato\u2019s skill and value.',src:'DOC A'},
+  LITERATE:{n:'\u201cHe Will Deny It\u201d',d:'The ad admits Cato can read — and that he is smart enough to hide it. The enslaver records resistance without meaning to.',src:'DOC A'},
+  SILENCE:{n:'The Silence',d:'Nowhere does the ad say why Cato ran. It cannot — naming a cause would indict the man who paid for the notice.',src:'DOC A'},
+  ROUTE:{n:'The River Road',d:'Harrington supposes Cato will make for the Savannah River and pass as free.',src:'DOC A'},
+  CAUSE:{n:'The Whipping',d:'June 28 — Cato whipped for insolence. He would not beg pardon. Five days before he ran.',src:'DOC B'},
+  SALE:{n:'Dilcey, $650',d:'July 1 — Cato\u2019s wife sold to a Hamburg trader. Two days before he ran.',src:'DOC B'},
+  PRICE:{n:'$900 on the Books',d:'The daybook values Cato at $900 — the private ledger behind the public reward.',src:'DOC B'},
+  TRAIL:{n:'The $2.50 Notice',d:'July 11 — the daybook records paying the Gazette. The private record and the public ad are one system.',src:'DOC B'},
+  MEMORY:{n:'She Remembers the Sale',d:'Eighty-eight years later, Phoebe Glover names the same event — the wife sold away — as the reason he left.',src:'DOC C'},
+  HOPE:{n:'Clean to Ohio',d:'She heard he made it free. No other document confirms it. Memory carries hope as well as fact.',src:'DOC C'},
+  GUARD:{n:'\u201cAin\u2019t for Puttin\u2019 Down\u201d',d:'A white stranger with a notebook, in Jim Crow South Carolina. She chose what to withhold. The transcript has a survivor\u2019s silences.',src:'DOC C'},
+  WORTH:{n:'Two Ledgers Agree',d:'CONNECTION — The public reward and the private valuation corroborate: Cato was among the most valuable people on the place.',src:'A + B'},
+  CONCEALED:{n:'What the Ad Concealed',d:'CONNECTION — The daybook records a whipping and a sale in the week before the escape. The ad records neither. Its silence was deliberate.',src:'A \u00d7 B'},
+  RIVER:{n:'Both Point to the River',d:'CONNECTION — The enslaver\u2019s guess and the community\u2019s memory agree on the route. Independent sources, same river.',src:'A + C'},
+  MOTIVE:{n:'Memory Meets the Ledger',d:'CONNECTION — Eighty-eight years apart, the daybook and the memory name the same sale. Corroboration across a lifetime.',src:'B + C'},
+  LIMIT:{n:'Where the Record Ends',d:'CONNECTION — Her hope for Ohio is uncorroborated, and she guarded her words. The honest finding is that the trail ends here.',src:'C \u00d7 C'}
+ },
+ interro:[
+  {doc:0,qs:[
+   {q:'What does a fifty-dollar reward reveal?',hit:'VALUED',resp:'Rewards were priced to value. Harrington is not advertising for just any laborer.'},
+   {q:'Why admit that he \u201ccan read a little\u201d?',hit:'LITERATE',resp:'A warning to slave-catchers becomes, for you, evidence — of literacy, and of a man managing what his enslaver knew.'},
+   {q:'Does the ad ever say why Cato ran?',hit:'SILENCE',resp:'Read it again. Not one word of cause. That absence is not an accident — it is the document\u2019s deepest tell.'},
+   {q:'Where does Harrington think Cato is going?',hit:'ROUTE',resp:'The Savannah River, toward Augusta — the enslaver\u2019s best guess, worth testing against other sources.'},
+   {q:'Is the physical description accurate?',hit:null,resp:'No way to test that from this document alone. The ad describes; nothing here can verify. A lead spent teaches a source\u2019s limits.'}
+  ]},
+  {doc:1,qs:[
+   {q:'What happened in the days before July 3?',hit:'CAUSE',unredact:'r1',resp:'The unexamined entry opens. June 28 — a whipping. \u201cHe would not beg pardon.\u201d'},
+   {q:'Does anyone else leave the plantation that summer?',hit:'SALE',unredact:'r2',resp:'The second entry opens. July 1 — Dilcey, sold south to Hamburg. The daybook does not call her Cato\u2019s wife. Another source will.'},
+   {q:'How does Harrington reckon his loss?',hit:'PRICE',resp:'\u201cI am out $900.\u201d In the private record, a man is a figure on a page.'},
+   {q:'Does the daybook mention the newspaper?',hit:'TRAIL',resp:'$2.50 to the Gazette. You can now trace the ad backward into the ledger that paid for it.'},
+   {q:'What was the weather that July?',hit:null,resp:'Dry, probably. Irrelevant, certainly. The daybook answers questions about the crop and the accounts — choose questions it can answer with profit.'}
+  ]},
+  {doc:2,qs:[
+   {q:'What reason does she give for his leaving?',hit:'MEMORY',resp:'\u201cThey sol\u2019 his wife off that spring.\u201d She was a child in the yard, and she remembers the why.'},
+   {q:'What does she claim that nothing else supports?',hit:'HOPE',resp:'Ohio. Freedom. \u201cThat\u2019s what the old folks tol\u2019 it.\u201d Hold this carefully — it is precious, and it is unproven.'},
+   {q:'Who is asking the questions, and does it matter?',hit:'GUARD',unredact:'r3',resp:'The interviewer\u2019s note opens. She went quiet about the patrols. What a source withholds under pressure is evidence too.'},
+   {q:'Is her stated age reliable?',hit:null,resp:'Enslaved people were rarely given documented birthdates — the theft of a birthday, as Douglass wrote. Nothing here can verify it either way.'},
+   {q:'Did she know the Harrington family?',hit:null,resp:'The transcript does not say. You cannot interrogate a document about what it never mentions.'}
+  ]}
+ ],
+ links:[
+  {pair:[['VALUED','PRICE']],kind:'corr',card:'WORTH'},
+  {pair:[['SILENCE','CAUSE'],['SILENCE','SALE']],kind:'contra',card:'CONCEALED'},
+  {pair:[['ROUTE','MEMORY']],kind:'corr',card:'RIVER'},
+  {pair:[['SALE','MEMORY']],kind:'corr',card:'MOTIVE'},
+  {pair:[['HOPE','GUARD']],kind:'contra',card:'LIMIT'}
+ ],
+ verdict:[
+  {q:'FINDING I — Why did Cato run?',
+   opts:['He was restless by nature; the record suggests no particular cause.',
+         'A whipping in late June, and the sale of his wife Dilcey days before he left.',
+         'He was lured away by agents from the North.'],
+   correct:1,cite:['CAUSE','SALE','MOTIVE']},
+  {q:'FINDING II — What did the published record conceal?',
+   opts:['Nothing — the advertisement is a candid account.',
+         'The cause it could not admit: the violence and the sale recorded in the private daybook.',
+         'Cato\u2019s true destination.'],
+   correct:1,cite:['CONCEALED']},
+  {q:'FINDING III — What kind of man does the record show, despite itself?',
+   opts:['A desperate, unskilled field hand.',
+         'Skilled, literate, deliberate — a first-rate carpenter who managed what his enslaver knew of him.',
+         'The record shows nothing of the man himself.'],
+   correct:1,cite:['LITERATE','VALUED','WORTH']},
+  {q:'FINDING IV — Did Cato reach freedom?',
+   opts:['Yes — the community memory of Ohio settles it.',
+         'No — men like Cato were always recaptured.',
+         'The evidence cannot say. The memory hopes; the record is silent. An honest historian marks the limit.'],
+   correct:2,cite:['LIMIT','HOPE']}
+ ],
+ epilogue:`<h4>WHAT HISTORY SAYS</h4>
+<p>Over two hundred thousand runaway advertisements like Doc A survive in American newspapers, and historians now read them exactly as you just did — against the grain, mining hostile documents for the skills, families, literacy, and defiance they record by accident. Every detail an enslaver printed to catch a person now testifies for that person instead.</p>
+<p>Most who escaped in 1849 were recaptured, returned, or forced back by hunger and patrols; a determined minority reached the free states or hid in Southern cities and swamps. For most, as for Cato, the paper trail simply ends — and the discipline of saying <i>we cannot know</i> is itself part of the historian\u2019s craft. The hope Phoebe Glover carried is also a fact of history: it is what the community chose to remember, and that choice is evidence of what freedom meant to them.</p>`
+},
+/* ═══════════ CASE II — THE CONTRACT ═══════════ */
+{
+ era:'CASE II · BARNWELL DISTRICT, SOUTH CAROLINA · 1866',
+ title:'The Contract',
+ short:'Freedom on paper. A planter cries idleness, the freedpeople answer, and a Bureau agent stands between.',
+ leads:8,
+ brief:`<b>THE PROBLEM —</b> January 1866. Slavery is dead eight months. On the Rhett place, forty-one freedpeople sign a labor contract witnessed by the Freedmen\u2019s Bureau. By September the planter is demanding enforcement against \u201cidleness.\u201d By October the freedpeople have lodged their answer. Determine what \u201cidleness\u201d actually described, who broke the contract first, why the planter pressed when he did, and what freedom meant here in practice. You hold <b>eight leads</b>.`,
  docs:[
-  {tab:'DOC A · THE PETITION',type:'PETITION TO THE STATE LEGISLATURE — MANUSCRIPT',style:'script',
-   meta:'Memorial of sundry freeholders of the district, November 1832 · 41 signatures, led by the largest landholders',comp:'COMPOSITE DOCUMENT — built from the arguments of surviving anti-school petitions and legislative memorials.',
-   text:`<p>To the Honorable the Senate and House of Representatives: The memorial of the undersigned freeholders respectfully sheweth — That the free school moneys levied upon this district are a grievous burthen upon property for the benefit of those who contribute nothing; that the children of the laboring class are wanted in the fields and derive small profit from letters; that learning beyond a man's station breeds discontent and disorder among the lower sort of whites, and — your memorialists need not say — is by law wisely forbidden to the slave.</p><p>Our institutions rest upon each order keeping to its place. Your memorialists therefore pray the free school appropriation for this district be reduced, and the moneys applied to the patrol and the roads.</p>`},
-  {tab:'DOC B · THE EDITORIAL',type:'NEWSPAPER EDITORIAL — PRINT',style:'print',
-   meta:'The District Courier, January 1833 · editor a town merchant; the paper depended on planter subscriptions and legal notices',comp:'COMPOSITE DOCUMENT — modeled on moderate upcountry editorials of the period.',
-   text:`<p>THE FREE SCHOOLS. — We differ, respectfully, from the late memorial. A sound and limited schooling for the deserving poor is the cheapest police a state can buy. The boy who can read his Bible and cast simple accounts is proof against the demagogue and the agitator, and grows into a steadier tenant and a safer voter.</p><p>But let the schools be kept in proper hands. Let the commissioners be drawn from the substantial men of each parish, the masters examined for soundness of principle as well as letters, and the instruction confined to what a plain man requires. Of the objection touching our peculiar institution, nothing need be said: the law is settled, and no man of sense proposes to disturb it.</p>`},
-  {tab:'DOC C · THE LETTER',type:'PRIVATE LETTER — SCHOOLMASTER TO HIS BROTHER',style:'script',
-   meta:'Wm. Kerr, district schoolmaster, to his brother in Abbeville, March 1836 · private correspondence, never intended for publication',comp:'COMPOSITE DOCUMENT — built from surviving teachers\' letters and free-school commissioners\' reports.',
-   text:`<p>Dear Brother — You ask how the school prospers. It does not. My salary is eleven months in arrears and the commissioners do not answer. The house wants a roof on the north side; we lost January entire to the weather. Of forty children enrolled I see perhaps a dozen at once, the rest being kept to the crop, and the planters' sons are all away at the academies, so no man of weight in the district has a child under my roof or a reason to care whether it stands.</p><p>You will have heard of the late Act against teaching any slave to read, with its fines and its lashes. I will say to you privately what I would not say at the muster: they have made ignorance an institution here, and it is tended more carefully than the schools. — Yr. affectionate brother, WM. KERR.</p>`}],
- phases:[
-  {k:'mc',ph:'PHASE 1 · SOURCING',q:'Documents A and B disagree about the free schools. What is the sharpest description of what they AGREE on?',
-   exp:'When opponents share a premise, that premise is the era\'s deep structure.',
-   opts:[
-    {t:'Nothing — they are opposites.'},
-    {t:'Both accept that education must be rationed to preserve the social order: the petition wants less schooling to keep ranks fixed, the editorial wants controlled schooling to keep ranks quiet, and both treat Black literacy as settled beyond discussion.',ok:true},
-    {t:'Both believe education is a natural right that funding problems have compromised.'},
-    {t:'Both want the school money spent on roads instead.'}],
-   why:'<b>The craft:</b> the argument is about the dose, never the principle. The editorial\'s "support" is schooling as social control — "the cheapest police a state can buy." Map where the disagreement STOPS, and you have found the boundary of the politically thinkable in 1833.'},
-  {k:'mc',ph:'PHASE 1 · SOURCING',q:'Why does Document C\'s status as a PRIVATE letter change its evidentiary weight compared to A and B?',
-   exp:'Ask who each document is performing for.',
-   opts:[
-    {t:'It doesn\'t — private letters are gossip, public documents are official.'},
-    {t:'A and B are public performances aimed at the legislature and subscribers, shaped by what could safely be said; Kerr writes with no audience to manage, which is why he can name the system — "they have made ignorance an institution" — in words he admits he would not say aloud.',ok:true},
-    {t:'Private letters are always more accurate because they were written faster.'},
-    {t:'It is weaker evidence, because only one man saw it.'}],
-   why:'<b>The craft:</b> Kerr flags it himself — "I will say to you privately what I would not say at the muster." A source that marks the boundary between its public and private voice is handing you a measurement of the era\'s pressure. That sentence is the most valuable in the box.'},
-  {k:'grid',ph:'PHASE 2 · THE CORROBORATION GRID',
-   intro:'Judge each claim against all three documents.',
-   claims:[
-    {c:'The district\'s free schools were failing in practice by the 1830s.',a:0,why:'Corroborated: Kerr\'s arrears, roofless schoolhouse, and dozen pupils; the petition\'s drive to defund confirms the schools lacked protectors; even the editorial\'s defensive tone concedes the schools are under siege.'},
-    {c:'The planter elite deliberately preferred a limited-to-absent education for poor whites.',a:0,why:'Corroborated: the petition says it openly ("learning beyond a man\'s station breeds discontent"), and Kerr\'s letter shows the mechanism — the men of weight sent their sons to academies and let the free school rot. Intent plus mechanism, from opposite ends of the record.'},
-    {c:'The failure of the schools was caused simply by the district being too poor to fund them.',a:1,why:'Contested: the petition itself defeats the poverty thesis by proposing to move the money to patrols and roads — the funds existed; the priority did not. Kerr corroborates: ignorance was "tended more carefully than the schools." Poverty is the costume; policy is the body.'},
-    {c:'Black literacy was legally suppressed in this period.',a:0,why:'Corroborated: the petition invokes the prohibition approvingly, the editorial calls the law "settled," and Kerr names the 1834-type Act "with its fines and its lashes." All three, across the whole political spectrum of the box — which is itself the finding.'},
-    {c:'Enslaved and free Black Carolinians in the district nonetheless pursued literacy covertly.',a:3,why:'Silence — in THIS box. It happened, as other archives attest (recall Cato\'s primer), but none of these three documents says so. The discipline is telling: you may know something is true and still be unable to cite it from the file in front of you. Say so, and go find the source that can.'},
-    {c:'Schoolmaster Kerr supported the planters\' view of education.',a:1,why:'Contested — his public and private selves conflict by his own admission. At the muster he performs assent; to his brother he indicts the system. When one man is two sources, record the split rather than choosing a "real" Kerr.'}]},
-  {k:'grain',ph:'PHASE 3 · READING AGAINST THE GRAIN',
-   q:'Now read the PETITION (Doc A) against itself. Its authors meant to argue for defunding schools. What does the document reveal despite its purpose? Select every sound inference.',
-   exp:'What must be true about the world for this petition to have been written this way?',
-   opts:[
-    {t:'The elite believed education had real power — enough power to threaten the social order if it spread.',ok:true,why:'You do not petition a legislature against a harmless thing. The petition is an involuntary testimonial to literacy\'s force.'},
-    {t:'White supremacy and class hierarchy were governed together — the same document polices poor whites\' learning and the enslaved\'s in one breath.',ok:true,why:'"The lower sort of whites" and "the slave" appear in the same sentence of exclusions. The petition\'s own syntax links the two systems.'},
-    {t:'Public resources were actively redirected from education to enforcement — "the patrol and the roads."',ok:true,why:'The remedy clause is the smoking gun: money for patrols is money for policing slavery. The petition documents the trade explicitly.'},
-    {t:'The petitioners were too poor to pay the school levy.',ok:false,why:'They are "freeholders" led by "the largest landholders" who propose spending the same money elsewhere. The document refutes its own poverty plea.'},
-    {t:'Poor white families universally opposed schooling for their children.',ok:false,why:'The petition speaks OF the laboring class, not FOR it — 41 signatures led by large landholders. Whose voice a document carries is the first sourcing question, and this one carries the planters\'.'}]},
-  {k:'account',ph:'PHASE 4 · PUBLISH THE ACCOUNT',
-   q:'Choose exactly FOUR sentences for publication.',
-   opts:[
-    {t:'By the 1830s the district\'s free school system was collapsing — unpaid teachers, ruined buildings, and enrollment hollowed out by field labor.',v:'sound',why:'Kerr\'s letter, corroborated by the political attack on the system\'s funding.'},
-    {t:'The collapse was not mere poverty: the same petitioners who called the school levy a burden proposed spending it on slave patrols, revealing an ordering of priorities rather than an empty treasury.',v:'sound',why:'The petition\'s remedy clause, read against the grain — the strongest single move in this case.'},
-    {t:'Elite opposition rested on an explicit theory that education should be rationed by station, applied to poor whites and enforced absolutely against the enslaved.',v:'sound',why:'Stated in A, presumed in B, mechanism confirmed in C — corroborated across the box\'s full political range.'},
-    {t:'Even the era\'s "pro-school" voices framed education as an instrument of social control, marking the narrow boundary of reform.',v:'sound',why:'"The cheapest police a state can buy" — the editorial convicts itself in its own words.'},
-    {t:'Schoolmaster Kerr publicly denounced the planters and organized resistance to the education laws.',v:'unsup',why:'He tells his brother precisely the opposite — that he would NOT say this at the muster. Publishing this erases the very distinction between public and private voice the letter teaches.'},
-    {t:'South Carolina\'s planters made ignorance a deliberate policy — as Kerr wrote privately, "an institution... tended more carefully than the schools."',v:'sound',why:'A direct quotation, corroborated by the petition\'s own logic. Also correct — but you may only publish four; part of the craft is choosing among sound claims.'},
-    {t:'Poor whites in the district were content without schools, as their low attendance proves.',v:'over',why:'Attendance tracked the crop calendar and an eleven-months-unpaid teacher in a roofless building. Reading structural neglect as popular preference is the oldest overreach in educational history.'},
-    {t:'The events in this district prove that no Southern state ever sincerely attempted public education before the Civil War.',v:'unsup',why:'One district, one decade, three documents. The claim may find support elsewhere — this file cannot carry it.'}],
-   epi:'<h3>CASE CLOSED — WHAT THE FILE TEACHES</h3><p>Neglect is a verdict, not a cause. Read separately, these documents show a poor district failing at schools; read against each other, they show a system in which ignorance was funded, tended, and enforced — for the enslaved by statute, for poor whites by starvation of the alternative. The petition proved intent, the letter proved mechanism, and the friendly editorial proved how narrow the ground of "reform" really was. When sources across a spectrum share a silence, the silence is the policy.</p>'}]},
-
-/* ═══════════ CASE III — TWO VISITORS IN DURHAM ═══════════ */
-{era:'CASE III · DURHAM, NORTH CAROLINA · 1910–1912',
- title:'Two Visitors in Durham',
- brief:`<b>THE PROBLEM —</b> Between 1910 and 1912, the two most powerful Black intellectuals in America — bitter rivals — visited the same few blocks of Durham, North Carolina, and both published their impressions. Booker T. Washington preached patient enterprise within segregation; W.E.B. Du Bois demanded protest, higher education, and full rights. Durham should have proven one of them wrong. Instead each claimed it. Documents A and B are their real, published words. Document C is the balance sheet neither of them wrote.`,
+  {tab:'DOC A · THE CONTRACT',type:'LABOR CONTRACT',style:'print',
+   meta:'Executed January 8, 1866 · Rhett plantation · witnessed by the Freedmen\u2019s Bureau',
+   comp:'COMPOSITE DOCUMENT — built from the standard form and clauses of surviving Freedmen\u2019s Bureau labor contracts.',
+   text:`<p>ARTICLES OF AGREEMENT between J. T. RHETT of Barnwell District, party of the first part, and the Freedmen and Freedwomen whose names are hereunto affixed, parties of the second part.</p>
+<p>The said laborers agree to work faithfully ten hours per day, to be respectful and obedient, and to lose no time from the crop. For every day\u2019s absence without leave there shall be deducted <b>fifty cents</b>, and for insolence or neglect such further sums as the employer shall judge proper.</p>
+<p>The party of the first part agrees to furnish quarters, fuel, and rations of meal and bacon weekly, and at the division of the crop to pay over <b>one-third part</b> of the cotton and corn to the said laborers, share and share alike.</p>
+<p>Signed with the marks of forty-one freedpeople. Witnessed: Lt. E. M. Stoeber, Sub-Asst. Commissioner.</p>`},
+  {tab:'DOC B · THE COMPLAINT',type:'PLANTER\u2019S LETTER',style:'hand',
+   meta:'J. T. Rhett to the Bureau sub-district office, September 14, 1866',
+   comp:'COMPOSITE DOCUMENT — built from the recurring language of planter complaint letters in Bureau records.',
+   text:`<p>Sir — I am compelled to lay before you the conduct of the freedpeople on my place, which has become insufferable. They are idle beyond correction. The women have in great part withdrawn from the field and give their hours to their own gardens and their children.</p>
+<p>The men absent themselves for meetings and burying-society gatherings, and of late a school has been raised at the quarter which draws off the young hands at the very press of picking season.</p>
+<p>I ask that the Bureau enforce the contract according to its letter, and remind these people that freedom does not mean freedom from labor. {{R:r1}}</p>
+<p>Your obt. servant, J. T. RHETT.</p>`,
+   redactions:{
+     r1:{teaser:'POSTSCRIPT — unexamined', text:'P.S. — You will know the price of cotton has fallen ruinously since spring, and a man must make his crop with fewer hands or be broken by it.'}
+   }},
+  {tab:'DOC C · THE REPORT',type:'BUREAU AGENT\u2019S MONTHLY REPORT',style:'hand',
+   meta:'Lt. E. M. Stoeber, monthly report for October 1866, with sworn complaints appended',
+   comp:'COMPOSITE DOCUMENT — built from Bureau agents\u2019 monthly reports and registers of complaints.',
+   text:`<p>The state of the Rhett place requires notice. I visited on the 9th and again on the 20th instant. The smokehouse is kept under lock and the weekly ration has been short since August — this I verified with my own eyes, the meal being cut to half measure.</p>
+<p>{{R:r2}}</p>
+<p>The freedpeople have raised a school at the quarter, taught evenings by a young freedwoman who has her letters, and the women work provision gardens which now feed what the ration does not. I find the people not idle but otherwise employed, and I find the employer in arrears of his own covenant.</p>`,
+   redactions:{
+     r2:{teaser:'SWORN COMPLAINT — appended', text:'Appended: sworn statement of Hannah Green, freedwoman. \u201cHe cut the meat off first, then the meal. He say we get nothing till the cotton is in. We signed for rations weekly and he know it.\u201d'}
+   }}
+ ],
+ cards:{
+  TERMS:{n:'Whose Pen',d:'Obedience, deductions, \u201csuch further sums as the employer shall judge proper.\u201d The Bureau witnessed the form; the planter\u2019s interest wrote the clauses.',src:'DOC A'},
+  FINES:{n:'Fifty Cents a Day',d:'Deduction clauses let the employer claw wages back — discipline continued by bookkeeping.',src:'DOC A'},
+  RATIONS:{n:'The Ration Clause',d:'Weekly meal and bacon is not charity — it is a contractual obligation the planter signed.',src:'DOC A'},
+  IDLE:{n:'The Meaning of Idleness',d:'Read Rhett\u2019s own list of \u201cidleness\u201d: gardens, children, meetings, burial societies, a school. He has itemized freedom and called it a vice.',src:'DOC B'},
+  MUSCLE:{n:'Enforcement',d:'Rhett wants the Bureau as his instrument — the contract \u201caccording to its letter,\u201d against the people it was meant to protect.',src:'DOC B'},
+  PRICES:{n:'The Postscript',d:'Cotton prices collapsed in 1866. Rhett admits, almost in passing, the squeeze behind his September letter.',src:'DOC B'},
+  HANNAH:{n:'Hannah Green\u2019s Word',d:'Sworn testimony: rations cut since the summer, held hostage to the harvest. The freedpeople\u2019s own voice enters the record.',src:'DOC C'},
+  AGENT:{n:'The Agent\u2019s Own Eyes',d:'Stoeber verified the short ration himself — half-measure meal, a locked smokehouse. Independent confirmation.',src:'DOC C'},
+  SCHOOL:{n:'The School at the Quarter',d:'Evening lessons from a freedwoman with her letters; gardens feeding what the ration does not. Institution-building, on record.',src:'DOC C'},
+  REDEF:{n:'Idleness, Read Against the Grain',d:'CONNECTION — What Rhett itemizes as idleness, the agent records as schooling, gardens, and family. The same facts; the difference is who is looking.',src:'B \u00d7 C'},
+  BREACH:{n:'Who Broke the Contract',d:'CONNECTION — The ration clause was Rhett\u2019s obligation. Testimony and the agent\u2019s own eyes prove he broke it first, months before his complaint.',src:'A \u00d7 C'},
+  SQUEEZE:{n:'The Squeeze',d:'CONNECTION — Falling cotton prices plus deduction clauses: the mechanism for extracting more labor for less pay, in writing.',src:'A + B'},
+  POWER:{n:'The Bureau Between',d:'CONNECTION — The planter wrote the terms and then demanded the Bureau enforce them. The contract and the muscle were meant to run through the same hands.',src:'A + B'}
+ },
+ interro:[
+  {doc:0,qs:[
+   {q:'Whose interests wrote these clauses?',hit:'TERMS',resp:'\u201cRespectful and obedient\u2026 as the employer shall judge proper.\u201d The form is the Bureau\u2019s; the teeth are the planter\u2019s.'},
+   {q:'What can cost a worker their pay?',hit:'FINES',resp:'Fifty cents a day — several days\u2019 deductions could eat a week\u2019s share. Note who judges the offense.'},
+   {q:'What does the planter owe, in black and white?',hit:'RATIONS',resp:'Quarters, fuel, weekly rations, one-third of the crop. Signed. Remember this clause — you will need it.'},
+   {q:'Could the freedpeople read what they signed?',hit:null,resp:'Forty-one marks, no signatures — but the document cannot tell you what was read aloud, explained, or negotiated before the marks were made. Its silence is real, but it is not evidence by itself.'}
+  ]},
+  {doc:1,qs:[
+   {q:'What, exactly, does Rhett call \u201cidleness\u201d?',hit:'IDLE',resp:'List it out: women with their children and gardens, men at meetings and burial societies, the young at school. He has inventoried everything freedom made possible.'},
+   {q:'What does Rhett want the Bureau to do?',hit:'MUSCLE',resp:'Enforce \u201caccording to its letter.\u201d He is asking the freedpeople\u2019s protector to become his overseer.'},
+   {q:'What does he admit without meaning to?',hit:'PRICES',unredact:'r1',resp:'The postscript opens. Cotton has fallen ruinously — and suddenly the timing of his outrage has a market price.'},
+   {q:'Is his account of the acreage accurate?',hit:null,resp:'No plat, no returns, nothing to check it against in this box. A lead spent on a question the archive cannot answer.'}
+  ]},
+  {doc:2,qs:[
+   {q:'What do the freedpeople themselves testify?',hit:'HANNAH',unredact:'r2',resp:'The appended complaint opens. Hannah Green, sworn: meat first, then the meal, nothing till the cotton is in.'},
+   {q:'What does the agent verify with his own eyes?',hit:'AGENT',resp:'Half-measure meal, a locked smokehouse, two visits. Testimony is strong; testimony plus inspection is stronger.'},
+   {q:'What are the freedpeople building?',hit:'SCHOOL',resp:'A school taught by a freedwoman, gardens that outproduce the ration. The \u201cidle\u201d are institution-building in their own hours.'},
+   {q:'What did Washington make of this report?',hit:null,resp:'Beyond this box. The monthly report went up the chain, but its reception is not in your archive.'}
+  ]}
+ ],
+ links:[
+  {pair:[['IDLE','SCHOOL']],kind:'contra',card:'REDEF'},
+  {pair:[['RATIONS','HANNAH'],['RATIONS','AGENT']],kind:'contra',card:'BREACH'},
+  {pair:[['PRICES','FINES']],kind:'corr',card:'SQUEEZE'},
+  {pair:[['TERMS','MUSCLE']],kind:'corr',card:'POWER'}
+ ],
+ verdict:[
+  {q:'FINDING I — What did \u201cidleness\u201d actually describe?',
+   opts:['A genuine collapse of labor on the place.',
+         'Freedom exercised — schooling, gardens, family time, and association, seen through a planter\u2019s ledger.',
+         'The agent could not determine.'],
+   correct:1,cite:['REDEF','IDLE','SCHOOL']},
+  {q:'FINDING II — Who broke the contract first?',
+   opts:['The freedpeople, by absenting themselves from the field.',
+         'The planter — rations cut by August, sworn to by Hannah Green and verified by the agent\u2019s own inspection.',
+         'Neither party; the contract was merely ambiguous.'],
+   correct:1,cite:['BREACH','AGENT','HANNAH']},
+  {q:'FINDING III — Why did Rhett press the Bureau in September?',
+   opts:['A sincere concern for the freedpeople\u2019s welfare.',
+         'Cotton prices had collapsed — the squeeze made every hour of labor and every withheld ration a line in his accounts.',
+         'Pressure from his neighbors.'],
+   correct:1,cite:['PRICES','SQUEEZE']},
+  {q:'FINDING IV — What did freedom mean here, in practice?',
+   opts:['A settled legal status, secured at emancipation.',
+         'A daily contest — labor, schooling, rations, and family time fought over clause by clause, with the Bureau standing between.',
+         'Nothing had changed since slavery.'],
+   correct:1,cite:['REDEF','POWER']}
+ ],
+ epilogue:`<h4>WHAT HISTORY SAYS</h4>
+<p>The Freedmen\u2019s Bureau left behind one of the richest archives in American history — thousands of contracts, complaint registers, and monthly reports, now digitized and searchable. Historians read them exactly as you did: the planter\u2019s letter against the agent\u2019s inspection, the contract\u2019s clauses against the sworn complaints of freedpeople like the real Hannah Greens whose testimony fills the registers.</p>
+<p>The pattern in this case is the pattern in the records. Across the South in 1866, \u201cidleness\u201d in planters\u2019 letters meant women claiming their own labor, children in school, and communities building churches and burial societies — while falling cotton prices drove employers to cut rations and claw back shares. Freedom was not handed over in 1865; it was contested line by line, and the contest is exactly what these documents, read against each other, still record.</p>`
+},
+/* ═══════════ CASE III — THE TWO VISITORS ═══════════ */
+{
+ era:'CASE III · THE LOWCOUNTRY, GEORGIA & SOUTH CAROLINA · 1849 / 1856',
+ title:'The Two Visitors',
+ short:'Two famous travelers toured the same world and published opposite accounts. Neither is lying. Both are hiding something.',
+ leads:7,
+ brief:`<b>THE PROBLEM —</b> Two celebrated visitors toured the plantation South and published what they saw. Sir Charles Lyell, the great British geologist, traveled as the honored guest of planters in 1845–46 and published in 1849. Frederick Law Olmsted traveled alone as a paying newspaper correspondent and published in 1856. Their accounts flatly disagree. Establish why they differ, what can be trusted from either, whose testimony is missing from both, and whether bias makes a source worthless. You hold <b>seven leads</b>.`,
  docs:[
-  {tab:'DOC A · WASHINGTON',type:'PUBLISHED MAGAZINE ARTICLE — REAL TEXT',style:'print',
-   meta:'Booker T. Washington, "Durham, North Carolina, a City of Negro Enterprises," The Independent, 1911',comp:'REAL PUBLISHED SOURCE — excerpted from the public-domain original.',
-   text:`<p>"I never saw in a city of this size so many prosperous carpenters, brick masons, tinners... shoemakers, colored contractors and haulers..."</p><p>Washington reports Black Durham "more and more taking on the industrial habits of the community," praises its businessmen by name, and emphasizes throughout that "friendly relations exist between the two races" — crediting white Durham's leading men for a climate in which, as he frames it, merit is permitted its reward. The article closes by presenting Durham as evidence that economic development, patiently pursued, is the surest road for the race.</p>`},
-  {tab:'DOC B · DU BOIS',type:'PUBLISHED MAGAZINE ARTICLE — REAL TEXT',style:'print',
-   meta:'W.E.B. Du Bois, "The Upbuilding of Black Durham," World\'s Work, 1912',comp:'REAL PUBLISHED SOURCE — excerpted from the public-domain original.',
-   text:`<p>"There is in this small city a group of five thousand or more colored people, whose social and economic development is perhaps more striking than that of any similar group in the nation..."</p><p>Du Bois catalogues the mill, the insurance society, the bank, the drug stores and grocers — men, he stresses, "who have built up their businesses by their own efforts." He finds it "singularly encouraging" that white Durham has "on the whole, not hindered" — a phrasing that measures the exception while naming the rule. For Du Bois, Durham demonstrates Black capacity so plainly that the caste system standing over it is exposed as nothing but caste.</p>`},
-  {tab:'DOC C · THE LEDGER',type:'BUSINESS RECORD ABSTRACT — FIGURES OF RECORD',style:'type',
-   meta:'Abstracted from N.C. Mutual and Durham business records of the period',comp:'COMPOSITE ABSTRACT — figures and facts drawn from the documented record of Black Durham, c. 1898–1912.',
-   text:`<p>N.C. MUTUAL & PROVIDENT ASSOC. — chartered 1898, seven founders, initial treasury under $500. Income 1899: $840. Income 1910: approx. $250,000. Agents in two states.</p><p>MECHANICS & FARMERS BANK — chartered 1907, opened 1908, Parrish St. Deposits year one: modest; lending concentrated in Negro homes and businesses refused elsewhere.</p><p>LINCOLN HOSPITAL — opened 1901, land and building funded substantially by the Duke family.</p><p>HAYTI DISTRICT — churches 2 (major), graded school, library (1913, in organization), some 100+ Negro-owned enterprises by 1910. NOTE: Negro residents disenfranchised under N.C. suffrage amendment of 1900; no vote cast by the above-named businessmen in municipal affairs.</p>`}],
- phases:[
-  {k:'mc',ph:'PHASE 1 · SOURCING',q:'Washington and Du Bois report the same streets, the same businesses, even the same facts — and reach opposite conclusions. What is the correct historiographical description of this situation?',
-   exp:'This is the central puzzle of the case. Take your time.',
-   opts:[
-    {t:'One of them is lying, and the historian\'s job is to determine which.'},
-    {t:'Their agreement on facts makes the facts reliable, while their divergence reveals that each account is an ARGUMENT — Durham is the shared evidence, and each man reads it as proof of his own program. The sources corroborate the city and contest its meaning.',ok:true},
-    {t:'Since they contradict each other, neither article can be used as evidence.'},
-    {t:'The later article (Du Bois, 1912) supersedes the earlier one, as historians always prefer the most recent source.'}],
-   why:'<b>The craft:</b> separate the plane of fact from the plane of interpretation. Two rivals independently confirming the mills, the Mutual, and the bank is powerful corroboration OF THE FACTS. Their opposite conclusions are not a contradiction to resolve but a debate to analyze — the historian holds both readings at once and asks what the city\'s strength meant that BOTH programs could claim it.'},
-  {k:'mc',ph:'PHASE 1 · SOURCING',q:'Compare the two men\'s handling of white Durham. Washington: "friendly relations exist between the two races." Du Bois: white Durham has "on the whole, not hindered." What is the sharpest reading of that difference?',
-   exp:'Nearly the same observation — listen to the grammar.',
-   opts:[
-    {t:'They are saying the same thing in different words.'},
-    {t:'Washington describes a positive relationship and credits white goodwill; Du Bois describes an ABSENCE of obstruction — praising white Durham only for not doing what he implies white cities normally do. The compliment contains the indictment.',ok:true},
-    {t:'Du Bois had less information about race relations than Washington.'},
-    {t:'Washington was writing for a Black audience and Du Bois for a white one.'}],
-   why:'<b>The craft:</b> "not hindered" is a negative construction — it names hindrance as the norm in the act of noting its exception. Word-level reading is not pedantry; the entire difference between the two programs lives in the space between "friendly relations" and "not hindered."'},
-  {k:'grid',ph:'PHASE 2 · THE CORROBORATION GRID',
-   intro:'Judge each claim against all three documents.',
-   claims:[
-    {c:'Black Durham built substantial, growing enterprises between 1898 and 1912.',a:0,why:'Corroborated by all three — two hostile-to-each-other witnesses plus the figures. As strong as historical evidence gets.'},
-    {c:'Durham proved that Washington\'s program of enterprise-within-segregation was the correct strategy for Black America.',a:1,why:'Contested — this is Washington\'s reading, and Du Bois reads the identical evidence as proof that caste, not capacity, was the only barrier. The FACT of Durham is corroborated; the LESSON of Durham is the whole dispute.'},
-    {c:'Black Durham\'s businessmen operated without political rights.',a:0,why:'Corroborated: Doc C states the 1900 disenfranchisement flatly, and Du Bois\'s "not hindered" phrasing presumes the caste structure. Note that Washington\'s article passes over it — a silence WITHIN a source, which is itself data about his argument.'},
-    {c:'White Durham\'s elite provided meaningful early support to at least one Black institution.',a:2,why:'Single source — only the ledger (Lincoln Hospital, Duke funding) states it plainly. Washington gestures at white goodwill but names no transaction. One source with figures beats one source with atmosphere, but it is still one source in this box.'},
-    {c:'The ordinary Black workers of Durham — the tobacco hands and domestics — shared in this prosperity.',a:3,why:'Silence. Both visitors toured the summit: the Mutual\'s offices, the bank, the named businessmen. The washerwomen and factory hands appear in no document here. Elite sources produce elite pictures; the historian names who is missing from the frame.'},
-    {c:'Durham\'s Black institutions were financially fragile and likely to fail.',a:1,why:'Contested at best — the growth figures cut against it, and both visitors judged the institutions substantial. (History\'s postscript: the Mutual and the bank outlived every man in these documents.) But the box\'s figures alone cannot prove durability forward; mark what the evidence supports, not what you know from outside it.'}]},
-  {k:'account',ph:'PHASE 4 · PUBLISH THE ACCOUNT',
-   q:'Choose exactly FOUR sentences for publication.',
-   opts:[
-    {t:'Between 1898 and 1912, Black Durham built an interlocking economy — insurance, banking, and commerce — whose growth was independently confirmed by the era\'s two leading and mutually opposed Black intellectuals.',v:'sound',why:'The corroboration is the point: rivals make the strongest co-witnesses.'},
-    {t:'Washington and Du Bois each presented Durham as vindication of his own program, making the city a contested symbol in the era\'s central debate rather than a neutral case study.',v:'sound',why:'The dual-claim structure, stated as a finding about the SOURCES — the case\'s core insight.'},
-    {t:'This prosperity was built under political exclusion: Durham\'s Black businessmen commanded capital but, after 1900, no votes.',v:'sound',why:'The ledger\'s note, corroborated by Du Bois\'s framing — and the fact that gives both men\'s arguments their stakes.'},
-    {t:'Du Bois\'s praise of white Durham as having "not hindered" measured tolerance as the exception, quietly naming obstruction as the American rule.',v:'sound',why:'A defensible close reading, anchored in the quoted text.'},
-    {t:'Du Bois conceded in 1912 that Washington had been right about economics all along.',v:'over',why:'He conceded Durham\'s achievement, not the program — the same paragraphs turn the achievement against caste. Collapsing his argument into surrender misreads the document\'s whole design.'},
-    {t:'The prosperity of Black Durham was primarily a gift of white philanthropy.',v:'unsup',why:'One documented gift (Lincoln Hospital) cannot carry "primarily"; both visitors and the figures emphasize internally generated capital — "by their own efforts."'},
-    {t:'Durham\'s example shows that segregation was, on balance, economically beneficial to Black southerners.',v:'unsup',why:'Nothing in the box supports the causal claim, both authors would reject it, and it converts an achievement WON AGAINST constraint into a defense of the constraint. This is the misuse this file exists to teach against.'}],
-   epi:'<h3>CASE CLOSED — WHAT THE FILE TEACHES</h3><p>When two sources agree on the evidence and split on its meaning, do not flip a coin — report the split, because the split IS the history. Durham\'s strength was so undeniable that both programs of Black uplift claimed it; holding Washington\'s reading and Du Bois\'s reading together, without collapsing either, recovers more truth than choosing a winner. And note who neither visitor saw: the tobacco hands whose labor floors every ledger in the box. Every archive has a summit bias. Name it.</p>'}]},
-
-/* ═══════════ CASE IV — THE CLEARING OF HAYTI ═══════════ */
-{era:'CASE IV · DURHAM, NORTH CAROLINA · 1958–1994',
- title:'The Clearing of Hayti',
- brief:`<b>THE PROBLEM —</b> Between 1958 and 1970, urban renewal and a new expressway removed most of Hayti, the heart of Black Durham. No mob did it; it arrived by brochure, ballot, and appraisal. Three documents: the promise, the price, and — thirty-six years later — the memory. This case tests the hardest skills in the craft: reading euphemism, weighing retrospective testimony, and hearing what an official record is built not to say.`,
+  {tab:'DOC A · LYELL',type:'PUBLISHED TRAVEL ACCOUNT',style:'print',
+   meta:'Sir Charles Lyell, A Second Visit to the United States (1849) · toured as the guest of planters',
+   comp:'CONDENSED DOCUMENT — abridged and simplified from Lyell\u2019s published account for play; the substance follows the original.',
+   text:`<p>We were received at the plantations of our hosts with every hospitality. The condition of the negroes on these estates struck me as far milder than reports in England had led me to expect. They appeared cheerful, well fed, and attached to their masters, and I saw no punishment inflicted during my stay.</p>
+<p>The laborers work by the task, and the industrious among them finish by two or three o\u2019clock in the afternoon, after which their time is their own. Many keep poultry and cultivate little crops of their own, which they sell for money.</p>
+<p>When I consider the condition of the operatives in our English factory towns, I am not persuaded the laborer here is worse provided for in food and lodging than many a free workman of Manchester.</p>`},
+  {tab:'DOC B · OLMSTED',type:'PUBLISHED TRAVEL ACCOUNT',style:'print',
+   meta:'Frederick Law Olmsted, A Journey in the Seaboard Slave States (1856) · traveled unescorted as a paying correspondent',
+   comp:'CONDENSED DOCUMENT — abridged and simplified from Olmsted\u2019s published account for play; the substance follows the original.',
+   text:`<p>The gang I observed worked under a driver who carried a whip and used it, urging on the hoe-hands with a stream of orders. The labor was performed sullenly and with no more exertion than would escape notice. The rations I saw issued were a peck of corn meal by the week and a little bacon, which the people eked out as they could.</p>
+<p>They work by tasks, and a smart hand having finished his task by mid-afternoon turns to a patch of his own, raising corn, melons, and fowls, which he sells or trades for coffee and tobacco. The proceeds are his own, and this is the one part of his industry into which he puts his heart.</p>
+<p>The planters with whom I spoke complained without end of the shiftlessness of slave labor, of tools broken and mules ruined — losses they charged to the character of the negro, and never to the system which gives the laborer no wage and no reason.</p>`}
+ ],
+ cards:{
+  HOST:{n:'The Guest\u2019s View',d:'Lyell saw estates his hosts chose, on days his hosts arranged, at the pace of hospitality. Access shaped everything he could witness.',src:'DOC A'},
+  TASKA:{n:'Afternoons of Their Own',d:'Lyell records the task system — tasks done by early afternoon, own crops, own money — as a detail in passing.',src:'DOC A'},
+  MILLS:{n:'Compared to Manchester',d:'Lyell\u2019s yardstick is the English factory poor. The comparison softens everything it touches — his frame is doing quiet work.',src:'DOC A'},
+  UNHEARD:{n:'Voices Missing',d:'In all Lyell\u2019s pages of cheerful laborers, not one recorded conversation with an enslaved person. The subjects of the account never speak in it.',src:'DOC A'},
+  PAYING:{n:'The Paying Traveler',d:'Olmsted came unescorted, paid his own way, and owed his hosts nothing. Different access, different sight.',src:'DOC B'},
+  DRIVER:{n:'Under the Driver',d:'A whip carried and used; labor given sullenly, at the minimum that escapes notice. Compulsion witnessed, and resistance too.',src:'DOC B'},
+  TASKB:{n:'The Same Afternoons',d:'Olmsted records the task system too — tasks by mid-afternoon, own patches, own proceeds, \u201cthe one part of his industry into which he puts his heart.\u201d',src:'DOC B'},
+  FREESOIL:{n:'A Free-Soil Pen',d:'Olmsted wrote for a Northern paper and against the economics of slavery. His eye is sharper than Lyell\u2019s — and it is not innocent either.',src:'DOC B'},
+  ANGLE:{n:'Two Angles of Vision',d:'CONNECTION — The honored guest and the paying stranger toured the same world and could not see the same things. Access is evidence.',src:'A \u00d7 B'},
+  AGREE:{n:'Where Enemies Agree',d:'CONNECTION — Both accounts, from opposite politics, record the task system and the enslaved people\u2019s own crops and marketing. Agreement across bias is the strongest evidence a historian gets.',src:'A + B'},
+  LENS:{n:'Every Eye Has a Lens',d:'CONNECTION — Lyell measured against Manchester; Olmsted against free labor. Neither account is a window. Both are lenses — and a lens, once located, can be corrected for.',src:'A \u00d7 B'},
+  ABSENT:{n:'The Missing Witnesses',d:'CONNECTION — The people whose lives are at issue appear in both accounts only as observed — cheerful in one, sullen in the other — and speak in neither.',src:'A \u00d7 B'}
+ },
+ interro:[
+  {doc:0,qs:[
+   {q:'Who arranged what Lyell saw?',hit:'HOST',resp:'His hosts did. Every field he walked was a field a planter chose to show him. Ask always: who controlled the visit?'},
+   {q:'What does Lyell record without weighing it?',hit:'TASKA',resp:'The task system, dropped in as local color — afternoons free, crops of their own, money earned. He notes it and moves on. You should not.'},
+   {q:'What is Lyell\u2019s frame of comparison?',hit:'MILLS',resp:'Manchester. Measure slavery against the factory poor and slavery will always come out softened. The frame is the argument.'},
+   {q:'Does Lyell ever speak with the enslaved themselves?',hit:'UNHEARD',resp:'Search the pages. Cheerful, well fed, attached — all adjectives, no voices. The silence at the center of the account is itself a finding.'},
+   {q:'How long did Lyell stay at each estate?',hit:null,resp:'The condensed account does not say, and the itinerary would not settle much if it did. A lead spent for little.'}
+  ]},
+  {doc:1,qs:[
+   {q:'How does Olmsted travel, and why does it matter?',hit:'PAYING',resp:'Alone, unannounced, paying his way. Nobody staged the fields for him — which is precisely why planters complained to him so freely.'},
+   {q:'What labor does Olmsted actually witness?',hit:'DRIVER',resp:'The driver, the whip, the sullen minimum. Note that he records compulsion and quiet resistance in the same sentence.'},
+   {q:'What do the enslaved do with their own hours?',hit:'TASKB',resp:'Own patches, own proceeds, real effort. Set this beside Lyell\u2019s afternoon and see what happens.'},
+   {q:'What politics does Olmsted bring to the page?',hit:'FREESOIL',resp:'Free-soil, anti-slavery economics, a Northern readership. A good detective indicts every witness — including the ones on their side.'},
+   {q:'Are Olmsted\u2019s ration figures exact?',hit:null,resp:'A peck of meal is what he saw issued where he stood. One observation cannot give you the whole South, and this box holds nothing to average it against.'}
+  ]}
+ ],
+ links:[
+  {pair:[['HOST','PAYING']],kind:'contra',card:'ANGLE'},
+  {pair:[['TASKA','TASKB']],kind:'corr',card:'AGREE'},
+  {pair:[['MILLS','FREESOIL']],kind:'contra',card:'LENS'},
+  {pair:[['UNHEARD','DRIVER']],kind:'contra',card:'ABSENT'}
+ ],
+ verdict:[
+  {q:'FINDING I — Why do the two accounts differ so sharply?',
+   opts:['One of the travelers is simply lying.',
+         'Access and politics shaped what each man could see — the guest saw hospitality\u2019s stage, the stranger saw the working day.',
+         'Conditions changed completely between 1846 and 1856.'],
+   correct:1,cite:['ANGLE','LENS']},
+  {q:'FINDING II — What can be trusted from these sources?',
+   opts:['Lyell, because he was the more distinguished man of science.',
+         'Olmsted, because his sympathies were better.',
+         'What they independently agree on — the task system, and the enslaved people\u2019s own crops and marketing.'],
+   correct:2,cite:['AGREE']},
+  {q:'FINDING III — Whose testimony is missing from both accounts?',
+   opts:['The planters\u2019 — both travelers ignored them.',
+         'The enslaved themselves, who appear as observed in both and as speakers in neither.',
+         'Northern investors.'],
+   correct:1,cite:['ABSENT','UNHEARD']},
+  {q:'FINDING IV — Does bias make a source useless?',
+   opts:['Yes — a biased source must be discarded.',
+         'No — bias, once located, becomes evidence itself, and can be read for and corrected against.',
+         'Only Northern sources carry bias.'],
+   correct:1,cite:['LENS','ANGLE']}
+ ],
+ epilogue:`<h4>WHAT HISTORY SAYS</h4>
+<p>Lyell and Olmsted are real, and historians still read them against each other much as you just did. Olmsted\u2019s dispatches, collected in books like <i>A Journey in the Seaboard Slave States</i>, became the North\u2019s most influential eyewitness picture of slavery; Lyell\u2019s genial account is now read largely as evidence of what planters wanted distinguished visitors to see.</p>
+<p>And the detail on which these opposed witnesses agreed — the task system, with its afternoons and provision grounds and petty marketing — is precisely what later scholarship confirmed as a foundation of lowcountry Black life, an economy enslaved people built inside slavery and defended fiercely. Where hostile witnesses agree, historians dig; the digging has been paying off for fifty years. The deepest lesson of the case stands: travelers\u2019 accounts tell you as much about the traveler as the country, and the people most concerned must be sought in other records — which is where your next case begins.</p>`
+},
+/* ═══════════ CASE IV — THE LAW AND THE LEARNERS ═══════════ */
+{
+ era:'CASE IV · SOUTH CAROLINA · 1834–1937',
+ title:'Ignorance as Policy',
+ short:'SEALED — earn STRONG or better on two cases to open this box.',
+ leads:8,
+ locked:true,
+ brief:`<b>THE PROBLEM —</b> In December 1834, South Carolina made it a crime to teach an enslaved person to read or write. Statutes do not explain themselves. Determine what the law\u2019s purpose truly was, whether it worked, what its makers feared, and what the ban itself proves about the people it targeted. Three documents: the statute, a petition behind it, and a memory from the other side of the schoolhouse door. You hold <b>eight leads</b>.`,
  docs:[
-  {tab:'DOC A · THE BROCHURE',type:'MUNICIPAL PLANNING BROCHURE — PRINT',style:'print',
-   meta:'City of Durham urban renewal program, Hayti–Elizabeth Street project area, 1958 · produced to win public and federal approval',comp:'COMPOSITE DOCUMENT — built from the language of period renewal brochures and planning studies.',
-   text:`<p>A BRIGHTER FUTURE FOR DURHAM. — Slum clearance under the federal Housing Act will remove blighted structures and obsolete land uses from the project area. A modern expressway will improve access to the central business district and relieve congestion. Families and businesses within the area will be relocated to decent, safe and sanitary accommodations, with fair compensation paid for all properties acquired.</p><p>Redevelopment will return cleared land to productive use, broadening the tax base for every citizen. Progress requires bold action. Durham moves forward together.</p>`},
-  {tab:'DOC B · THE APPRAISAL',type:'ACQUISITION LEDGER ABSTRACT — OFFICIAL RECORD',style:'type',
-   meta:'Redevelopment authority acquisition records, parcels 214–219, Fayetteville St. corridor, 1965–66',comp:'COMPOSITE DOCUMENT — modeled on urban renewal acquisition and relocation records.',
-   text:`<p>PARCEL 214 — Barber shop & residence (owner-occ., 31 yrs). Appraised $6,100. Owner protest: replacement cost of comparable commercial premises est. $14,000+. Protest denied per schedule. Acquired.</p><p>PARCEL 215 — Grocery (leased). Business relocation grant: $2,500 ceiling per schedule. Lessee did not re-establish.</p><p>PARCEL 217 — Residence (owner-occ.). Appraised $4,300. Acquired. Relocation: referred to Housing Authority waiting list.</p><p>PARCEL 219 — Church annex. Acquired. Demolition contracted.</p><p>SUMMARY NOTE, 1966 — acquisitions proceeding on schedule. Re-establishment rate of area businesses to date: not tracked by this office.</p>`},
-  {tab:'DOC C · THE MEMORY',type:'ORAL HISTORY — COMMUNITY HISTORY PROJECT',style:'script',
-   meta:'Interview with Mr. J.W. Pratt, barber, age 79, Durham, 1994 · Black interviewer, recorded on tape',comp:'COMPOSITE DOCUMENT — modeled on Durham oral histories of urban renewal and displacement.',
-   text:`<p>"Thirty-one years I cut hair on that corner. My daddy started it. When the letters came they said don't worry, you'll be relocated, everything fair. What they paid me wouldn't buy half a shop anywhere they'd let us open one. I kept the letter that said 'decent, safe and sanitary.' I keep it still.</p><p>"They told us Hayti would be rebuilt better. I'm seventy-nine. I'm still waiting. You could stand on that highway today and not know a thing was ever there. That's the part I can't — a whole world, and you'd never know. Write that down exactly."</p>`}],
- phases:[
-  {k:'mc',ph:'PHASE 1 · SOURCING',q:'Document A never lies outright — every sentence describes a real planned action. How, then, does it deceive?',
-   exp:'Study the vocabulary, and ask what work each word is doing.',
-   opts:[
-    {t:'It doesn\'t deceive; it is a neutral technical document.'},
-    {t:'Through classification: "blight" defines a living community as a disease so that "clearance" reads as cure; "relocated" makes removal sound like a service; and every actor disappears into passive voice — structures are removed, families are relocated, by no one. The deception is in the categories, not the claims.',ok:true},
-    {t:'It uses statistics selectively to overstate the project\'s benefits.'},
-    {t:'It was written by the federal government to mislead the city.'}],
-   why:'<b>The craft:</b> euphemism analysis. Official language does its heaviest work at the level of nouns and voice — who is named, who vanishes, what gets called what. "Nobody votes to destroy a neighborhood; they vote for clearance and progress." Track the vocabulary and you can watch consent being manufactured a word at a time.'},
-  {k:'mc',ph:'PHASE 1 · SOURCING',q:'Document C was recorded thirty-six years after the events. For which of the following is it the STRONGEST source in the box — despite the time gap?',
-   exp:'Retrospective testimony has a signature: weak where records are strong, strong where records are silent.',
-   opts:[
-    {t:'The exact appraisal figures and dates of acquisition.'},
-    {t:'The lived meaning and long aftermath of displacement — what the promises felt like to receive, what the compensation could not buy, and what the erasure did to memory across three decades. No contemporaneous record in the box can testify to 1994 from 1965.',ok:true},
-    {t:'Nothing — a 36-year-old memory is inadmissible as evidence.'},
-    {t:'The engineering details of the expressway\'s construction.'}],
-   why:'<b>The craft:</b> match the source to the question. For parcel numbers, trust the ledger over the memory; for what the ledger DID to people, the memory is the only witness there is. Mr. Pratt even preserves a document inside his testimony — the kept letter — where the archive and the memory physically touch.'},
-  {k:'grid',ph:'PHASE 2 · THE CORROBORATION GRID',
-   intro:'Judge each claim against all three documents.',
-   claims:[
-    {c:'Compensation paid to Hayti owners often fell well below what re-establishment actually cost.',a:0,why:'Corroborated with unusual precision: the ledger records the $6,100 award against a $14,000+ replacement protest, denied "per schedule," and Mr. Pratt describes the identical arithmetic from the receiving end. An official record and a memory confirming each other across 30 years is corroboration of the highest grade.'},
-    {c:'The promised rebuilding of Hayti did not come.',a:0,why:'Corroborated: Pratt\'s three decades of waiting, and the ledger\'s quiet corroboration by omission — an office that does not track business re-establishment is an office not measuring the promise. (The wider documentary record concurs.)'},
-    {c:'City planners in 1958 secretly intended to destroy Black Durham\'s economic base.',a:3,why:'Silence — on the question of secret intent, this box holds no memo, no minutes, no private letter. The historian can prove the effect (documents A–C do) and the willful blindness ("not tracked by this office") without possessing proof of intent. Overclaiming intent where you can prove effect and negligence is how strong cases get discredited.'},
-    {c:'Displaced business owners were made whole, as the brochure promised.',a:1,why:'Contested — the brochure asserts it prospectively; the ledger and the memory refute it in practice. When promise and performance are both in the record, the claim is contested and the CONTRAST is your finding.'},
-    {c:'Mr. Pratt\'s barbershop stood on the corner for thirty-one years.',a:2,why:'Single source overlap — the ledger\'s parcel 214 says "owner-occ., 31 yrs" and Pratt says thirty-one years... which looks like corroboration, and likely is (a barber, owner-occupied, 31 years). But the ledger does not name him. Flag probable-but-unnamed matches honestly; the linkage is an inference, not a record.'},
-    {c:'The physical erasure of Hayti extended to public memory — the landscape itself no longer testifies.',a:2,why:'Single source: only Pratt speaks to it — "you\'d never know a thing was ever there" — because only a rememberer CAN. Some truths have exactly one kind of witness.'}]},
-  {k:'grain',ph:'PHASE 3 · READING AGAINST THE GRAIN',
-   q:'Read the ACQUISITION LEDGER (Doc B) against its bureaucratic grain. It was written to document orderly procedure. What does it reveal despite itself? Select every sound inference.',
-   exp:'In official records, look hardest at the denials, the ceilings, and the categories that don\'t exist.',
-   opts:[
-    {t:'The compensation system was procedurally sealed — protests were denied "per schedule," meaning the schedule, not the market, defined fairness.',ok:true,why:'The ledger\'s own phrase. An appeal that can only be measured against the thing appealed is not an appeal.'},
-    {t:'The office knew how to count what it valued — and chose not to count business survival.',ok:true,why:'"Not tracked by this office," written by an office that tracked every parcel to the dollar. Selective measurement is policy wearing an accountant\'s clothes.'},
-    {t:'Displacement outcomes were unequal by design of the instruments: owners got schedule prices, tenants got capped grants, and at least one simply "did not re-establish."',ok:true,why:'Three parcels, three mechanisms, one direction. The ledger\'s categories map the machinery of loss.'},
-    {t:'The appraisers were personally corrupt and pocketed the difference.',ok:false,why:'Nothing in the record supports personal corruption — and the deeper finding is worse: the system produced these results while working exactly as designed.'},
-    {t:'Residents accepted the process willingly, since the ledger records little resistance.',ok:false,why:'The ledger records a protest — denied — and its silence elsewhere reflects what the FORM had fields for, not what people felt. Never read a bureaucracy\'s categories as the community\'s consent.'}]},
-  {k:'account',ph:'PHASE 4 · PUBLISH THE ACCOUNT',
-   q:'Choose exactly FOUR sentences for publication.',
-   opts:[
-    {t:'Hayti\'s destruction arrived through administrative instruments — classification, appraisal schedules, and relocation ceilings — rather than open violence, with each instrument documented in the authority\'s own records.',v:'sound',why:'The ledger against the grain: the case\'s spine.'},
-    {t:'The brochure\'s vocabulary of "blight," "clearance," and "relocation" reframed the removal of a living community as a public health measure, manufacturing consent at the level of language.',v:'sound',why:'Euphemism analysis anchored in the document\'s own words.'},
-    {t:'Compensation systematically fell short of re-establishment costs — a gap recorded in the authority\'s ledger and confirmed, from the other side of the counter, by displaced residents\' testimony decades later.',v:'sound',why:'The box\'s strongest corroboration: record and memory agreeing across thirty years.'},
-    {t:'The promise of rebuilding went unfulfilled and unmeasured — the office charged with renewal did not track whether displaced businesses survived, and residents were still waiting a generation later.',v:'sound',why:'Willful non-measurement plus lived aftermath: effect and negligence proven without overclaiming intent.'},
-    {t:'Durham\'s planners conspired in secret from the outset to eliminate Black economic power in the city.',v:'over',why:'The effect is proven; the secret intent is not in THIS record. State what the documents carry — the case is devastating enough without the memo you do not have.'},
-    {t:'Mr. Pratt\'s recollections should be discounted, since oral history taken decades later is unreliable.',v:'unsup',why:'Backwards: on compensation his memory matched the ledger exactly, and on meaning and aftermath he is the only competent witness in the box. Source-blindness, not source-criticism.'},
-    {t:'Urban renewal affected all Durham neighborhoods equally, as the race-neutral language of the brochure indicates.',v:'unsup',why:'Confusing the language of the instrument with the incidence of the harm — the precise confusion the brochure was built to produce.'}],
-   epi:'<h3>CASE CLOSED — WHAT THE FILE TEACHES</h3><p>The hardest sources are the polite ones. A brochure that never lies, a ledger that balances perfectly, and between them a neighborhood disappears. You proved the shortfall by making the record and the memory corroborate each other across thirty years; you proved the broken promise partly from what an office refused to count; and you declined to claim the secret intent the box could not support — which is why the four sentences you did publish cannot be knocked down. The archive of power documents its procedures and buries its effects. The historian\'s work is the exhumation.</p>'}]}
+  {tab:'DOC A · THE STATUTE',type:'ACT OF THE GENERAL ASSEMBLY',style:'print',
+   meta:'An Act of December 17, 1834, State of South Carolina · condensed',
+   comp:'CONDENSED DOCUMENT — abridged from the actual 1834 act; the provisions shown are historical.',
+   text:`<p>SEC. 1. Be it enacted, That if any person shall hereafter teach any slave to read or write, or shall aid or assist in teaching any slave to read or write, such person, if a free white person, shall be fined not exceeding one hundred dollars and imprisoned not more than six months; if a free person of color, shall be whipped not exceeding fifty lashes and fined not exceeding fifty dollars; and if a slave, shall be whipped at the discretion of the court, not exceeding fifty lashes.</p>
+<p>SEC. 2. And be it further enacted, That no free person of color shall keep any school or other place of instruction for teaching any slave or free person of color to read or write, under the penalties herein provided.</p>`},
+  {tab:'DOC B · THE PETITION',type:'CITIZENS\u2019 PETITION',style:'hand',
+   meta:'Petition of sundry citizens of an upcountry district to the General Assembly, 1835',
+   comp:'COMPOSITE DOCUMENT — built from the language of surviving petitions to Southern legislatures in the 1830s.',
+   text:`<p>To the Honorable the General Assembly — Your petitioners represent that the peace of this District stands in danger from the circulation of incendiary publications among our colored population, of the character of the pamphlet of the notorious Walker, and such prints as issue weekly from the Northern presses.</p>
+<p>{{R:r1}}</p>
+<p>Your petitioners therefore pray that the laws against the instruction of slaves be enforced with the utmost rigor, and that all assemblies of negroes for what is called religious instruction, where reading is taught under that color, be dispersed. And your petitioners will ever pray.</p>`,
+   redactions:{
+     r1:{teaser:'UNEXAMINED PASSAGE — an admission', text:'It is within the knowledge of your petitioners that sundry slaves in this District do already read such vile sheets, and read them aloud to others in the night, whereby the poison spreads beyond all reckoning.'}
+   }},
+  {tab:'DOC C · THE MEMORY',type:'RECOLLECTION',style:'hand',
+   meta:'Recollection of Isaiah Prue, formerly enslaved in South Carolina, set down in the 1870s',
+   comp:'COMPOSITE DOCUMENT — built from postwar recollections and interviews describing clandestine schooling under slavery.',
+   text:`<p>We had what we called the pit school. Out past the burying ground there was a gully grown over with brush, and of a Sunday night them that wanted their letters would slip out one and two at a time, and a man named Ephraim, that was a preacher and had his reading, would teach us out of a blue-back speller a white child had thrown away.</p>
+<p>{{R:r2}}</p>
+<p>My mother could not read a line but she would stand watch at the quarter and pray while we was gone. She said a head full of letters was the one thing they could not sell away from you.</p>`,
+   redactions:{
+     r2:{teaser:'UNEXAMINED PASSAGE — the cost', text:'A boy called Little Alec was caught with the speller in his shirt and they gave him lashes for it and burned the book before us all. We buried the next speller in a tin box and dug it up of a Sunday like treasure.'}
+   }}
+ ],
+ cards:{
+  LETTER:{n:'The Letter of the Law',d:'Reading and writing, criminalized outright — with fines for white teachers and the lash for Black ones. The full machinery of the state, aimed at the alphabet.',src:'DOC A'},
+  WALLS:{n:'Sealing Every Door',d:'The act punishes white teachers, free Black teachers, and enslaved learners alike, and closes the schools of free people of color. It aims at every channel instruction could travel.',src:'DOC A'},
+  FEARCAP:{n:'A Law Confesses',d:'Legislatures do not outlaw the impossible. A statute against teaching is a confession, in law, that enslaved people could learn and wanted to.',src:'DOC A'},
+  PANIC:{n:'After the Appeal',d:'\u201cThe notorious Walker\u201d — David Walker\u2019s Appeal, 1829, followed by Nat Turner in 1831. The petition is written inside a panic about what reading had already done.',src:'DOC B'},
+  CIRCUIT:{n:'Words That Travel',d:'Pamphlets, weekly prints, reading aloud in the night. What the petitioners fear is not literacy but a network — words moving from hand to hand and voice to voice.',src:'DOC B'},
+  ALREADY:{n:'Already Reading',d:'The petition\u2019s own admission: enslaved people in the district already read, and read aloud to others. The demand for enforcement proves the practice it fears.',src:'DOC B'},
+  MIDNIGHT:{n:'The Pit School',d:'A gully past the burying ground, Sunday nights, one and two at a time, a cast-off speller. Schooling organized like a conspiracy — because the law made it one.',src:'DOC C'},
+  RISK:{n:'The Price of a Letter',d:'Lashes for a boy, a book burned before the quarter — and the next speller buried in a tin box. The cost was known, and paid, and the school went on.',src:'DOC C'},
+  TEACHERS:{n:'Unlikely Teachers',d:'A preacher with his reading; a mother who could not read a line standing watch. The school had a faculty, and the faculty had lookouts.',src:'DOC C'},
+  POLICY:{n:'Ignorance as Policy',d:'CONNECTION — The law confesses capacity, and the petition confesses practice. Ignorance was not the condition of the enslaved; it was a policy pursued against them, because learning was already winning.',src:'A \u00d7 B'},
+  DEFIED:{n:'The Law Defied',d:'CONNECTION — Set the statute beside the pit school. The General Assembly wrote the law; Ephraim and the buried speller repealed it, Sunday by Sunday, at the lash\u2019s risk.',src:'A \u00d7 C'},
+  WHY:{n:'What Power Feared',d:'CONNECTION — Walker\u2019s Appeal, the weekly prints, reading aloud in the night. The fear was words that organize — literacy as a circuit, not a skill.',src:'B + B'},
+  LEAKS:{n:'Every Wall Leaks',d:'CONNECTION — The act sealed every door it could name, and instruction came through the ones it could not: a preacher, a child\u2019s cast-off speller, a mother standing watch.',src:'A \u00d7 C'}
+ },
+ interro:[
+  {doc:0,qs:[
+   {q:'What exactly does the law forbid?',hit:'LETTER',resp:'Teaching, aiding, assisting — reading and writing both. Note the graded penalties: the freer the teacher, the lighter the punishment.'},
+   {q:'Why punish white teachers too?',hit:'WALLS',resp:'Because instruction had white channels — mistresses, children, evangelicals. The act maps every route learning traveled by trying to close them all.'},
+   {q:'What does the ban itself imply about the enslaved?',hit:'FEARCAP',resp:'Turn the statute over. No assembly legislates against what cannot happen. The law is a confession of capacity — and of fear.'},
+   {q:'Was the hundred-dollar fine ever collected?',hit:null,resp:'Court returns are not in this box. Enforcement is a real question, but this statute cannot answer it alone.'}
+  ]},
+  {doc:1,qs:[
+   {q:'What events stand behind this petition?',hit:'PANIC',resp:'Walker\u2019s Appeal reached Southern ports in 1829 sewn into sailors\u2019 clothes; Turner rose in 1831. The petition breathes that air.'},
+   {q:'What do the petitioners fear literacy will carry?',hit:'CIRCUIT',resp:'Not spelling — circulation. Pamphlets, prints, letters, news of abolition. They fear the enslaved joining an Atlantic conversation.'},
+   {q:'What does the petition admit is already happening?',hit:'ALREADY',unredact:'r1',resp:'The passage opens. \u201cSundry slaves\u2026 do already read\u2026 and read aloud to others in the night.\u201d The petition proves the practice it fears.'},
+   {q:'How many citizens signed?',hit:null,resp:'The signature leaf is not in the box, and a count would not change the argument. Spend leads on what a document says, not its arithmetic.'}
+  ]},
+  {doc:2,qs:[
+   {q:'How were the lessons hidden?',hit:'MIDNIGHT',resp:'Geography, timing, tradecraft — the gully, Sunday nights, ones and twos. Read it as the organization it was.'},
+   {q:'What did learning cost?',hit:'RISK',unredact:'r2',resp:'The passage opens. Lashes for Little Alec, a book burned before the quarter — and a new speller buried like treasure. Count what people paid, and kept paying.'},
+   {q:'Who taught, and who guarded the school?',hit:'TEACHERS',resp:'Ephraim the preacher taught; a mother who could not read stood watch. \u201cThe one thing they could not sell away from you.\u201d'},
+   {q:'What became of Isaiah Prue after the war?',hit:null,resp:'His later life is outside this box. Stay on the case.'}
+  ]}
+ ],
+ links:[
+  {pair:[['FEARCAP','ALREADY']],kind:'contra',card:'POLICY'},
+  {pair:[['LETTER','MIDNIGHT']],kind:'contra',card:'DEFIED'},
+  {pair:[['PANIC','CIRCUIT']],kind:'corr',card:'WHY'},
+  {pair:[['WALLS','TEACHERS']],kind:'contra',card:'LEAKS'}
+ ],
+ verdict:[
+  {q:'FINDING I — What was the law\u2019s true purpose?',
+   opts:['To reflect the natural incapacity of the enslaved.',
+         'To manufacture ignorance as policy — a political project against a people already learning.',
+         'To standardize education across the state.'],
+   correct:1,cite:['POLICY','FEARCAP']},
+  {q:'FINDING II — Did the law work?',
+   opts:['Completely — literacy was extinguished until emancipation.',
+         'Imperfectly — schooling went underground, and literacy persisted at a price paid in lashes and burned books.',
+         'The question cannot be approached with these sources.'],
+   correct:1,cite:['DEFIED','MIDNIGHT','RISK']},
+  {q:'FINDING III — What did the lawmakers actually fear?',
+   opts:['Poor penmanship.',
+         'Words that travel and organize — appeals, prints, and reading aloud, moving through a network they could not police.',
+         'Economic competition from literate laborers.'],
+   correct:1,cite:['WHY','CIRCUIT']},
+  {q:'FINDING IV — What does the ban itself prove?',
+   opts:['That the enslaved could not learn.',
+         'Capacity and desire — a confession in statute form, corroborated by the petition\u2019s own admission.',
+         'Nothing; statutes are not evidence.'],
+   correct:1,cite:['FEARCAP','ALREADY','POLICY']}
+ ],
+ epilogue:`<h4>WHAT HISTORY SAYS</h4>
+<p>The 1834 act is real, and it was the harshest of a wave of Southern anti-literacy laws passed in the shadow of David Walker\u2019s Appeal and Nat Turner\u2019s rebellion. So were the pit schools, the midnight lessons, and the blue-back spellers hidden and buried — historians have recovered them from postwar recollections, Freedmen\u2019s Bureau school reports, and interviews like the ones you have already learned to read against the interviewer.</p>
+<p>Scholars estimate that despite the law, a meaningful fraction of enslaved people achieved some literacy by 1860 — every one of them evidence that ignorance in the Old South was never a condition. It was a policy, funded and enforced, and it lost ground every Sunday night. When freedom came, the campaign for schools that swept the postwar South did not begin from nothing; it surfaced. The verdict you just wrote is the argument of a generation of scholarship — the archive was built to conceal it, and reading against the grain is how it was found.</p>`
+}
 ];
-
 /* ════════════════════════════════════════════════════════════
    ENGINE
    ════════════════════════════════════════════════════════════ */
-const $=id=>document.getElementById(id);
-const S={rigor:0,ci:-1,pi:0,done:[false,false,false,false],score:[0,0,0,0]};
-const GRID_LABELS=['CORROBORATED','CONTESTED','SINGLE SOURCE','SILENCE'];
+const COMMENDS={
+  SILENCE:{n:'HEARD THE SILENCE',d:'Caught a document telling on itself by what it refused to say.'},
+  GRAIN:{n:'AGAINST THE GRAIN',d:'Established your first contradiction on the evidence board.'},
+  HONEST:{n:'HONEST HISTORIAN',d:'Marked the limit of the evidence instead of forcing a conclusion.'},
+  ENEMIES:{n:'WHERE ENEMIES AGREE',d:'Found corroboration across opposed witnesses.'},
+  POLICYC:{n:'IGNORANCE AS POLICY',d:'Proved a statute to be a confession.'}
+};
+const GRADES=[
+  {g:'AIRTIGHT',min:.88,line:'Every shred accounted for. This verdict would survive any seminar in the country.'},
+  {g:'STRONG',min:.66,line:'A sound case, well evidenced. A sharper interrogation would seal it.'},
+  {g:'CIRCUMSTANTIAL',min:.40,line:'The outline is right but the evidence is thin. The archive holds more than you found.'},
+  {g:'DISMISSED',min:0,line:'The case does not hold. Return to the documents — they have not finished talking.'}
+];
 
+const S={
+  ci:-1,            // current case index
+  grades:{},        // caseIdx -> grade string
+  commends:{},      // id -> true
+  cs:null           // current case state
+};
+function freshState(ci){
+  const c=CASES[ci];
+  return {leads:c.leads, cards:{}, order:[], unred:{}, asked:{}, linksFound:{},
+          wrongLinks:0, sel:null, verdict:c.verdict.map(()=>({opt:-1,cite:null})),
+          activeDoc:0, phase:0};
+}
+const $=id=>document.getElementById(id);
+
+/* ── the Archivist (tutorial) ── */
+S.tut={seen:{},off:false};
+const TUT={
+  case1:`Welcome to the reading room, detective. Work the phases in order across the top — <b>READ</b> the documents, <b>INTERROGATE</b> them, <b>CONNECT</b> what they let slip, then stamp your <b>VERDICT</b>. And mind the blacked-out passages: those are unexamined, and only the right question will open them. My METHOD card is in the top bar if you lose your way.`,
+  interro:`Careful now — every question here <b>costs one lead</b>, and the box holds more questions than you have leads. A good question secures evidence; a poor one teaches you a document's limits at the same price. Read first. Then spend.`,
+  firstcard:`Your first piece of evidence — it is pinned to the board under <b>CONNECT</b>. Evidence in a drawer proves nothing. Evidence tied to other evidence closes cases.`,
+  board:`Tap one card, then another, to tie a thread between them. True connections become <b>new evidence</b> — corroborations, and the contradictions that catch a document lying. False threads weaken your case by 2, so tie only what the documents themselves support.`,
+  firstlink:`There it is — a connection is evidence in its own right, and often the strongest you will hold. Some findings at the verdict <b>can only be carried by connection evidence</b>. The board is not decoration; it is the case.`,
+  verdict:`The stamp is patient — you may still return to the documents and the board. Each finding needs the right <b>claim</b> and the right <b>citation</b> beneath it; a true claim on weak evidence only half holds. When you stamp, the attempt closes and the grade is earned.`
+};
+function tutShow(id){
+  if(S.tut.off||S.tut.seen[id])return;
+  S.tut.seen[id]=true;
+  $('tutBody').innerHTML=TUT[id];
+  $('tut').classList.add('on');
+}
+function tutClose(){$('tut').classList.remove('on');}
+function tutSkipAll(){S.tut.off=true;tutClose();toast('The Archivist withdraws. The METHOD card remains in the top bar.');}
+function openMethod(){$('method').classList.add('on');}
+function closeMethod(){$('method').classList.remove('on');}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600);}
+function commend(id){if(S.commends[id])return;S.commends[id]=true;toast('\u2605 COMMENDATION \u2014 '+COMMENDS[id].n);}
+
+/* ── navigation ── */
 function openShelf(){
-  $('title').style.display='none';
-  $('game').classList.add('on');
-  $('case').classList.remove('on');
+  $('title').style.display='none';$('case').classList.remove('on');
+  $('result').classList.remove('on');$('result').innerHTML='';
+  $('hud').classList.remove('on');
   $('shelf').classList.add('on');
   renderShelf();
+  window.scrollTo(0,0);
 }
+function backToShelf(){S.ci=-1;S.cs=null;openShelf();}
+function strongCount(){return Object.values(S.grades).filter(g=>g==='AIRTIGHT'||g==='STRONG').length;}
+
 function renderShelf(){
-  const row=$('caseRow');let h='';
+  const row=$('caseRow');row.innerHTML='';
   CASES.forEach((c,i)=>{
-    const locked=i>0&&!S.done[i-1];
-    h+=`<button class="caseFolder" ${locked?'disabled':''} onclick="openCase(${i})">
-      <span class="ftab">BOX ${['I','II','III','IV'][i]}</span>
-      <span class="folder fbody" style="display:block">
-        <span class="fera">${c.era.split('·')[1].trim()}</span>
-        <h3>${c.title}</h3>
-        <span class="fdesc">${c.docs.length} documents · ${c.phases.length} phases</span>
-        <span class="fstat ${S.done[i]?'done':''}">${S.done[i]?'✓ CASE CLOSED · +'+S.score[i]+' RIGOR':locked?'🔒 CLOSE THE PREVIOUS CASE':'OPEN FOR ANALYSIS'}</span>
-      </span></button>`;
+    const locked=c.locked&&strongCount()<2;
+    const b=document.createElement('button');
+    b.className='box'+(locked?' locked':'');
+    b.innerHTML=`<div class="bnum">BOX ${['I','II','III','IV'][i]}${locked?' \u00b7 SEALED':''}</div>
+      <h3>${locked?'\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588':c.title}</h3>
+      <div class="bdesc">${locked?'Earn STRONG or better on two cases to break the seal.':c.short}</div>
+      <div class="bgrade">${S.grades[i]?`<span class="stamp gstamp ${S.grades[i]}">${S.grades[i]}</span>`:''}</div>
+      ${locked?`<div class="lockmsg">SEALED \u00b7 ${strongCount()}/2 STRONG VERDICTS</div>`:''}`;
+    if(!locked)b.onclick=()=>openCase(i);
+    row.appendChild(b);
   });
-  row.innerHTML=h;
-  $('rigor').textContent=S.rigor;
+  const cr=$('commendRow');
+  const earned=Object.keys(S.commends);
+  cr.innerHTML=earned.length?`<div class="ct">COMMENDATIONS OF THE ARCHIVE</div>`+
+    earned.map(k=>`<span class="medal" title="${COMMENDS[k].d}">\u2605 ${COMMENDS[k].n}</span>`).join(''):'';
 }
+
 function openCase(i){
-  S.ci=i;S.pi=0;S.caseScore=0;
+  S.ci=i;S.cs=freshState(i);
   const c=CASES[i];
   $('shelf').classList.remove('on');
   $('case').classList.add('on');
+  $('hud').classList.add('on');
+  $('hudTitle').textContent='AGAINST THE GRAIN \u00b7 '+['I','II','III','IV'][i];
   $('chEra').textContent=c.era;
   $('chTitle').textContent=c.title;
   $('chBrief').innerHTML=c.brief;
-  buildTabs();showDoc(0);
-  showPhase();
+  renderHUD();renderPhases();
   window.scrollTo(0,0);
-}
-function buildTabs(){
-  const c=CASES[S.ci];
-  $('dtabs').innerHTML=c.docs.map((d,i)=>
-    `<button class="dtab${i===0?' sel':''}" id="dt${i}" onclick="showDoc(${i})">${d.tab}</button>`).join('');
-}
-function showDoc(i){
-  const d=CASES[S.ci].docs[i];
-  CASES[S.ci].docs.forEach((_,k)=>$('dt'+k).classList.toggle('sel',k===i));
-  $('dType').textContent=d.type;
-  $('dMeta').textContent=d.meta;
-  $('dBody').className='docbody type-'+d.style;
-  $('dBody').innerHTML=d.text;
-  $('dComp').textContent=d.comp;
-}
-function addRigor(n){S.caseScore+=n;S.rigor=Math.max(0,S.rigor+n);$('rigor').textContent=S.rigor;}
-
-function showPhase(){
-  const c=CASES[S.ci];
-  if(S.pi>=c.phases.length){caseVerdict();return;}
-  const p=c.phases[S.pi],el=$('phase');
-  const head=`<div class="pbar"><span>${p.ph}</span><span class="pn">${S.pi+1} / ${c.phases.length}</span></div>`;
-  if(p.k==='mc')renderMC(el,head,p);
-  else if(p.k==='grid')renderGrid(el,head,p);
-  else if(p.k==='grain')renderGrain(el,head,p);
-  else if(p.k==='account')renderAccount(el,head,p);
-  el.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-function nextPhase(){S.pi++;showPhase();}
-
-/* ── multiple choice ── */
-function renderMC(el,head,p){
-  el.innerHTML=head+`<div class="pq">${p.q}</div><div class="pexp">${p.exp}</div><div class="popts" id="popts"></div><div id="pwhy"></div>`;
-  p.opts.forEach((o,i)=>{
-    const b=document.createElement('button');b.className='popt';b.textContent=o.t;
-    b.onclick=()=>{
-      [...$('popts').children].forEach(x=>x.disabled=true);
-      const right=!!o.ok;
-      b.classList.add(right?'right':'wrong');
-      if(!right)[...$('popts').children][p.opts.findIndex(x=>x.ok)].classList.add('right');
-      addRigor(right?10:2);
-      $('pwhy').innerHTML=`<div class="pwhy">${p.why}<br><b>${right?'+10 RIGOR':'+2 RIGOR — the reasoning above is the takeaway'}</b></div>
-        <button class="pnext" onclick="nextPhase()">CONTINUE →</button>`;
-    };
-    $('popts').appendChild(b);
-  });
+  tutShow('case1');
 }
 
-/* ── corroboration grid ── */
-function renderGrid(el,head,p){
-  let h=head+`<div class="pexp" style="padding-top:14px">${p.intro}</div><div id="claims"></div>
-    <button class="pnext" id="gridGo" disabled onclick="scoreGrid()">FILE THE GRID →</button>`;
-  el.innerHTML=h;
-  const box=$('claims');
-  p.claims.forEach((cl,ci)=>{
-    const d=document.createElement('div');d.className='claim';
-    d.innerHTML=`<div class="ctext">“${cl.c}”</div>
-      <div class="cbtns">${GRID_LABELS.map((L,li)=>
-        `<button class="cbtn" data-c="${ci}" data-v="${li}" onclick="pickGrid(${ci},${li},this)">${L}</button>`).join('')}</div>
-      <div class="cwhy" id="cwhy${ci}"></div>`;
-    box.appendChild(d);
-  });
-  S.gridPick=new Array(p.claims.length).fill(-1);
+/* ── HUD ── */
+function maxScore(c){
+  let hits=0;c.interro.forEach(d=>d.qs.forEach(q=>{if(q.hit)hits++;}));
+  const usableHits=Math.min(hits,c.leads);
+  return usableHits*5 + c.links.length*8 + c.verdict.length*6;
 }
-function pickGrid(ci,li,btn){
-  const row=btn.parentElement;
-  [...row.children].forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel');
-  S.gridPick[ci]=li;
-  if(S.gridPick.every(v=>v>-1))$('gridGo').disabled=false;
+function curScore(){
+  const cs=S.cs;let s=0;
+  for(const k in cs.cards)if(cs.cards[k]==='q')s+=5;
+  s+=Object.keys(cs.linksFound).length*8;
+  s-=cs.wrongLinks*2;
+  return Math.max(0,s);
 }
-function scoreGrid(){
-  const p=CASES[S.ci].phases[S.pi];
-  let got=0;
-  p.claims.forEach((cl,ci)=>{
-    const rows=document.querySelectorAll(`[data-c="${ci}"]`);
-    rows.forEach(b=>{b.disabled=true;
-      const v=+b.dataset.v;
-      if(v===cl.a)b.classList.add('right');
-      else if(v===S.gridPick[ci])b.classList.add('wrong');
-    });
-    const w=$('cwhy'+ci);w.style.display='block';
-    const hit=S.gridPick[ci]===cl.a;if(hit)got++;
-    w.innerHTML=(hit?'✓ ':'✗ Correct: <b>'+GRID_LABELS[cl.a]+'</b>. ')+cl.why;
-    addRigor(hit?8:0);
-  });
-  $('gridGo').outerHTML=`<div class="pwhy" style="margin-top:10px"><b>${got} of ${p.claims.length} judgments correct — +${got*8} RIGOR.</b> The grid is the discipline: most historical error is a category error made here.</div>
-    <button class="pnext" onclick="nextPhase()">CONTINUE →</button>`;
+function renderHUD(){
+  const c=CASES[S.ci],cs=S.cs;
+  let pips='';
+  for(let i=0;i<c.leads;i++)pips+=`<span class="${i<cs.leads?'':'spent'}">\u25cf</span>`;
+  $('leadPips').innerHTML=pips;
+  const pct=Math.min(100,Math.round(curScore()/maxScore(c)*100));
+  $('csFill').style.width=pct+'%';
 }
 
-/* ── against the grain (multi-select) ── */
-function renderGrain(el,head,p){
-  el.innerHTML=head+`<div class="pq">${p.q}</div><div class="pexp">${p.exp}</div>
-    <div class="popts" id="gopts"></div>
-    <button class="pnext" id="grainGo" onclick="scoreGrain()">SUBMIT THE READING →</button><div id="gwhy"></div>`;
-  S.grainPick=new Set();
-  p.opts.forEach((o,i)=>{
-    const b=document.createElement('button');b.className='gopt';b.textContent=o.t;
-    b.onclick=()=>{ if(b.disabled)return;
-      if(S.grainPick.has(i)){S.grainPick.delete(i);b.classList.remove('sel');}
-      else{S.grainPick.add(i);b.classList.add('sel');}};
-    $('gopts').appendChild(b);
+/* ── phases ── */
+const PHASES=['READ','INTERROGATE','CONNECT','VERDICT'];
+function renderPhases(){
+  const cs=S.cs;
+  const t=$('ptabs');t.innerHTML='';
+  PHASES.forEach((p,i)=>{
+    const b=document.createElement('button');
+    b.className='ptab'+(cs.phase===i?' on':'');
+    let badge='';
+    if(i===2){const n=Object.keys(cs.cards).length;if(n)badge=`<span class="badge">${n}</span>`;}
+    b.innerHTML=p+badge;
+    b.onclick=()=>{cs.phase=i;renderPhases();};
+    t.appendChild(b);
   });
-}
-function scoreGrain(){
-  const p=CASES[S.ci].phases[S.pi];
-  let pts=0,report='';
-  [...$('gopts').children].forEach((b,i)=>{
-    b.disabled=true;const o=p.opts[i],picked=S.grainPick.has(i);
-    let mark='';
-    if(o.ok&&picked){b.classList.add('right');mark='✓ +6';pts+=6;}
-    else if(o.ok&&!picked){b.classList.add('missed');mark='MISSED';}
-    else if(!o.ok&&picked){b.classList.add('wrong');mark='✗ −5';pts-=5;}
-    if(mark){const m=document.createElement('span');m.className='gmark';m.textContent=mark;b.appendChild(m);}
-    report+=`<p><b>${o.ok?'SOUND':'UNSOUND'}:</b> ${o.why}</p>`;
-  });
-  pts=Math.max(0,pts);addRigor(pts);
-  $('grainGo').outerHTML=`<div class="pwhy">${report}<b>+${pts} RIGOR.</b></div>
-    <button class="pnext" onclick="nextPhase()">CONTINUE →</button>`;
+  const body=$('phaseBody');body.innerHTML='';
+  [renderRead,renderInterro,renderBoard,renderVerdict][cs.phase](body);
+  if(cs.phase===1)tutShow('interro');
+  if(cs.phase===2&&Object.keys(cs.cards).length)tutShow('board');
+  if(cs.phase===3)tutShow('verdict');
 }
 
-/* ── the account ── */
-function renderAccount(el,head,p){
-  el.innerHTML=head+`<div class="pq">${p.q}</div>
-    <div class="acount" id="acount">0 of 4 selected</div>
-    <div class="popts" id="aopts"></div>
-    <button class="pnext" id="aGo" disabled onclick="scoreAccount()">SEND TO PRESS →</button><div id="awhy"></div>`;
-  S.acctPick=new Set();
-  p.opts.forEach((o,i)=>{
-    const b=document.createElement('button');b.className='aopt';
-    b.innerHTML=o.t+`<span class="astamp">${o.v==='sound'?'SOUND':o.v==='over'?'OVERREACH':'UNSUPPORTED'}</span>`;
-    b.onclick=()=>{ if(b.disabled)return;
-      if(S.acctPick.has(i)){S.acctPick.delete(i);b.classList.remove('sel');}
-      else if(S.acctPick.size<4){S.acctPick.add(i);b.classList.add('sel');}
-      $('acount').textContent=S.acctPick.size+' of 4 selected';
-      $('aGo').disabled=S.acctPick.size!==4;};
-    $('aopts').appendChild(b);
+/* ── READ ── */
+function docHTML(c,di){
+  const d=c.docs[di],cs=S.cs;
+  let txt=d.text.replace(/\{\{R:(\w+)\}\}/g,(m,id)=>{
+    const r=d.redactions[id];
+    if(cs.unred[id])return `<span class="unredacted">${r.text}</span>`;
+    return `<span class="redact" data-teaser="${r.teaser} \u2014 interrogate to open" aria-label="redacted passage: ${r.teaser}">${'\u2588'.repeat(Math.min(46,Math.max(18,r.text.length/3)))}</span>`;
   });
+  return `<div class="dochead"><span class="dtype">${d.type}</span><span class="dmeta">${d.meta}</span></div>
+    <div class="docbody"><div class="${d.style}">${txt}</div></div>
+    <div class="composite">${d.comp}</div>`;
 }
-function scoreAccount(){
-  const p=CASES[S.ci].phases[S.pi];
-  let pts=0,rep='';
-  [...$('aopts').children].forEach((b,i)=>{
-    b.disabled=true;const o=p.opts[i],picked=S.acctPick.has(i);
-    if(picked){
-      b.classList.add(o.v);
-      if(o.v==='sound'){pts+=10;}else if(o.v==='over'){pts-=5;}else{pts-=10;}
-      rep+=`<p><b>${o.v==='sound'?'✓ SOUND +10':o.v==='over'?'△ OVERREACH −5':'✗ UNSUPPORTED −10'}:</b> ${o.why}</p>`;
-    }
+function renderRead(body){
+  const c=CASES[S.ci],cs=S.cs;
+  const tabs=document.createElement('div');tabs.className='dtabs';
+  c.docs.forEach((d,i)=>{
+    const b=document.createElement('button');
+    b.className='dtab'+(cs.activeDoc===i?' on':'');
+    b.textContent=d.tab;
+    b.onclick=()=>{cs.activeDoc=i;renderPhases();};
+    tabs.appendChild(b);
   });
-  pts=Math.max(0,pts);addRigor(pts);
-  $('aGo').outerHTML=`<div class="pwhy">${rep}<b>Published account earned +${pts} RIGOR.</b></div>
-    <button class="pnext" onclick="nextPhase()">CLOSE THE CASE →</button>`;
+  body.appendChild(tabs);
+  const paper=document.createElement('div');paper.className='paper';
+  paper.innerHTML=docHTML(c,cs.activeDoc);
+  body.appendChild(paper);
+  const hint=document.createElement('div');
+  hint.className='paper';hint.style.fontStyle='italic';hint.style.fontSize='14px';
+  hint.innerHTML='Blacked-out passages are <b>unexamined</b> \u2014 the right interrogation question opens them. Read every tab closely before spending a lead. The documents reward the reader who notices what is missing.';
+  body.appendChild(hint);
 }
 
-/* ── case verdict ── */
-function caseVerdict(){
-  const c=CASES[S.ci];
-  S.done[S.ci]=true;S.score[S.ci]=S.caseScore;
-  const acct=c.phases.find(p=>p.k==='account');
-  let h=`<div class="pbar"><span>CASE ${['I','II','III','IV'][S.ci]} · VERDICT</span><span class="pn">+${S.caseScore} RIGOR</span></div>
-    <div style="padding:14px 17px 17px">${acct.epi}`;
-  if(S.done.every(Boolean)){
-    const total=S.rigor;
-    const rank=total>=340?'MASTER OF THE CRAFT':total>=250?'HISTORIAN':total>=150?'ARCHIVIST':'APPRENTICE';
-    h+=`<div class="verdictCard" style="box-shadow:none;border:1px solid #C9BC9C;margin-top:14px">
-      <h3>THE READING ROOM CLOSES</h3>
-      <div class="scoreLine"><span>Case I · The Notice in the Gazette</span><span>+${S.score[0]}</span></div>
-      <div class="scoreLine"><span>Case II · The Question of Schools</span><span>+${S.score[1]}</span></div>
-      <div class="scoreLine"><span>Case III · Two Visitors in Durham</span><span>+${S.score[2]}</span></div>
-      <div class="scoreLine"><span>Case IV · The Clearing of Hayti</span><span>+${S.score[3]}</span></div>
-      <div class="scoreLine"><span>RIGOR · RANK: ${rank}</span><span>${total}</span></div>
-      <p style="margin-top:12px">Four boxes, and one method throughout: source the document, corroborate the claim, read the hostile record against itself, and publish only what the evidence can carry. The advertisement testified to a man's genius, the petition confessed a policy, two rivals corroborated a city while contesting its meaning, and a balanced ledger recorded a world's erasure. Nothing in the archive speaks for itself — and everything in it speaks. That is the craft.</p></div>`;
+/* ── INTERROGATE ── */
+function renderInterro(body){
+  const c=CASES[S.ci],cs=S.cs;
+  if(cs.leads<=0){
+    const w=document.createElement('div');w.className='paper noleads';
+    w.textContent='YOUR LEADS ARE SPENT. Take what you have to the board, and to the verdict.';
+    body.appendChild(w);
   }
-  h+=`<button class="backBtn" onclick="openShelf()">RETURN TO THE BOXES →</button></div>`;
-  $('phase').innerHTML=h;
-  window.scrollTo({top:0,behavior:'smooth'});
-  $('phase').scrollIntoView({behavior:'smooth'});
-  renderShelfBadgeOnly();
+  const tabs=document.createElement('div');tabs.className='dtabs';
+  c.docs.forEach((d,i)=>{
+    const b=document.createElement('button');
+    b.className='dtab'+(cs.activeDoc===i?' on':'');
+    b.textContent=d.tab;
+    b.onclick=()=>{cs.activeDoc=i;renderPhases();};
+    tabs.appendChild(b);
+  });
+  body.appendChild(tabs);
+  const set=c.interro.find(x=>x.doc===cs.activeDoc);
+  const paper=document.createElement('div');paper.className='paper iqdoc';
+  paper.innerHTML=`<div class="dochead"><span class="dtype">PUT A QUESTION TO ${c.docs[cs.activeDoc].tab}</span><span class="dmeta">EACH QUESTION COSTS ONE LEAD</span></div>`;
+  set.qs.forEach((q,qi)=>{
+    const key=cs.activeDoc+':'+qi;
+    const asked=cs.asked[key];
+    const b=document.createElement('button');
+    b.className='iq'+(asked?(q.hit?' hit':' dead'):'');
+    b.disabled=!!asked||cs.leads<=0;
+    let inner=`${q.q}${asked?'':'<span class="qcost">\u25cf 1 LEAD</span>'}`;
+    if(asked){
+      inner+=`<div class="iresp">${q.resp}</div>`;
+      inner+=q.hit?`<span class="icard">EVIDENCE SECURED \u2014 ${c.cards[q.hit].n.toUpperCase()}</span>`
+                  :`<span class="icard deadend">DEAD END \u2014 LEAD SPENT</span>`;
+    }
+    b.innerHTML=inner;
+    if(!asked)b.onclick=()=>askQ(cs.activeDoc,qi);
+    paper.appendChild(b);
+  });
+  body.appendChild(paper);
 }
-function renderShelfBadgeOnly(){$('rigor').textContent=S.rigor;}
+function askQ(di,qi){
+  const c=CASES[S.ci],cs=S.cs;
+  if(cs.leads<=0)return;
+  const key=di+':'+qi;
+  if(cs.asked[key])return;
+  cs.leads--;cs.asked[key]=true;
+  const q=c.interro.find(x=>x.doc===di).qs[qi];
+  if(q.hit){
+    cs.cards[q.hit]='q';cs.order.push(q.hit);
+    if(q.unredact)cs.unred[q.unredact]=true;
+    if(q.hit==='SILENCE')commend('SILENCE');
+    toast('EVIDENCE SECURED \u2014 '+c.cards[q.hit].n.toUpperCase());
+    tutShow('firstcard');
+  }else{
+    toast('DEAD END \u2014 the document cannot answer.');
+  }
+  renderHUD();renderPhases();
+}
+
+/* ── CONNECT (evidence board) ── */
+function renderBoard(body){
+  const c=CASES[S.ci],cs=S.cs;
+  const board=document.createElement('div');board.id='board';
+  const owned=cs.order.filter(k=>cs.cards[k]==='q');
+  board.innerHTML=`<div class="boardHint">TAP TWO CARDS TO TIE A THREAD \u00b7 TRUE CONNECTIONS BECOME EVIDENCE \u00b7 FALSE THREADS WEAKEN THE CASE (\u22122)</div>`;
+  const grid=document.createElement('div');grid.className='cardGrid';
+  if(!owned.length){
+    const e=document.createElement('div');
+    e.style.cssText='color:#c9b98d;font-style:italic;text-align:center;grid-column:1/-1;padding:20px 6px';
+    e.textContent='The board is bare. Interrogate the documents to pin your first evidence.';
+    grid.appendChild(e);
+  }
+  owned.forEach(k=>{
+    const cd=c.cards[k];
+    const b=document.createElement('button');
+    b.className='ecard'+(cs.sel===k?' sel':'');
+    b.innerHTML=`<div class="en">${cd.n}</div><div class="ed">${cd.d}</div><div class="esrc">${cd.src}</div>`;
+    b.onclick=()=>pickCard(k,b);
+    grid.appendChild(b);
+  });
+  board.appendChild(grid);
+  body.appendChild(board);
+  const found=Object.keys(cs.linksFound);
+  const tl=document.createElement('div');tl.className='threadlist';
+  if(found.length){
+    found.forEach(cardId=>{
+      const link=c.links.find(l=>l.card===cardId);
+      const cd=c.cards[cardId];
+      const t=document.createElement('div');
+      t.className='thread'+(link.kind==='contra'?' contra':'');
+      t.innerHTML=`<div class="tk">${link.kind==='contra'?'\u2716 CONTRADICTION ESTABLISHED':'\u2714 CORROBORATION ESTABLISHED'}</div>
+        <div class="tn">${cd.n}</div><div class="td">${cd.d}</div>`;
+      tl.appendChild(t);
+    });
+  }
+  body.appendChild(tl);
+}
+function pickCard(k,el){
+  const cs=S.cs;
+  if(cs.sel===null){cs.sel=k;renderPhases();return;}
+  if(cs.sel===k){cs.sel=null;renderPhases();return;}
+  attemptLink(cs.sel,k,el);
+}
+function attemptLink(a,b,el){
+  const c=CASES[S.ci],cs=S.cs;
+  cs.sel=null;
+  const link=c.links.find(l=>!cs.linksFound[l.card]&&l.pair.some(p=>(p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a)));
+  if(link){
+    cs.linksFound[link.card]=true;
+    cs.cards[link.card]='l';cs.order.push(link.card);
+    if(link.kind==='contra')commend('GRAIN');
+    if(link.card==='AGREE')commend('ENEMIES');
+    if(link.card==='POLICY')commend('POLICYC');
+    toast((link.kind==='contra'?'\u2716 CONTRADICTION \u2014 ':'\u2714 CORROBORATION \u2014 ')+c.cards[link.card].n.toUpperCase());
+    tutShow('firstlink');
+  }else{
+    cs.wrongLinks++;
+    if(el)el.classList.add('shake');
+    toast('THE THREAD HANGS SLACK \u2014 no true connection there. CASE STRENGTH \u22122.');
+  }
+  renderHUD();
+  setTimeout(renderPhases,el&&!link?280:0);
+}
+
+/* ── VERDICT ── */
+function renderVerdict(body){
+  const c=CASES[S.ci],cs=S.cs;
+  const intro=document.createElement('div');intro.className='paper';
+  intro.innerHTML=`<b style="color:var(--stampred)">CLOSE THE CASE —</b> Assert each finding, then back it with a piece of evidence from your board. A claim without the right citation will not hold. You may return to the documents and the board before submitting — but the verdict, once stamped, is final for this attempt.`;
+  body.appendChild(intro);
+  const ownedAll=cs.order.slice();
+  c.verdict.forEach((f,fi)=>{
+    const v=cs.verdict[fi];
+    const p=document.createElement('div');p.className='paper vfind';
+    p.innerHTML=`<div class="vq">${f.q}</div>`;
+    f.opts.forEach((o,oi)=>{
+      const ob=document.createElement('button');
+      ob.className='vopt'+(v.opt===oi?' on':'');
+      ob.textContent=o;
+      ob.onclick=()=>{v.opt=oi;renderPhases();};
+      p.appendChild(ob);
+    });
+    const cw=document.createElement('div');cw.className='vcite';
+    cw.innerHTML=`<div class="cl">CITE YOUR EVIDENCE \u2014 which card carries this finding?</div>`;
+    if(!ownedAll.length){
+      cw.innerHTML+=`<div style="font-style:italic;font-size:14px;color:var(--faded)">No evidence secured yet. A verdict without evidence will be dismissed.</div>`;
+    }
+    ownedAll.forEach(k=>{
+      const cb=document.createElement('button');
+      cb.className='citebtn'+(v.cite===k?' on':'');
+      cb.textContent=c.cards[k].n;
+      cb.onclick=()=>{v.cite=k;renderPhases();};
+      cw.appendChild(cb);
+    });
+    p.appendChild(cw);
+    body.appendChild(p);
+  });
+  const ready=cs.verdict.every(v=>v.opt>=0);
+  const sub=document.createElement('button');
+  sub.className='vsubmit';sub.textContent='STAMP THE VERDICT';
+  sub.disabled=!ready;
+  sub.onclick=submitVerdict;
+  body.appendChild(sub);
+  if(!ready){
+    const w=document.createElement('div');w.className='vwarn';
+    w.textContent='Every finding must be asserted before the verdict can be stamped.';
+    body.appendChild(w);
+  }
+}
+function submitVerdict(){
+  const c=CASES[S.ci],cs=S.cs;
+  let s=curScore(),max=maxScore(c);
+  const notes=[];
+  c.verdict.forEach((f,fi)=>{
+    const v=cs.verdict[fi];
+    const claimOK=v.opt===f.correct;
+    const citeOK=claimOK&&v.cite&&f.cite.includes(v.cite);
+    if(claimOK)s+=3;
+    if(citeOK)s+=3;
+    notes.push({q:f.q,claimOK,citeOK,cited:v.cite?c.cards[v.cite].n:null});
+    if(fi===3&&S.ci===0&&claimOK)commend('HONEST');
+  });
+  const pct=Math.max(0,Math.min(1,s/max));
+  const grade=GRADES.find(g=>pct>=g.min);
+  const prev=S.grades[S.ci];
+  const rank=g=>GRADES.findIndex(x=>x.g===g);
+  if(!prev||rank(grade.g)<rank(prev))S.grades[S.ci]=grade.g;
+  showResult(grade,pct,notes);
+}
+function showResult(grade,pct,notes){
+  const c=CASES[S.ci],cs=S.cs;
+  $('case').classList.remove('on');
+  const r=$('result');r.classList.add('on');
+  const missedCards=Object.keys(c.cards).length-cs.order.length;
+  r.innerHTML=`
+   <div class="gradeWrap"><span class="bigstamp ${grade.g}">${grade.g}</span></div>
+   <div class="scoreline">CASE STRENGTH ${Math.round(pct*100)}% \u00b7 EVIDENCE ${cs.order.length}/${Object.keys(c.cards).length} \u00b7 LEADS UNSPENT ${cs.leads}</div>
+   <div class="paper" style="text-align:center;font-style:italic">${grade.line}</div>
+   <div class="paper debrief"><b style="color:var(--stampred)">THE DEBRIEF —</b><ul style="margin-top:8px">
+     ${notes.map(n=>`<li>${n.q.replace(/FINDING [IV]+ \u2014 /,'')} \u2014 ${
+        n.claimOK?(n.citeOK?'<b>held, and well cited.</b>':'held, but the citation'+(n.cited?` (<i>${n.cited}</i>)`:'')+' did not carry it.')
+        :'<b>did not hold.</b>'}</li>`).join('')}
+     ${missedCards>0?`<li>${missedCards} piece${missedCards>1?'s':''} of evidence never made it to your board.</li>`:''}
+     ${cs.wrongLinks>0?`<li>${cs.wrongLinks} false thread${cs.wrongLinks>1?'s':''} weakened the case.</li>`:''}
+   </ul></div>
+   <div class="paper epi">${c.epilogue}</div>
+   <div class="rbtns">
+     <button class="rbtn" onclick="openCase(${S.ci})">REOPEN THE CASE</button>
+     <button class="rbtn" onclick="backToShelf()">RETURN TO THE SHELF</button>
+   </div>`;
+  window.scrollTo(0,0);
+  renderShelf();
+}
+
 </script>
 </body>
 </html>
