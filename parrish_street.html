@@ -348,6 +348,7 @@ button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
   <div class="tdates">1898 ——— 1970</div>
   <button class="tstart" onclick="startGame()">WALK THE MILE</button>
   <div class="tnote">A historical simulation. Every decision is written into the ledger — and at the end, your record is set beside the one history actually wrote.</div>
+  <div style="margin-top:14px;color:#5F7A6C;font-family:'Courier New',monospace;font-size:10px;letter-spacing:.2em;">BUILD 2.4 · WALKING EDITION</div>
 </div>
 
 <!-- ════════ BRIEFING ════════ -->
@@ -445,6 +446,19 @@ button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
 
 <script>
 'use strict';
+/* ── on-screen error reporter — if anything breaks, say so visibly ── */
+window.addEventListener('error',function(e){
+  try{
+    var bar=document.getElementById('errBar');
+    if(!bar){
+      bar=document.createElement('div');
+      bar.id='errBar';
+      bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#7A2E2E;color:#F2E9D5;font:12px/1.5 monospace;padding:8px 12px;white-space:pre-wrap;max-height:40vh;overflow:auto;';
+      document.body.appendChild(bar);
+    }
+    bar.textContent+='⚠ '+(e.message||e.type)+(e.lineno?(' @ line '+e.lineno+':'+e.colno):'')+'\n';
+  }catch(_){}
+});
 /* ════════════════════════════════════════════════════════════
    STATE  (ported verbatim from the ledger edition)
    ════════════════════════════════════════════════════════════ */
