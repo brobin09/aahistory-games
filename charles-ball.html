@@ -109,6 +109,8 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
   bottom:calc(20px + env(safe-area-inset-bottom));font-family:'Courier New',monospace;}
 .tb:active{background:rgba(232,197,90,.22);}
 #bAct{right:calc(16px + env(safe-area-inset-right));}
+#bEat{right:calc(16px + env(safe-area-inset-right));bottom:calc(108px + env(safe-area-inset-bottom));
+  border-color:rgba(217,138,74,.6);color:#F0B27A;}
 #bCrouch{right:calc(104px + env(safe-area-inset-right));}
 @media(min-width:900px) and (hover:hover){#ctrl.on{display:none;}}
 #rotate{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;
@@ -122,7 +124,7 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
 <div id="hud"><div class="hrow">
   <span class="hb">STRENGTH<span class="bar" id="stBar"><i style="width:100%"></i></span></span>
   <span class="hb">FOOD<span class="bar" id="fdBar"><i style="width:100%"></i></span></span>
-  <span class="hb">🌽 <span id="corn">0</span></span>
+  <span class="hb">🌽 <span id="corn">0</span> &nbsp;🍠 <span id="yam">0</span></span>
   <span class="hb" id="marks"></span>
   <span class="hb" id="alertHb">⚠ SEEN</span>
   <span class="hb"><span id="phaseLbl">NIGHT</span> <span id="nightNo">I</span><span class="bar" id="dawnBar"><i style="width:100%"></i></span></span>
@@ -131,6 +133,7 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
 <div id="ctrl">
   <div id="stick"><div id="nub"></div></div>
   <div class="tb" id="bCrouch">CREEP</div>
+  <div class="tb" id="bEat">EAT</div>
   <div class="tb" id="bAct">ACT</div>
 </div>
 
@@ -148,7 +151,7 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
   <div class="ofact">MOVE BY NIGHT · HIDE BY DAY · EAT WHEN YOU CAN · THE STAR IS THE ONLY MAP</div>
   <div class="osub" style="margin-top:10px;font-size:.82em;opacity:.82">The sky strobes — a short night to run, then a brief, killing daylight. When <b style="color:#F5C542">DAY</b> breaks you must already be hidden — inside a shelter, or under dense canopy — or a hand closes on your collar. Shelters and cover are scattered and hard to find, so mark them as you go.</div>
   <button class="obtn" onclick="showChap()">STEP INTO THE DARK</button>
-  <div class="okeys">MOVE — WASD / arrows / on-screen stick &nbsp;·&nbsp; CREEP — hold SHIFT or tap CREEP (quiet, unseen in cover)<br>ACT — E / SPACE or tap ACT (talk · gather · eat corn · enter shelter) &nbsp;·&nbsp; the ✦ at the top of the sky is NORTH<br>THE SKY STROBES — 14-19s of night to run, then a 3s daylight that takes you in the open.<br>BE HIDDEN WHEN DAY BREAKS — a shelter or dense canopy. Hunger slows you. Cover is scattered and hard to find.</div>
+  <div class="okeys">MOVE — WASD / arrows / on-screen stick &nbsp;·&nbsp; CREEP — hold SHIFT or tap CREEP (quiet, unseen in cover)<br>ACT — E / SPACE or tap ACT (talk · gather corn &amp; sweet potatoes · enter shelter) &nbsp;·&nbsp; EAT — F or tap EAT<br>ROAST AT A FIRE to fill up — eaten raw, food fills only half. The ✦ at the top of the sky is NORTH.<br>THE SKY STROBES — 14-19s of night to run, then a 3s daylight that takes you in the open.<br>BE HIDDEN WHEN DAY BREAKS — a shelter or dense canopy. Hunger slows you. Cover is scattered and hard to find.</div>
   <div class="onote">Drawn from Ball's narrative, published 1836 and reissued as <em>Fifty Years in Chains</em>. The people who help you on this road — enslaved, free, and a few whites — stand for the thousands the record names and the many more it never could. What they risk in these pages, people truly risked.</div>
 </div>
 
@@ -239,6 +242,12 @@ function growStage(rows,si){
   }
   let cornN=2+(R()<0.4?1:0),cp=0,ct=0;
   while(cp<cornN&&ct<200){ct++;const x=2+((R()*(W-4))|0),y=1+((R()*(ADD-2))|0);if(band[y][x]==='.'){band[y][x]='C';cp++;}}
+  let yamN=2+(R()<0.5?1:0),yp=0,yt=0;
+  while(yp<yamN&&yt<200){yt++;const x=2+((R()*(W-4))|0),y=1+((R()*(ADD-2))|0);if(band[y][x]==='.'){band[y][x]='Y';yp++;}}
+  /* a rare campfire — a chance to roast, tucked off the path like the shelters */
+  if(R()<0.7){let ft2=0;while(ft2<120){ft2++;const x=2+((R()*(W-4))|0),y=2+((R()*(ADD-4))|0);
+    if(band[y][x]==='.'){const near=[[0,1],[0,-1],[1,0],[-1,0]].some(([dx,dy])=>{const nx=x+dx,ny=y+dy;return ny>=0&&ny<ADD&&nx>=0&&nx<W&&band[ny][nx]==='#';});
+      if(near){band[y][x]='K';break;}}}}
   let foeN=1+((si*0.7)|0),fp=0,ft=0;
   while(fp<foeN&&ft<200){ft++;const x=3+((R()*(W-6))|0),y=1+((R()*(ADD-2))|0);if(band[y][x]==='.'){band[y][x]='P';fp++;}}
   band[ADD-1][ax]='.';
@@ -685,7 +694,7 @@ addEventListener('pointerdown',()=>{try{window.focus();}catch(e){}initAudio();})
 
 let stage=0,grid=[],Wd=46,Ht=0,pal=null;
 let px=0,py=0,face=0,creep=false,moving=false;
-let stam=100,food=100,corn=0,marks=0;
+let stam=100,food=100,corn=0,yam=0,marks=0;
 let phase='night',phaseT=NIGHT_MIN,nights=1,expose=0,dayFlash=0;
 let adren=ADREN_MAX,adrenOn=false;
 let sheltered=false,shelter=null,exitCool=0;
@@ -759,6 +768,7 @@ addEventListener('keydown',e=>{
   initAudio();
   keys[e.code]=true;
   if(e.code==='KeyE'||e.code==='Space'){act();e.preventDefault();}
+  if(e.code==='KeyF'){eat();e.preventDefault();}
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();});
 addEventListener('keyup',e=>{keys[e.code]=false;});
 
@@ -787,6 +797,8 @@ const T={x:0,y:0,on:false,creep:false};
   bA.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();initAudio();act();},{passive:false});
   const bC=document.getElementById('bCrouch');
   bC.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();T.creep=!T.creep;bC.style.background=T.creep?'rgba(232,197,90,.3)':'rgba(10,14,30,.55)';},{passive:false});
+  const bE=document.getElementById('bEat');
+  bE.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();eat();},{passive:false});
 })();
 
 const tile=(cx,cy)=>(cx<0||cy<0||cx>=Wd||cy>=Ht)?'#':grid[cy][cx];
@@ -808,6 +820,7 @@ function loadStage(i,fullReset){
     const t=grid[y][x];
     if(t==='@'){px=x*TS+8;py=y*TS+4;ckx=px;cky=py;grid[y][x]='.';}
     else if(t==='C'){items.push({x,y,k:'corn'});grid[y][x]='.';}
+    else if(t==='Y'){items.push({x,y,k:'yam'});grid[y][x]='.';}
     else if(t==='K'){items.push({x,y,k:'camp',lit:false});grid[y][x]='.';}
     else if(t==='H'){items.push({x,y,k:'cabin'});grid[y][x]='.';}
     else if(t==='B'){items.push({x,y,k:'barn'});grid[y][x]='.';}
@@ -860,7 +873,7 @@ function los(x0,y0,x1,y1){
 function inCover(){const t=tileAtPx(px+8,py+12);return t===','||t==='T';}
 function nearShelter(){
   for(const it of items){
-    if(it.k==='corn')continue;
+    if(it.k==='corn'||it.k==='yam')continue;
     if(Math.hypot(it.x*TS+17-(px+8),it.y*TS+17-(py+10))<40)return it;}
   return null;
 }
@@ -871,6 +884,7 @@ function updHUD(){
   document.querySelector('#fdBar i').style.width=Math.max(0,food)+'%';
   document.getElementById('fdBar').classList.toggle('low',food<25);
   document.getElementById('corn').textContent=corn;
+  document.getElementById('yam').textContent=yam;
   document.getElementById('nightNo').textContent=ROMAN[Math.min(nights-1,ROMAN.length-1)];
   document.getElementById('marks').textContent='⛓'.repeat(marks)+'·'.repeat(Math.max(0,3-marks));
 }
@@ -951,11 +965,11 @@ function captured(){
     if(third){
       showEvent('SEIZED — THE NIGHT IS LOST',
         `<p>Rough hands, a rope, a long walk back under guard. It takes a week of watching and waiting before another night opens — and this whole ground must be crossed again, wiser and hungrier.</p>`,
-        [{t:'BEGIN THE NIGHT AGAIN',fn:()=>{closeEvent();nights++;stam=70;food=55;corn=0;loadStage(stage,true);updHUD();}}]);
+        [{t:'BEGIN THE NIGHT AGAIN',fn:()=>{closeEvent();nights++;stam=70;food=55;corn=0;yam=0;loadStage(stage,true);updHUD();}}]);
     }else{
       showEvent('SEIZED — AND SLIPPED',
         `<p>They have you — a fist in your collar, a shout for a rope — and in the jostle of their triumph you twist free and are gone into the dark before the lantern swings around. Your corn is scattered. Your legs shake. The mark is real: <b>${marks} of 3</b> — and the hunt is faster now. They know you\u2019re close.</p>`,
-        [{t:'BACK TO SHELTER — RUN',fn:()=>{closeEvent();corn=0;stam=Math.max(30,stam-25);food=Math.max(15,food-15);
+        [{t:'BACK TO SHELTER — RUN',fn:()=>{closeEvent();corn=0;yam=0;stam=Math.max(30,stam-25);food=Math.max(15,food-15);
           px=ckx;py=cky;scent=[];updHUD();}}]);
     }
   });
@@ -1005,16 +1019,40 @@ function act(){
   // shelters
   const sh=nearShelter();
   if(sh){enterShelter(sh);return;}
-  // corn on the ground
+  // food on the ground — corn or sweet potato
   for(const it of items){
-    if(it.got||it.k!=='corn')continue;
+    if(it.got||(it.k!=='corn'&&it.k!=='yam'))continue;
     if(Math.hypot(it.x*TS+17-(px+8),it.y*TS+17-(py+10))<34){
-      it.got=true;corn++;burst(it.x*TS+17,it.y*TS+17,'#E8C55A');sfx.corn();updHUD();return;}
+      it.got=true;
+      if(it.k==='corn'){corn++;burst(it.x*TS+17,it.y*TS+17,'#E8C55A');toast('you pull an ear of corn');}
+      else{yam++;burst(it.x*TS+17,it.y*TS+17,'#D98A4A');toast('you dig a sweet potato');}
+      sfx.corn();updHUD();return;}
   }
-  // eat corn
-  if(corn>0&&food<92){corn--;food=Math.min(100,food+32);stam=Math.min(100,stam+10);
-    sfx.eat();updHUD();burst(px+8,py+2,'#E8C55A');toast('you eat — strength comes back to your legs');return;}
-  if(corn===0&&food<40)toast('nothing in the bundle to eat');
+  if((corn>0||yam>0)&&food<92)toast('press EAT to eat — roast it at a fire to fill up');
+}
+
+/* ── eating: raw fills half, roasting at a fire fills the most ── */
+function fireHere(){
+  if(sheltered&&shelter&&shelter.k==='camp')return shelter;
+  for(const it of items){if(it.k==='camp'&&Math.hypot(it.x*TS+17-(px+8),it.y*TS+17-(py+10))<52)return it;}
+  return null;
+}
+function eat(){
+  if(state!=='play')return;
+  if(corn<=0&&yam<=0){toast('nothing in the bundle to eat');return;}
+  if(food>=96){toast('you are not hungry yet');return;}
+  const fire=fireHere();
+  let kind;
+  if(fire&&yam>0)kind='yam';else if(corn>0)kind='corn';else kind='yam';   /* roast the hearty yam; eat corn on the move */
+  const V=kind==='corn'?{f:34,s:8,c:'#E8C55A',n:'corn'}:{f:48,s:10,c:'#D98A4A',n:'sweet potato'};
+  if(kind==='corn')corn--;else yam--;
+  const mult=fire?1:0.5;                 /* raw is half of a roasted meal */
+  if(fire)fire.lit=true;
+  food=Math.min(100,food+V.f*mult);
+  stam=Math.min(100,stam+V.s*mult);
+  sfx.eat();burst(px+8,py+2,V.c);updHUD();
+  toast(fire?('you roast the '+V.n+' over the coals — it fills you')
+            :('raw '+V.n+' — it helps, but a fire would fill you more'));
 }
 
 /* ════════════════ UPDATE ════════════════ */
@@ -1159,7 +1197,7 @@ function captured3(){
   fieldNote('caught',()=>{
     showEvent('SEIZED \u2014 THE GROUND IS LOST',
       `<p>Rough hands, a rope, a long walk back under guard. It takes a week of watching before another chance opens \u2014 and this whole ground must be crossed again, wiser and hungrier.</p>`,
-      [{t:'BEGIN AGAIN',fn:()=>{closeEvent();stam=70;food=55;corn=0;loadStage(stage,true);updHUD();}}]);
+      [{t:'BEGIN AGAIN',fn:()=>{closeEvent();stam=70;food=55;corn=0;yam=0;loadStage(stage,true);updHUD();}}]);
   });
 }
 
@@ -1495,6 +1533,10 @@ function render(){
       c.fillStyle='#B08A2E';
       for(let k=0;k<3;k++)c.fillRect(sx-2+k*2,sy+bob-4+k,1.5,1.5);
       c.fillStyle='#7BA23F';c.fillRect(sx-1,sy+bob+5,2,6);}
+    else if(it.k==='yam'){
+      c.fillStyle='#C56A2E';c.beginPath();c.ellipse(sx,sy+bob,7,4.5,0.5,0,Math.PI*2);c.fill();
+      c.fillStyle='#9A4E20';c.beginPath();c.ellipse(sx-2,sy+bob-1,1.1,1.1,0,0,Math.PI*2);c.fill();
+      c.fillStyle='#5E7A34';c.beginPath();c.moveTo(sx+4,sy+bob-3);c.lineTo(sx+6,sy+bob-7);c.lineTo(sx+7,sy+bob-3);c.fill();}
     else if(it.k==='camp'){
       c.fillStyle='#4E3A26';c.fillRect(sx-9,sy+8,18,4);
       c.fillStyle='#3E2E1E';c.fillRect(sx-7,sy+6,4,3);c.fillRect(sx+3,sy+6,4,3);
@@ -1509,7 +1551,7 @@ function render(){
     else if(it.k==='barn')drawBarn(sx-17,sy-17,occ);
     else if(it.k==='tree')drawHollow(sx-17,sy-17,occ);
     // shelter label when near
-    if(it.k!=='corn'&&!occ&&Math.hypot(it.x*TS+17-(px+8),it.y*TS+17-(py+10))<64){
+    if(it.k!=='corn'&&it.k!=='yam'&&!occ&&Math.hypot(it.x*TS+17-(px+8),it.y*TS+17-(py+10))<64){
       c.fillStyle='rgba(154,184,200,0.75)';c.font='9px "Courier New"';c.textAlign='center';
       c.fillText('[ACT] hide — '+({camp:'camp',cabin:'cabin',barn:'barn',tree:'hollow tree'})[it.k],sx,sy+30);c.textAlign='left';}
     if(occ){
