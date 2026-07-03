@@ -649,6 +649,10 @@ const TIMELINE=[
    {t:'PETITION WASHINGTON',d:'Document the denials, file complaints, wait for enforcement.',e:{trust:2,arch:1},led:'V.A. denials documented and filed.'},
    {t:'NOTHING CAN BE DONE',d:'The veterans will manage as the Mile always has.',e:{trust:-6},led:'Veterans\' benefits go unhonored in Durham.',tone:'loss'}]},
  {yr:1948,era:4,title:'The College on the Hill',type:'note',
+  dynreq:s=>!!s.inst.school,
+  alt:{title:'The College That Never Was',type:'note',
+   text:`Dr. Shepard is gone — dead the year before, still writing letters for a school this board never backed. The state's money went to campuses in other towns. Durham's brightest leave on the morning train and learn to build somebody else's institutions.`,
+   e:{trust:-4},led:['The Training School was never chartered — the college rises elsewhere.'],tone:'loss'},
   text:`Dr. Shepard is gone — dead the year before, mourned like a head of state. His Training School has become <em>North Carolina College at Durham</em>, the state's flagship for Black scholars. Its graduates staff Lincoln Hospital, the Mutual's offices, and the law practice suing Jim Crow. Institutions raise the people who defend institutions.`,
   e:{trust:6},led:['N.C. College thrives — Shepard\'s legacy compounds.'],tone:'gain'},
  {yr:1952,era:4,title:'The Old Guard and the Editor',type:'choice',
@@ -773,7 +777,9 @@ const cv=document.getElementById('world'), cx2=cv.getContext('2d');
 let CW=0,CH=0,SCALE=1,GY=0,DPR=1;
 function resize(){
   DPR=Math.min(2,window.devicePixelRatio||1);
-  CW=window.innerWidth; CH=window.innerHeight;
+  CW=window.innerWidth||document.documentElement.clientWidth||800;
+  CH=window.innerHeight||document.documentElement.clientHeight||600;
+  if(CW<10)CW=800; if(CH<10)CH=600;
   cv.width=CW*DPR; cv.height=CH*DPR;
   cv.style.width=CW+'px'; cv.style.height=CH+'px';
   cx2.setTransform(DPR,0,0,DPR,0,0);
@@ -872,7 +878,9 @@ function bodyH(s){
   if(s.kind==='mutual') return mutualTower?  (34+6*44) : 96;
   if(s.houses) return 64;
   if(s.theater) return 34+s.fl*40;
-  return 34 + s.fl*40;   // storefront 34 + floors
+  let fl=s.fl;
+  if(s.id==='schoolS'&&s.built&&TIMELINE[Math.min(S.turn,TIMELINE.length-1)].era>=4)fl=3; // NC College grows
+  return 34 + fl*40;   // storefront 34 + floors
 }
 function drawBuilding(s,t){
   if(!inView(s.x-20,s.w+40))return;
@@ -934,7 +942,7 @@ function drawBuilding(s,t){
   for(let dx=x+3*SCALE;dx<x+w-3*SCALE;dx+=8*SCALE)cx2.fillRect(dx,top+7*SCALE,4*SCALE,3*SCALE);
 
   const isTower = s.id==='mutual'&&(mutualTower||towerRise>=0);
-  const floors = isTower? Math.max(2,Math.round((H-34)/44)) : s.fl;
+  const floors = isTower? Math.max(2,Math.round((H-34)/44)) : Math.max(1,Math.round((bodyH(s)-34)/40));
   const storeH=34*SCALE, flH=((H*SCALE)-storeH-12*SCALE)/Math.max(1,floors-1||1);
 
   // upper windows
@@ -1992,6 +2000,10 @@ function frame(ts){
   requestAnimationFrame(frame);
   const dt=Math.min(0.05,(ts-lastTS)/1000||0.016); lastTS=ts; nowT+=dt;
   const t=nowT;
+  // viewport can arrive late or change without firing resize (embedded views, rotation)
+  if((window.innerWidth&&window.innerWidth!==CW)||(window.innerHeight&&window.innerHeight!==CH))resize();
+  if(!isFinite(camX))camX=player.x;
+  if(!isFinite(camTarget))camTarget=player.x;
 
   // ── update ──
   if(skyT<1)skyT=Math.min(1,skyT+dt*0.7);
