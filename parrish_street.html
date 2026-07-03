@@ -360,11 +360,11 @@ button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
       <h4>HOW A SEASON PLAYS</h4>
       History moves first — an event arrives, sometimes with a decision, sometimes with a document to read like a historian. Then the board acts — walk to any site marked with a brass seal and choose <em>one</em> initiative. What you build appears on the street. What you lose disappears from it.
       <h4>WHAT THE NUMBERS MEAN</h4>
-      <span class="bres">CAPITAL</span> — money to build with. Institutions earn it every season.<br>
-      <span class="bres">TRUST</span> — the community's faith in the Mile. It drains a little every season; watch the sidewalks fill and empty with it.<br>
-      <span class="bres">DEPENDENCE</span> — how much you owe white Durham's goodwill. Cheap now, expensive later.<br>
+      <span class="bres">CAPITAL</span> — money to build with. Institutions earn it every season — and every season, keeping them open costs some back.<br>
+      <span class="bres">TRUST</span> — the community's faith in the Mile. It drains a little every season; institutions and good choices refill it. Watch the sidewalks fill and empty with it.<br>
+      <span class="bres">DEPENDENCE</span> — how much you owe white Durham's goodwill. Here is the bargain: past 20 it pays a real dividend every season in contracts and referrals. But the more you owe, the faster the community's faith drains — a little at 30, badly at 50, ruinously at 70. It helped build the Mile. It also nearly owned it.<br>
       <span class="bres">ARCHIVE</span> — the historical record you build by reading documents well.
-      <div class="goal">THE GOAL — reach 1970 with the highest <b>LEGACY</b> (watch it live on the brass plaque): institutions standing, trust held, archive full, dependence low. Build early. The final act is coming, and it cannot be stopped — only answered.<br><br>AND THE MILE CAN FALL — if <b>TRUST</b> ever reaches zero at a season's close, premiums lapse, deposits walk, and the ledger closes early. Money recovers. Faith, once gone, does not.</div>
+      <div class="goal">THE GOAL — reach 1970 with the highest <b>LEGACY</b> (watch it live on the brass plaque): institutions standing, trust held, archive full, dependence low. Build early. The final act is coming, and it cannot be stopped — only answered.<br><br>AND THE MILE CAN FALL — two ways. If <b>TRUST</b> reaches zero at a season's close, the community walks away and the ledger closes. If the <b>TREASURY</b> stands empty two seasons running, receivership. Faith and money. You must hold both, and dependence trades one for the other.</div>
       <div class="keys" id="keysBox">WALK — arrow keys or A / D<br>ACT — E, Enter, or walk up and press the button<br>LEDGER — L, or the tab at lower left</div>
     </div>
     <button class="contbtn" style="margin:0 20px 20px;width:calc(100% - 40px);" onclick="closeBrief()">TO THE DRUGSTORE · 1898</button>
@@ -379,7 +379,7 @@ button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
   </div>
   <div id="track"><div id="trackFill"></div></div>
   <div id="res">
-    <div class="plaque"><div class="rl">CAPITAL</div><div class="rv" id="rCap">$8<small>K</small></div></div>
+    <div class="plaque" id="pCap"><div class="rl">CAPITAL</div><div class="rv" id="rCap">$8<small>K</small></div></div>
     <div class="plaque" id="pTrust"><div class="rl">TRUST</div><div class="rv" id="rTrust">40</div></div>
     <div class="plaque" id="pDep"><div class="rl">DEPENDENCE</div><div class="rv" id="rDep">0</div></div>
     <div class="plaque"><div class="rl">ARCHIVE</div><div class="rv" id="rArch">0</div></div>
@@ -1435,6 +1435,7 @@ function renderRes(){
   $('rArch').textContent=S.arch;
   $('rLeg').textContent=legacyNow();
   $('pDep').classList.toggle('warn',S.dep>=40);
+  $('pCap').classList.toggle('warn',S.cap<=2);
   $('pTrust').classList.toggle('warn',S.trust<=12);
   if(S.trust<=12&&S.trust>0&&!lowTrustWarned){lowTrustWarned=true;toast('<b>THE PEWS ARE THINNING.</b> If Trust reaches zero at a season\'s close, the Mile unravels.',4200);}
   if(S.trust>12)lowTrustWarned=false;
@@ -1630,18 +1631,27 @@ function endInitiative(){
    ════════════════════════════════════════════════════════════ */
 function income(){
   let cap=0,trust=0;const rep=[];
+  const era=TIMELINE[S.turn].era;
   if(S.inst.mutual&&!S.inst.mutual.gone){cap+=3;rep.push('+$3K Mutual premiums');}
   if(S.inst.bank&&!S.inst.bank.gone){const i=Math.min(5,Math.max(1,Math.round(S.cap*0.1)));cap+=i;rep.push('+$'+i+'K M&F circulation');}
   if(S.inst.biltmore&&!S.inst.biltmore.gone){cap+=2;rep.push('+$2K Hayti commerce');}
   if(S.inst.housing&&!S.inst.housing.gone){cap+=1;trust+=1;rep.push('+$1K, +1 Trust homeowners');}
+  /* dependence pays — white Durham's contracts, referrals, and credit */
+  if(S.dep>=20){cap+=2;rep.push('+$2K white Durham patronage (dependence pays)');}
+  /* and everything costs — the buildings must be kept */
+  const standing=Object.keys(S.inst).filter(id=>!S.inst[id].gone).length;
+  let ops=Math.ceil(standing/3); if(era===3)ops*=2; if(era===5)ops+=1;
+  cap-=ops;rep.push('−$'+ops+'K operating costs'+(era===3?' (hard times)':era===5?' (aging buildings)':''));
   let ct=0;
   for(const id of['whiterock','stjoseph'])if(S.inst[id]&&!S.inst[id].gone)ct+=1;
   if(S.inst.hospital&&!S.inst.hospital.gone)ct+=2;
   for(const id of['school','library','times'])if(S.inst[id]&&!S.inst[id].gone)ct+=1;
   if(ct){trust+=ct;rep.push('+'+ct+' Trust from churches & civic institutions');}
-  const decay=(TIMELINE[S.turn].era>=3?4:3)+(S.dep>=50?2:0);
-  trust-=decay;rep.push('−'+decay+' Trust seasonal drift'+(S.dep>=50?' (dependence weighs)':''));
-  S.cap+=cap;S.trust=clamp(S.trust+trust,0,100);
+  /* dependence weighs — graduated, the more you owe the faster faith drains */
+  const depDrag=S.dep>=70?4:S.dep>=50?2:S.dep>=30?1:0;
+  const decay=(era>=3?5:3)+depDrag;
+  trust-=decay;rep.push('−'+decay+' Trust seasonal drift'+(depDrag?' (dependence weighs: −'+depDrag+')':''));
+  S.cap=Math.max(0,S.cap+cap);S.trust=clamp(S.trust+trust,0,100);
   renderRes();
   return rep;
 }
@@ -1692,7 +1702,7 @@ function tutNext(){
   tut++;
   if(tut===2){
     $('res').classList.add('hl');
-    tutRibbon('<b>THE PLAQUES</b> — Capital builds. Trust fills the sidewalks — watch the crowd thin when it falls. Dependence is white Durham\'s goodwill, cheap now and costly later. Archive is the record you keep.',true);
+    tutRibbon('<b>THE PLAQUES</b> — Capital builds, but the buildings cost to keep. Trust fills the sidewalks and drains every season. Dependence is white Durham\'s goodwill — past 20 it pays a dividend, and the deeper you owe, the faster Trust bleeds. If either Trust or the treasury hits bottom, the Mile falls.',true);
   }
   else if(tut===3){
     $('res').classList.remove('hl');
@@ -1724,7 +1734,15 @@ function showEvent(){
   const yr=TIMELINE[S.turn].yr;
   worldFx(yr,nowT);
   const rep=S.turn>0?income():null;
-  if(rep&&S.trust<=0){ failEpilogue(yr); return; }
+  if(rep){
+    if(S.trust<=0){ failEpilogue(yr,'trust'); return; }
+    if(S.cap<=0){
+      S.brokeStreak=(S.brokeStreak||0)+1;
+      if(S.brokeStreak>=2){ failEpilogue(yr,'capital'); return; }
+      ledger(yr,'The treasury stands empty — the board covers the shortfall from their own pockets. It cannot happen twice.','loss');
+      toast('<b>THE TREASURY IS EMPTY.</b> The board covers it — once. A second empty season means receivership.',4600);
+    } else S.brokeStreak=0;
+  }
   const ev=resolveEvent(TIMELINE[S.turn]);
   $('dockLabel').textContent= ev.type==='doc'?'ENTERED INTO EVIDENCE':'MINUTES OF THE MEETING';
   $('evTitle').textContent=ev.title;
@@ -1903,27 +1921,35 @@ function drawDozer(){
 /* ════════════════════════════════════════════════════════════
    FAILURE — the community walks away
    ════════════════════════════════════════════════════════════ */
-function failEpilogue(yr){
+function failEpilogue(yr,kind){
   uiState='epi';
   $('modal').classList.remove('on');
   $('hud').classList.remove('on');$('ledTab').classList.remove('on');
   $('ledger').classList.remove('on');
   $('epi').classList.add('on');
-  $('epiH2').textContent='THE LEDGER CLOSES EARLY';
+  $('epiH2').textContent= kind==='capital'? 'RECEIVERSHIP':'THE LEDGER CLOSES EARLY';
   $('epiSub').textContent='DURHAM · '+yr;
   const standing=Object.keys(S.inst).filter(id=>!S.inst[id].gone).length;
   $('scoreCard').innerHTML=`
     <div class="scoreRow"><span>Year the ledger closed</span><span>${yr}</span></div>
     <div class="scoreRow"><span>Institutions chartered</span><span>${standing}</span></div>
-    <div class="scoreRow"><span>Community trust</span><span>0</span></div>
-    <div class="scoreRow"><span>The Archive</span><span>${S.arch}</span></div>
+    <div class="scoreRow"><span>Community trust</span><span>${S.trust}</span></div>
+    <div class="scoreRow"><span>Capital remaining</span><span>$${S.cap}K</span></div>
+    <div class="scoreRow"><span>Dependence carried</span><span>${S.dep}</span></div>
     <div class="scoreRow"><span>LEGACY</span><span>—</span></div>`;
-  $('verdict').innerHTML=`<h3>THE MILE UNRAVELS · ${yr}</h3>
-    <p>Not for want of money. The Mutual's books could always be rebuilt — they were, in 1899, when Merrick and Moore covered the death claims out of their own pockets. What cannot be rebuilt by two men's pockets is faith. Premiums lapsed. Deposits walked across town. The pews emptied, and the sidewalks with them.</p>
-    <p>An institution is a promise the community has decided to believe. When Trust reached zero, there was no one left to believe it — and no initiative, however well capitalized, that could call them back.</p>
-    <p><em>Notice when it went wrong. Rarely in the moment of decision — usually two eras earlier, in trust spent and never refilled. Reopen the ledger and guard it differently.</em></p>`;
+  if(kind==='capital'){
+    $('verdict').innerHTML=`<h3>RECEIVERSHIP · ${yr}</h3>
+      <p>The charter is surrendered. The assets are assigned. White Durham's newspapers run the story with something between sympathy and satisfaction, and the depositors line up for what fraction can be paid.</p>
+      <p>In the winter of 1899 this nearly happened to the Mutual itself — death claims came due and the treasury could not meet them. Merrick and Moore reached into their own pockets and covered every claim. Your board did the same, once. The second winter, there were no pockets left.</p>
+      <p><em>Look at where the money went — and look at the dividend you did or didn't take from white Durham's goodwill. Patronage pays real dollars. The question this game asks is what it costs, and when the bill arrives.</em></p>`;
+  } else {
+    $('verdict').innerHTML=`<h3>THE MILE UNRAVELS · ${yr}</h3>
+      <p>Not for want of money. The Mutual's books could always be rebuilt — they were, in 1899, when Merrick and Moore covered the death claims out of their own pockets. What cannot be rebuilt by two men's pockets is faith. Premiums lapsed. Deposits walked across town. The pews emptied, and the sidewalks with them.</p>
+      <p>An institution is a promise the community has decided to believe. When Trust reached zero, there was no one left to believe it — and no initiative, however well capitalized, that could call them back.</p>
+      <p><em>Notice how much of the drain was dependence. White Durham's patronage pays a dividend every season — and every season it weighs on the community's faith. That balance is the game. It was also the balance Merrick, Moore, and Spaulding walked for fifty years.</em></p>`;
+  }
   $('history').innerHTML=`<h3>WHAT HISTORY'S LEDGER SAYS</h3>
-    <p>In history, the faith held. Through the Panic of 1907, the 1933 bank holiday — when Mechanics & Farmers lost not a dollar of its depositors' money — and through everything after, Black Durham kept believing in its own institutions. That belief, more than any balance sheet, is what built the Mile. It is also the hardest thing in this game to keep — which is the point.</p>`;
+    <p>In history, both books balanced. The Mutual took white Durham's goodwill — Washington Duke's early encouragement, downtown's tolerance — and never let it become the foundation. Mechanics & Farmers came through the 1933 bank holiday without losing a dollar of its depositors' money. The faith held because the institutions kept earning it, season after season, in both currencies at once.</p>`;
   window.scrollTo(0,0);
 }
 
