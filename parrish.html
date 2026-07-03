@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>PARRISH STREET · Building Black Wall Street</title>
 <style>
 /* ════════════════════════════════════════════════════════════
    PARRISH STREET — Durham, North Carolina · 1898–1970
-   A ledger-book simulation of Black Wall Street
+   A walkable street simulation of Black Wall Street
    Palette: banker's green felt, ledger cream, oxblood, brass
+   World: hand-tinted postcard sepia
    ════════════════════════════════════════════════════════════ */
 :root{
   --felt:#123B2D; --felt-dk:#0B291F; --felt-lt:#1B4A39;
@@ -20,17 +21,19 @@
   --red-entry:#8E3B2E; --green-entry:#2E5D42;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;}
 body{
   font-family:Georgia,'Times New Roman',serif;color:var(--ink);
-  background:
-    radial-gradient(ellipse at 50% -10%, var(--felt-lt), transparent 60%),
-    linear-gradient(180deg,var(--felt),var(--felt-dk));
-  min-height:100%;
+  background:var(--felt-dk);
+  touch-action:none;
+  -webkit-user-select:none;user-select:none;
+  position:fixed;inset:0;
 }
 button{font-family:Georgia,serif;cursor:pointer;}
 button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+
+#world{position:fixed;inset:0;display:block;width:100%;height:100%;}
 
 /* ── shared paper panel ── */
 .panel{
@@ -39,10 +42,20 @@ button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
   box-shadow:0 1px 0 #fff inset, 0 8px 24px rgba(0,0,0,.45);
   border-radius:3px;
 }
+.docket{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 16px;border-bottom:2px solid var(--ink);
+  font-family:'Courier New',monospace;font-size:11px;letter-spacing:.22em;color:var(--ink);
+}
+.stamp{
+  border:1.5px solid var(--oxblood);color:var(--oxblood);
+  padding:2px 8px;font-size:10px;letter-spacing:.2em;transform:rotate(-2deg);
+  font-family:'Courier New',monospace;white-space:nowrap;
+}
 
 /* ════════ TITLE SCREEN ════════ */
 #title{
-  position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;
+  position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;padding:24px;
   background:
     radial-gradient(ellipse at 50% 20%, var(--felt-lt), transparent 65%),
@@ -60,197 +73,282 @@ button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
   text-shadow:0 2px 0 var(--brass-dk),0 4px 0 rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.6);
 }
 #title h1 span{color:var(--brass);}
-.tsub{color:#BFD3C6;font-style:italic;font-size:clamp(13px,3.4vw,17px);margin:14px 0 4px;max-width:520px;line-height:1.7;}
+.tsub{color:#BFD3C6;font-style:italic;font-size:clamp(13px,3.4vw,17px);margin:14px 0 4px;max-width:560px;line-height:1.7;}
 .tdates{color:var(--brass);letter-spacing:.4em;font-size:clamp(11px,2.8vw,13px);margin-bottom:26px;font-family:'Courier New',monospace;}
 .tstart{
-  background:linear-gradient(180deg,var(--brass),var(--brass-dk));color:#211A05;border:1px solid #6d5610;
-  font-weight:700;letter-spacing:.2em;font-size:clamp(14px,3.8vw,17px);
-  padding:15px 46px;border-radius:2px;min-height:52px;
-  box-shadow:0 3px 0 #5c470d,0 10px 26px rgba(0,0,0,.5);
+  background:linear-gradient(180deg,var(--brass),var(--brass-dk));
+  color:#241B06;border:1px solid #7A6112;border-radius:3px;
+  font-size:clamp(15px,4vw,18px);letter-spacing:.18em;padding:14px 34px;
+  box-shadow:0 1px 0 #F5DE9B inset,0 6px 18px rgba(0,0,0,.5);
 }
-.tstart:active{transform:translateY(2px);box-shadow:0 1px 0 #5c470d;}
-.tnote{color:#7FA18E;font-size:clamp(11px,2.8vw,12.5px);margin-top:22px;max-width:440px;line-height:1.75;font-style:italic;}
+.tstart:active{transform:translateY(1px);}
+.tnote{color:#8FA79A;font-size:12px;font-style:italic;max-width:480px;line-height:1.7;margin-top:22px;}
 
-/* ── BRIEFING ── */
-#brief{position:fixed;inset:0;z-index:55;display:none;align-items:center;justify-content:center;
-  background:rgba(6,20,15,.92);padding:16px;overflow-y:auto;}
+/* ════════ BRIEFING ════════ */
+#brief{position:fixed;inset:0;z-index:55;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(6,20,15,.72);overflow-y:auto;}
 #brief.on{display:flex;}
-.briefCard{max-width:560px;width:100%;padding:0;overflow:hidden;}
-.briefCard .docket{background:var(--oxblood);}
-.briefBody{padding:16px 20px 20px;font-size:clamp(13.5px,3.5vw,15px);line-height:1.75;color:var(--ink-soft);}
-.briefBody h4{color:var(--oxblood);letter-spacing:.18em;font-size:12px;margin:14px 0 4px;}
+.briefCard{max-width:560px;width:100%;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;}
+.briefBody{padding:16px 20px;font-size:14.5px;line-height:1.75;color:var(--ink-soft);overflow-y:auto;}
+.briefBody h4{font-family:'Courier New',monospace;font-size:11px;letter-spacing:.24em;color:var(--oxblood);margin:14px 0 5px;}
 .briefBody h4:first-child{margin-top:0;}
-.briefBody .bres{font-family:'Courier New',monospace;color:var(--teal);font-size:.92em;}
-.briefBody .goal{background:#FBF6E9;border:1px solid #C9B98F;border-left:4px solid var(--brass);
-  padding:10px 12px;margin-top:14px;font-style:italic;}
-
-/* ── YEAR TRACK ── */
-#track{height:14px;position:relative;margin:2px 2px 0;border-radius:7px;overflow:hidden;
-  background:var(--felt-lt);border:1px solid rgba(201,162,39,.4);}
-#trackFill{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,var(--teal),var(--brass));
-  transition:width .5s ease;}
-#trackLbl{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:center;
-  padding:0 8px;font-family:'Courier New',monospace;font-size:9px;color:var(--paper);letter-spacing:.15em;}
-
-/* ── SEASON REPORT ── */
-.season{margin:12px 18px 0;padding:9px 12px;background:#EDF2E8;border:1px solid #A8BCA0;
-  border-left:4px solid var(--green-entry);font-family:'Courier New',monospace;
-  font-size:clamp(11px,2.9vw,12.5px);line-height:1.7;color:var(--green-entry);}
-.season b{letter-spacing:.2em;font-size:.9em;color:var(--ink-soft);display:block;}
-
-/* ── RESOURCE PULSE ── */
-@keyframes pulseUp{0%{transform:scale(1);color:#9BE3B4}60%{transform:scale(1.18)}100%{transform:scale(1)}}
-@keyframes pulseDn{0%{transform:scale(1);color:#F0937A}60%{transform:scale(1.18)}100%{transform:scale(1)}}
-.rv.up{animation:pulseUp .7s ease;}
-.rv.dn{animation:pulseDn .7s ease;}
-
-/* ════════ GAME LAYOUT ════════ */
-#game{display:none;min-height:100dvh;flex-direction:column;max-width:1060px;margin:0 auto;padding:10px 10px 24px;gap:10px;}
-#game.on{display:flex;}
-
-/* era banner */
-#eraBar{
-  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-  color:var(--paper);padding:6px 4px 0;flex-wrap:wrap;
+.bres{font-family:'Courier New',monospace;font-size:12px;letter-spacing:.12em;color:var(--ink);font-weight:bold;}
+.goal{
+  margin-top:14px;padding:11px 14px;background:var(--paper-dk);
+  border-left:3px solid var(--brass-dk);font-size:13.5px;line-height:1.7;
 }
-#eraName{font-size:clamp(15px,4.2vw,21px);letter-spacing:.12em;}
-#eraName b{color:var(--brass);font-weight:400;}
-#yearBox{font-family:'Courier New',monospace;color:var(--brass);font-size:clamp(15px,4.4vw,22px);letter-spacing:.1em;}
-
-/* resource strip — brass plaques */
-#res{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.plaque{
-  background:linear-gradient(180deg,#20514000,#00000030),var(--felt-lt);
-  border:1px solid rgba(201,162,39,.5);border-radius:3px;
-  padding:8px 10px;color:var(--paper);text-align:center;
-}
-.plaque .rl{font-size:clamp(8.5px,2.2vw,10px);letter-spacing:.22em;color:#9FC0AE;}
-.plaque .rv{font-family:'Courier New',monospace;font-size:clamp(15px,4.4vw,21px);color:var(--brass);margin-top:2px;font-weight:700;}
-.plaque .rv small{font-size:.6em;color:#9FC0AE;font-weight:400;}
-.plaque.warn .rv{color:#E08A6D;}
-
-/* main stage */
-#stage{display:grid;grid-template-columns:1fr 300px;gap:10px;align-items:start;}
-@media(max-width:820px){#stage{grid-template-columns:1fr;}}
-
-/* event / action card area */
-#main{padding:0;overflow:hidden;}
-.docket{
-  background:var(--oxblood);color:var(--paper);padding:8px 14px;
-  letter-spacing:.25em;font-size:clamp(10px,2.6vw,11.5px);
-  display:flex;justify-content:space-between;align-items:center;
-}
-.docket .stamp{font-family:'Courier New',monospace;letter-spacing:.05em;opacity:.85;}
-#evTitle{font-size:clamp(17px,4.8vw,24px);padding:16px 18px 4px;line-height:1.25;}
-#evText{padding:8px 18px 6px;font-size:clamp(13.5px,3.5vw,15.5px);line-height:1.75;color:var(--ink-soft);}
-#evText em{color:var(--oxblood);}
-/* document exhibit */
-.exhibit{
-  margin:12px 18px 4px;padding:14px 16px;background:#FBF6E9;
-  border:1px solid #C9B98F;border-left:4px solid var(--brass);
-  font-size:clamp(12.5px,3.2vw,14px);line-height:1.8;color:var(--ink);
-  position:relative;
-}
-.exhibit .exlabel{
-  position:absolute;top:-9px;left:10px;background:var(--brass);color:#211A05;
-  font-size:9.5px;letter-spacing:.2em;padding:2px 8px;font-weight:700;
-}
-.exhibit .exsrc{display:block;margin-top:8px;font-style:italic;color:var(--ink-faint);font-size:.88em;text-align:right;}
-/* choices */
-#choices{display:flex;flex-direction:column;gap:9px;padding:14px 18px 18px;}
-.chc{
-  text-align:left;background:var(--paper-dk);border:1px solid #B29E74;border-radius:3px;
-  padding:12px 14px;font-size:clamp(13px,3.4vw,14.5px);line-height:1.55;color:var(--ink);
-  min-height:50px;transition:background .12s;
-}
-.chc:hover{background:#EADDBE;}
-.chc b{display:block;letter-spacing:.12em;font-size:.86em;color:var(--oxblood);margin-bottom:3px;}
-.chc .fx{display:block;margin-top:5px;font-family:'Courier New',monospace;font-size:.82em;color:var(--teal);}
-.chc.correct{background:#DEE8D6;border-color:var(--green-entry);}
-.chc.wrong{background:#EBD6CE;border-color:var(--red-entry);}
-.chc:disabled{cursor:default;opacity:.75;}
+.keys{margin-top:12px;padding:10px 14px;background:#EDE2C6;border:1px dashed var(--ink-faint);
+  font-family:'Courier New',monospace;font-size:12px;letter-spacing:.06em;line-height:1.9;color:var(--ink-soft);}
 .contbtn{
-  margin:0 18px 18px;background:linear-gradient(180deg,var(--brass),var(--brass-dk));
-  border:1px solid #6d5610;color:#211A05;font-weight:700;letter-spacing:.2em;
-  padding:13px;border-radius:2px;font-size:clamp(13px,3.6vw,15px);min-height:50px;
-  box-shadow:0 2px 0 #5c470d;
+  display:block;width:100%;
+  background:linear-gradient(180deg,var(--felt-lt),var(--felt));color:var(--paper);
+  border:1px solid var(--felt-dk);border-radius:3px;
+  font-size:14px;letter-spacing:.16em;padding:13px;
+  box-shadow:0 1px 0 rgba(255,255,255,.15) inset,0 4px 12px rgba(0,0,0,.35);
 }
-.contbtn:active{transform:translateY(2px);box-shadow:none;}
+.contbtn:active{transform:translateY(1px);}
 
-/* institutions */
-#instWrap{padding:12px 14px 14px;}
-.secLabel{letter-spacing:.28em;font-size:10.5px;color:var(--oxblood);border-bottom:1px solid #C9B98F;padding-bottom:6px;margin-bottom:10px;display:flex;justify-content:space-between;}
-#instGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;}
-.inst{
-  border:1px solid #B29E74;background:#FBF6E9;border-radius:2px;padding:8px 9px;
-  font-size:12px;line-height:1.45;position:relative;
+/* ════════ HUD ════════ */
+#hud{position:fixed;inset:0;z-index:20;pointer-events:none;display:none;}
+#hud.on{display:block;}
+#eraBar{
+  position:absolute;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:calc(6px + env(safe-area-inset-top)) 12px 6px;
+  background:linear-gradient(180deg,rgba(11,25,18,.88),rgba(11,25,18,.55) 75%,transparent);
 }
-.inst .iname{font-weight:700;font-size:12.5px;}
-.inst .iyr{font-family:'Courier New',monospace;color:var(--ink-faint);font-size:10.5px;}
-.inst .ifx{color:var(--teal);font-size:11px;font-style:italic;}
-.inst.gone{background:#E8DDD2;border-style:dashed;}
-.inst.gone .iname{text-decoration:line-through;color:var(--red-entry);}
-.inst.gone::after{
-  content:'DEMOLISHED';position:absolute;top:6px;right:-14px;transform:rotate(12deg);
-  color:var(--red-entry);border:2px solid var(--red-entry);font-size:8.5px;letter-spacing:.15em;
-  padding:1px 5px;font-weight:700;opacity:.85;background:#fff8;
+#eraName{color:var(--paper);font-family:'Courier New',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.2em;}
+#eraName b{color:var(--brass);}
+#yearBox{
+  color:var(--brass);font-size:clamp(18px,5vw,26px);letter-spacing:.14em;
+  font-family:'Courier New',monospace;text-shadow:0 2px 6px rgba(0,0,0,.6);
 }
-.inst.moved::after{
-  content:'RELOCATED';position:absolute;top:6px;right:-12px;transform:rotate(12deg);
-  color:var(--teal);border:2px solid var(--teal);font-size:8.5px;letter-spacing:.15em;
-  padding:1px 5px;font-weight:700;opacity:.9;background:#fff8;
+#track{position:absolute;top:calc(40px + env(safe-area-inset-top));left:12px;right:12px;height:3px;background:rgba(242,233,213,.18);border-radius:2px;}
+#trackFill{height:100%;width:0%;background:var(--brass);border-radius:2px;transition:width .6s ease;}
+
+#res{
+  position:absolute;top:calc(52px + env(safe-area-inset-top));left:10px;
+  display:flex;gap:6px;flex-wrap:wrap;max-width:70vw;
+}
+.plaque{
+  background:linear-gradient(180deg,#17352A,#0E241B);
+  border:1px solid var(--brass-dk);border-radius:3px;
+  padding:4px 9px 5px;min-width:64px;text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.4);
+}
+.rl{font-family:'Courier New',monospace;font-size:8.5px;letter-spacing:.18em;color:#9CB4A6;}
+.rv{color:var(--paper);font-size:16px;font-family:'Courier New',monospace;letter-spacing:.04em;}
+.rv small{font-size:10px;color:var(--brass);}
+.plaque.warn .rv{color:#E8A090;}
+#pLeg{border-color:var(--brass);}
+#pLeg .rv{color:var(--brass);}
+.rv.up{animation:pu .7s ease;}
+.rv.dn{animation:pd .7s ease;}
+@keyframes pu{0%{color:#9FE0B5;transform:scale(1.18);}100%{}}
+@keyframes pd{0%{color:#E89080;transform:scale(1.18);}100%{}}
+
+#instCount{
+  position:absolute;top:calc(52px + env(safe-area-inset-top));right:10px;
+  background:rgba(11,25,18,.7);border:1px solid var(--brass-dk);border-radius:3px;
+  color:var(--brass);font-family:'Courier New',monospace;font-size:10px;letter-spacing:.16em;
+  padding:6px 10px;pointer-events:auto;cursor:pointer;
 }
 
-/* ════════ THE LEDGER (signature element) ════════ */
+/* objective ribbon */
+#objective{
+  position:absolute;left:50%;transform:translateX(-50%);
+  top:calc(96px + env(safe-area-inset-top));
+  background:var(--paper);border:1px solid #B9A67F;border-radius:2px;
+  box-shadow:0 4px 14px rgba(0,0,0,.4);
+  padding:7px 16px;max-width:min(560px,92vw);text-align:center;
+  font-size:clamp(12px,3vw,13.5px);font-style:italic;color:var(--ink-soft);line-height:1.5;
+  display:none;pointer-events:auto;
+}
+#objective.on{display:block;}
+#objective b{font-style:normal;font-family:'Courier New',monospace;font-size:11px;letter-spacing:.14em;color:var(--oxblood);}
+.tutBtn{
+  display:inline-block;margin:7px 4px 1px;font-style:normal;
+  background:linear-gradient(180deg,var(--brass),var(--brass-dk));color:#241B06;
+  border:1px solid #7A6112;border-radius:3px;font-size:12px;letter-spacing:.14em;
+  padding:7px 16px;box-shadow:0 1px 0 #F5DE9B inset;
+}
+.tutSkip{
+  display:inline-block;margin:7px 4px 1px;font-style:normal;
+  background:none;border:none;color:var(--ink-faint);font-size:11px;
+  letter-spacing:.1em;text-decoration:underline;padding:7px 6px;
+}
+#res.hl .plaque{animation:plq 1s ease infinite;}
+@keyframes plq{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.4);}50%{box-shadow:0 0 0 3px rgba(201,162,39,.65),0 2px 8px rgba(0,0,0,.4);}}
+#ledTab.hl{animation:plq 1s ease infinite;}
+
+/* hold-in-reserve pass button */
+#passBtn{
+  position:absolute;right:10px;bottom:calc(96px + env(safe-area-inset-bottom));
+  pointer-events:auto;display:none;
+  background:var(--paper);border:1px solid #B9A67F;border-radius:3px;
+  font-family:'Courier New',monospace;font-size:10.5px;letter-spacing:.12em;color:var(--ink-soft);
+  padding:9px 12px;box-shadow:0 3px 10px rgba(0,0,0,.35);
+}
+#passBtn.on{display:block;}
+#passBtn b{color:var(--green-entry);}
+
+/* ── action card (near a site) ── */
+#actCard{
+  position:absolute;left:50%;transform:translateX(-50%) translateY(8px);
+  bottom:calc(104px + env(safe-area-inset-bottom));
+  width:min(480px,94vw);pointer-events:auto;display:none;opacity:0;
+  transition:opacity .18s ease,transform .18s ease;
+}
+#actCard.on{display:block;opacity:1;transform:translateX(-50%) translateY(0);}
+#actTitle{padding:10px 16px 2px;font-size:16.5px;letter-spacing:.02em;}
+#actDesc{padding:2px 16px 8px;font-size:13px;line-height:1.65;color:var(--ink-soft);font-style:italic;}
+#actFx{padding:0 16px 10px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:.1em;color:var(--green-entry);}
+#actBtns{display:flex;gap:8px;padding:0 12px 12px;}
+#actGo{flex:1;background:linear-gradient(180deg,var(--brass),var(--brass-dk));color:#241B06;border:1px solid #7A6112;border-radius:3px;font-size:13px;letter-spacing:.14em;padding:11px;box-shadow:0 1px 0 #F5DE9B inset;}
+#actGo:disabled{filter:grayscale(.8);opacity:.6;}
+#actNo{background:var(--paper-dk);border:1px solid #B9A67F;border-radius:3px;font-size:12px;color:var(--ink-soft);padding:11px 14px;letter-spacing:.08em;}
+
+/* ── touch controls ── */
+#pad{position:absolute;left:0;right:0;bottom:0;height:calc(88px + env(safe-area-inset-bottom));display:none;pointer-events:none;}
+#pad.on{display:block;}
+.pbtn{
+  position:absolute;bottom:calc(14px + env(safe-area-inset-bottom));
+  width:64px;height:64px;border-radius:50%;pointer-events:auto;
+  background:rgba(242,233,213,.14);border:1.5px solid rgba(201,162,39,.55);
+  color:var(--paper);font-size:24px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(2px);
+}
+.pbtn:active{background:rgba(201,162,39,.3);}
+#pL{left:14px;} #pR{left:92px;}
+#pAct{
+  right:14px;width:auto;height:auto;border-radius:3px;padding:16px 22px;
+  background:linear-gradient(180deg,var(--brass),var(--brass-dk));
+  border:1px solid #7A6112;color:#241B06;
+  font-family:Georgia,serif;font-size:14px;letter-spacing:.16em;
+  box-shadow:0 1px 0 #F5DE9B inset,0 4px 12px rgba(0,0,0,.4);
+  display:none;
+}
+#pAct.on{display:flex;}
+
+/* ════════ EVENT MODAL ════════ */
+#modal{
+  position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;
+  padding:14px;background:rgba(8,16,12,.6);overflow:hidden;
+}
+#modal.on{display:flex;}
+#mCard{
+  width:min(600px,96vw);max-height:88vh;max-height:88dvh;
+  display:flex;flex-direction:column;
+  animation:mIn .3s ease;
+}
+@keyframes mIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;}}
+#mScroll{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#evTitle{padding:14px 20px 4px;font-size:clamp(20px,5.4vw,27px);letter-spacing:.02em;line-height:1.15;}
+#evText{padding:6px 20px 12px;font-size:clamp(13.5px,3.6vw,15px);line-height:1.8;color:var(--ink-soft);}
+#evText em{color:var(--ink);}
+.season{
+  margin:12px 20px 0;padding:9px 13px;background:#EDE2C6;border:1px dashed var(--ink-faint);
+  font-family:'Courier New',monospace;font-size:11.5px;line-height:1.9;letter-spacing:.04em;color:var(--ink-soft);
+}
+.season b{display:block;color:var(--oxblood);letter-spacing:.18em;font-size:10px;margin-bottom:3px;}
+.exhibit{
+  margin:4px 20px 12px;padding:14px 16px;background:#EFE6CC;
+  border:1px solid #B9A67F;box-shadow:0 2px 0 var(--paper-shade);
+  font-size:13.5px;line-height:1.75;color:var(--ink);font-style:italic;position:relative;
+}
+.exlabel{
+  display:inline-block;font-style:normal;font-family:'Courier New',monospace;font-size:10px;
+  letter-spacing:.2em;color:var(--paper);background:var(--oxblood);padding:3px 8px;margin-bottom:9px;
+}
+.exsrc{display:block;margin-top:9px;font-size:11.5px;color:var(--ink-faint);font-style:normal;font-family:'Courier New',monospace;letter-spacing:.03em;}
+#choices{padding:2px 14px 14px;display:flex;flex-direction:column;gap:8px;}
+.chc{
+  text-align:left;background:var(--paper-dk);border:1px solid #B9A67F;border-radius:3px;
+  padding:11px 14px;font-size:13px;line-height:1.6;color:var(--ink-soft);
+  box-shadow:0 2px 0 var(--paper-shade);
+}
+.chc b{display:block;font-family:'Courier New',monospace;font-size:11.5px;letter-spacing:.14em;color:var(--ink);margin-bottom:3px;}
+.chc .fx{display:block;margin-top:5px;font-family:'Courier New',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--green-entry);}
+.chc:not(:disabled):hover{background:#EDE0BE;}
+.chc:disabled{opacity:.5;cursor:not-allowed;}
+.chc.correct{border-color:var(--green-entry);box-shadow:0 0 0 2px var(--green-entry) inset;}
+.chc.wrong{border-color:var(--red-entry);box-shadow:0 0 0 2px var(--red-entry) inset;opacity:.75;}
+.mcont{
+  margin:2px 14px 14px;
+  background:linear-gradient(180deg,var(--felt-lt),var(--felt));color:var(--paper);
+  border:1px solid var(--felt-dk);border-radius:3px;
+  font-size:13.5px;letter-spacing:.16em;padding:12px;
+  box-shadow:0 1px 0 rgba(255,255,255,.15) inset;
+}
+.expl{padding:2px 20px 6px;font-size:13.5px;line-height:1.7;color:var(--ink-soft);font-style:italic;}
+
+/* ════════ LEDGER DRAWER ════════ */
+#ledTab{
+  position:fixed;z-index:30;left:10px;bottom:calc(96px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,#17352A,#0E241B);border:1px solid var(--brass-dk);border-radius:3px;
+  color:var(--brass);font-family:'Courier New',monospace;font-size:10px;letter-spacing:.18em;
+  padding:9px 12px;display:none;box-shadow:0 3px 10px rgba(0,0,0,.4);
+}
+#ledTab.on{display:block;}
 #ledger{
-  padding:0;overflow:hidden;position:sticky;top:10px;
-  background:
-    repeating-linear-gradient(180deg,transparent 0 25px,rgba(62,107,91,.18) 25px 26px),
-    var(--paper);
+  position:fixed;z-index:45;left:0;right:0;bottom:0;max-height:62vh;max-height:62dvh;
+  transform:translateY(102%);transition:transform .28s ease;
+  display:flex;flex-direction:column;border-radius:6px 6px 0 0;
 }
-#ledger .docket{background:var(--felt);letter-spacing:.3em;}
-#ledEntries{
-  max-height:52dvh;overflow-y:auto;padding:10px 14px 14px 40px;position:relative;
-  font-family:'Courier New',monospace;font-size:12px;line-height:26px;color:var(--ink);
-}
-#ledEntries::before{
-  content:'';position:absolute;left:28px;top:0;bottom:0;width:1px;background:var(--red-entry);opacity:.55;
-}
-.led{display:block;}
-.led .lyr{color:var(--oxblood);font-weight:700;margin-right:6px;}
+#ledger.on{transform:translateY(0);}
+#ledEntries{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 16px 18px;font-size:12.5px;line-height:1.55;}
+.led{display:block;padding:5px 0;border-bottom:1px dotted #C9BA98;color:var(--ink-soft);}
+.led .lyr{font-family:'Courier New',monospace;font-size:10.5px;color:var(--ink-faint);letter-spacing:.1em;margin-right:8px;}
 .led.gain{color:var(--green-entry);}
 .led.loss{color:var(--red-entry);}
-@media(max-width:820px){
-  #ledger{position:static;}
-  #ledEntries{max-height:180px;}
+#ledClose{position:absolute;top:8px;right:10px;background:none;border:none;font-size:20px;color:var(--ink-faint);padding:4px 8px;}
+
+/* toast (small world notice) */
+#toast{
+  position:fixed;z-index:35;left:50%;transform:translateX(-50%);
+  bottom:calc(160px + env(safe-area-inset-bottom));
+  background:rgba(28,23,18,.88);color:var(--paper);border:1px solid var(--brass-dk);
+  border-radius:3px;padding:8px 16px;font-size:12.5px;font-style:italic;letter-spacing:.03em;
+  opacity:0;transition:opacity .3s;pointer-events:none;max-width:88vw;text-align:center;
 }
+#toast.on{opacity:1;}
 
 /* ════════ EPILOGUE ════════ */
-#epi{display:none;position:fixed;inset:0;z-index:60;overflow-y:auto;
-  background:linear-gradient(180deg,var(--felt),var(--felt-dk));padding:26px 14px 60px;}
+#epi{position:fixed;inset:0;z-index:58;display:none;overflow-y:auto;background:
+  radial-gradient(ellipse at 50% 0%, var(--felt-lt), transparent 60%),
+  linear-gradient(180deg,var(--felt),var(--felt-dk));}
 #epi.on{display:block;}
-.epiWrap{max-width:720px;margin:0 auto;}
-.epiWrap h2{color:var(--paper);text-align:center;letter-spacing:.15em;font-size:clamp(22px,6vw,34px);font-weight:400;margin-bottom:4px;}
-.epiWrap .esub{color:var(--brass);text-align:center;font-family:'Courier New',monospace;letter-spacing:.3em;font-size:12px;margin-bottom:20px;}
-.scoreCard{padding:16px 18px;margin-bottom:14px;}
-.scoreRow{display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:clamp(12px,3.2vw,14px);padding:5px 0;border-bottom:1px dashed #C9B98F;}
-.scoreRow:last-child{border-bottom:2px solid var(--ink);font-weight:700;}
-.verdict{padding:16px 18px;margin-bottom:14px;font-size:clamp(13.5px,3.5vw,15px);line-height:1.8;color:var(--ink-soft);}
-.verdict h3{color:var(--oxblood);letter-spacing:.15em;font-size:clamp(13px,3.4vw,15px);margin-bottom:8px;}
-.verdict p+p{margin-top:10px;}
-.replay{display:block;margin:22px auto 0;}
+.epiWrap{max-width:640px;margin:0 auto;padding:44px 18px 60px;}
+#epi h2{color:var(--paper);text-align:center;font-weight:400;letter-spacing:.1em;font-size:clamp(26px,7vw,40px);text-shadow:0 2px 0 var(--brass-dk);}
+.esub{text-align:center;color:var(--brass);font-family:'Courier New',monospace;letter-spacing:.4em;font-size:12px;margin:6px 0 24px;}
+.scoreCard{padding:16px 20px;margin-bottom:14px;}
+.scoreRow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dotted #C9BA98;font-size:14px;color:var(--ink-soft);}
+.scoreRow:last-child{border-bottom:none;font-family:'Courier New',monospace;letter-spacing:.14em;color:var(--ink);font-size:16px;padding-top:12px;}
+.scoreRow span:last-child{font-family:'Courier New',monospace;}
+.verdict{padding:18px 20px;margin-bottom:14px;font-size:14.5px;line-height:1.8;color:var(--ink-soft);}
+.verdict h3{font-family:'Courier New',monospace;letter-spacing:.2em;font-size:13px;color:var(--oxblood);margin-bottom:8px;}
+.verdict p{margin-bottom:10px;}
+.verdict p:last-child{margin-bottom:0;}
+.replay{display:block;margin:26px auto 0;}
+
+@media (min-width:700px){
+  #pad{display:none!important;}
+}
 </style>
 </head>
 <body>
 
+<canvas id="world"></canvas>
+
 <!-- ════════ TITLE ════════ -->
 <div id="title">
-  <div class="marquee">DURHAM · NORTH CAROLINA</div>
+  <div class="marquee">DURHAM, NORTH CAROLINA</div>
   <h1>PARRISH<br><span>STREET</span></h1>
-  <div class="tsub">Insurance built the bank. The bank built the credit. The credit built Hayti. You will build Black Wall Street — inside a system designed to stop you.</div>
+  <div class="tsub">Insurance built the bank. The bank built the credit. The credit built Hayti. Now walk the Mile and build Black Wall Street — inside a system designed to stop you.</div>
   <div class="tdates">1898 ——— 1970</div>
-  <button class="tstart" onclick="startGame()">OPEN THE LEDGER</button>
-  <div class="tnote">A historical simulation. Every decision you make is written into the ledger — and at the end, your record is set beside the one history actually wrote.</div>
+  <button class="tstart" onclick="startGame()">WALK THE MILE</button>
+  <div class="tnote">A historical simulation. Every decision is written into the ledger — and at the end, your record is set beside the one history actually wrote.</div>
+  <div style="margin-top:14px;color:#5F7A6C;font-family:'Courier New',monospace;font-size:10px;letter-spacing:.2em;">BUILD 2.4 · WALKING EDITION</div>
 </div>
 
 <!-- ════════ BRIEFING ════════ -->
@@ -259,55 +357,77 @@ button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
     <div class="docket"><span>YOUR CHARGE</span><span class="stamp">READ ONCE</span></div>
     <div class="briefBody">
       <h4>WHO YOU ARE</h4>
-      You sit on the boards of Black Durham's institutions across seventy-two years, from the founding of N.C. Mutual in 1898 to the closing of the books in 1970.
+      You sit on the boards of Black Durham's institutions across seventy-two years, from the founding of N.C. Mutual in 1898 to the closing of the books in 1970. The street below is yours to walk — Parrish Street downtown, the railroad, and Hayti beyond it.
       <h4>HOW A SEASON PLAYS</h4>
-      History moves first — an event arrives, sometimes with a decision, sometimes with a document to read like a historian. Then the board acts — you pick <em>one</em> initiative. Everything is written into the Ledger on the right.
+      History moves first — an event arrives, sometimes with a decision, sometimes with a document to read like a historian. Then the board acts — walk to any site marked with a brass seal and choose <em>one</em> initiative. What you build appears on the street. What you lose disappears from it.
       <h4>WHAT THE NUMBERS MEAN</h4>
-      <span class="bres">CAPITAL</span> — money to build with. Institutions earn it every season.<br>
-      <span class="bres">TRUST</span> — the community's faith in the Mile. It drains a little every season; institutions and good choices refill it.<br>
-      <span class="bres">DEPENDENCE</span> — how much you owe white Durham's goodwill. Cheap now, expensive later.<br>
+      <span class="bres">CAPITAL</span> — money to build with. Institutions earn it every season — and every season, keeping them open costs some back.<br>
+      <span class="bres">TRUST</span> — the community's faith in the Mile. It drains a little every season; institutions and good choices refill it. Watch the sidewalks fill and empty with it.<br>
+      <span class="bres">DEPENDENCE</span> — how much you owe white Durham's goodwill. Here is the bargain: past 20 it pays a real dividend every season in contracts and referrals. But the more you owe, the faster the community's faith drains — a little at 30, badly at 50, ruinously at 70. It helped build the Mile. It also nearly owned it.<br>
       <span class="bres">ARCHIVE</span> — the historical record you build by reading documents well.
-      <div class="goal">THE GOAL — reach 1970 with the highest <b>Legacy</b>: institutions standing, trust held, archive full, dependence low. Build early. The final act is coming, and it cannot be stopped — only answered.</div>
+      <div class="goal">THE GOAL — reach 1970 with the highest <b>LEGACY</b> (watch it live on the brass plaque): institutions standing, trust held, archive full, dependence low. Build early. The final act is coming, and it cannot be stopped — only answered.<br><br>AND THE MILE CAN FALL — two ways. If <b>TRUST</b> reaches zero at a season's close, the community walks away and the ledger closes. If the <b>TREASURY</b> stands empty two seasons running, receivership. Faith and money. You must hold both, and dependence trades one for the other.</div>
+      <div class="keys" id="keysBox">WALK — arrow keys or A / D<br>ACT — E, Enter, or walk up and press the button<br>LEDGER — L, or the tab at lower left</div>
     </div>
-    <button class="contbtn" style="margin:0 20px 20px;width:calc(100% - 40px);" onclick="closeBrief()">TO THE FIRST MEETING · 1898</button>
+    <button class="contbtn" style="margin:0 20px 20px;width:calc(100% - 40px);" onclick="closeBrief()">TO THE DRUGSTORE · 1898</button>
   </div>
 </div>
 
-<!-- ════════ GAME ════════ -->
-<div id="game">
+<!-- ════════ HUD ════════ -->
+<div id="hud">
   <div id="eraBar">
     <div id="eraName">ERA I · <b>FOUNDATIONS</b></div>
     <div id="yearBox">1898</div>
   </div>
-
-  <div id="track"><div id="trackFill"></div><div id="trackLbl"><span>1898</span><span>1970</span></div></div>
-
+  <div id="track"><div id="trackFill"></div></div>
   <div id="res">
-    <div class="plaque"><div class="rl">CAPITAL</div><div class="rv" id="rCap">$8<small>K</small></div></div>
-    <div class="plaque"><div class="rl">TRUST</div><div class="rv" id="rTrust">40</div></div>
+    <div class="plaque" id="pCap"><div class="rl">CAPITAL</div><div class="rv" id="rCap">$8<small>K</small></div></div>
+    <div class="plaque" id="pTrust"><div class="rl">TRUST</div><div class="rv" id="rTrust">40</div></div>
     <div class="plaque" id="pDep"><div class="rl">DEPENDENCE</div><div class="rv" id="rDep">0</div></div>
     <div class="plaque"><div class="rl">ARCHIVE</div><div class="rv" id="rArch">0</div></div>
+    <div class="plaque" id="pLeg"><div class="rl">LEGACY</div><div class="rv" id="rLeg">—</div></div>
+  </div>
+  <button id="instCount" onclick="toggleLedger()">3 STANDING</button>
+  <div id="objective"></div>
+  <button id="passBtn" onclick="passSeason()"><b>HOLD IN RESERVE</b> · +$1K<br>let the books rest</button>
+
+  <div class="panel" id="actCard">
+    <div class="docket"><span id="actDock">INITIATIVE</span><span class="stamp">ONE PER SEASON</span></div>
+    <div id="actTitle"></div>
+    <div id="actDesc"></div>
+    <div id="actFx"></div>
+    <div id="actBtns">
+      <button id="actGo">UNDERTAKE IT</button>
+      <button id="actNo" onclick="hideActCard(true)">WALK ON</button>
+    </div>
   </div>
 
-  <div id="stage">
-    <div>
-      <div class="panel" id="main">
-        <div class="docket"><span id="dockLabel">MINUTES OF THE MEETING</span><span class="stamp" id="dockStamp">No. 1</span></div>
-        <div id="evTitle"></div>
-        <div id="evText"></div>
-        <div id="exhibitBox"></div>
-        <div id="choices"></div>
-      </div>
+  <div id="pad">
+    <button class="pbtn" id="pL">◀</button>
+    <button class="pbtn" id="pR">▶</button>
+    <button class="pbtn" id="pAct">ACT</button>
+  </div>
+</div>
 
-      <div class="panel" id="instWrap" style="margin-top:10px;">
-        <div class="secLabel"><span>INSTITUTIONS OF THE MILE</span><span id="instCount"></span></div>
-        <div id="instGrid"></div>
-      </div>
-    </div>
+<button id="ledTab" onclick="toggleLedger()">THE LEDGER ▲</button>
+<div class="panel" id="ledger">
+  <div class="docket"><span>THE LEDGER</span><span class="stamp">DBL ENTRY</span></div>
+  <button id="ledClose" onclick="toggleLedger()">✕</button>
+  <div id="ledEntries"></div>
+</div>
 
-    <div class="panel" id="ledger">
-      <div class="docket"><span>THE LEDGER</span><span class="stamp">DBL ENTRY</span></div>
-      <div id="ledEntries"></div>
+<div id="toast"></div>
+
+<!-- ════════ EVENT MODAL ════════ -->
+<div id="modal">
+  <div class="panel" id="mCard">
+    <div class="docket"><span id="dockLabel">MINUTES OF THE MEETING</span><span class="stamp" id="dockStamp">No. 1</span></div>
+    <div id="mScroll">
+      <div id="evTitle"></div>
+      <div id="seasonSlot"></div>
+      <div id="evText"></div>
+      <div id="exhibitBox"></div>
+      <div id="explSlot"></div>
+      <div id="choices"></div>
     </div>
   </div>
 </div>
@@ -315,8 +435,8 @@ button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
 <!-- ════════ EPILOGUE ════════ -->
 <div id="epi">
   <div class="epiWrap">
-    <h2>THE RECORD CLOSES</h2>
-    <div class="esub">DURHAM · 1970</div>
+    <h2 id="epiH2">THE RECORD CLOSES</h2>
+    <div class="esub" id="epiSub">DURHAM · 1970</div>
     <div class="panel scoreCard" id="scoreCard"></div>
     <div class="panel verdict" id="verdict"></div>
     <div class="panel verdict" id="history"></div>
@@ -326,21 +446,30 @@ button:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
 
 <script>
 'use strict';
+/* ── on-screen error reporter — if anything breaks, say so visibly ── */
+window.addEventListener('error',function(e){
+  try{
+    var bar=document.getElementById('errBar');
+    if(!bar){
+      bar=document.createElement('div');
+      bar.id='errBar';
+      bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#7A2E2E;color:#F2E9D5;font:12px/1.5 monospace;padding:8px 12px;white-space:pre-wrap;max-height:40vh;overflow:auto;';
+      document.body.appendChild(bar);
+    }
+    bar.textContent+='⚠ '+(e.message||e.type)+(e.lineno?(' @ line '+e.lineno+':'+e.colno):'')+'\n';
+  }catch(_){}
+});
 /* ════════════════════════════════════════════════════════════
-   STATE
+   STATE  (ported verbatim from the ledger edition)
    ════════════════════════════════════════════════════════════ */
 const S={
   cap:8, trust:40, dep:0, arch:0,
   turn:0, aggressive:false, reserve:false, mortgages:false,
   activism:0, savedByBank:false, docsRight:0,
-  inst:{}, // id -> {level, gone, moved}
+  inst:{}, // id -> {gone, moved}
 };
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
-/* ════════════════════════════════════════════════════════════
-   INSTITUTIONS
-   inHayti: destroyed in Act V unless relocated by player choice
-   ════════════════════════════════════════════════════════════ */
 const INST={
   mutual:  {name:'N.C. Mutual Life Insurance', yr:1898, fx:'+$3K per season', inHayti:false},
   whiterock:{name:'White Rock Baptist Church', yr:1866, fx:'+2 Trust per season', inHayti:true},
@@ -353,11 +482,18 @@ const INST={
   biltmore:{name:'Biltmore Hotel & Hayti businesses', yr:1923, fx:'+$2K per season', inHayti:true},
   housing: {name:'Homeownership Program', yr:0, fx:'+1 Trust · +$1K per season', inHayti:true},
 };
-function found(id,yr){ if(!S.inst[id]){ S.inst[id]={}; if(yr)INST[id].yr=yr; renderInst(); } }
+function found(id,yr){
+  if(!S.inst[id]){
+    S.inst[id]={};
+    if(yr)INST[id].yr=yr;
+    onFound(id);           // world reacts: construction on the street
+    renderInst();
+  }
+}
 S.inst.mutual={}; S.inst.whiterock={}; S.inst.stjoseph={};
 
 /* ════════════════════════════════════════════════════════════
-   EFFECTS + LEDGER
+   EFFECTS + LEDGER  (ported verbatim)
    ════════════════════════════════════════════════════════════ */
 function fx(o){
   if(o.cap)  S.cap=Math.max(0,S.cap+o.cap);
@@ -383,10 +519,9 @@ function fxLabel(o){
   if(o.arch)p.push('+'+o.arch+' Archive');
   return p.join(' · ');
 }
-
-/* ════════════════════════════════════════════════════════════
-   PLAYER ACTION POOLS (drawn 3 per turn, era-gated)
-   ════════════════════════════════════════════════════════════ */
+</script>
+<script>
+'use strict';
 const ACTIONS=[
   {id:'agents',eras:[1,2,3,4],name:'Hire more Mutual agents',
    d:'Door to door across the tobacco belt — a policy is a promise, and a premium is capital white banks will never lend us.',
@@ -528,6 +663,10 @@ const TIMELINE=[
    {t:'PETITION WASHINGTON',d:'Document the denials, file complaints, wait for enforcement.',e:{trust:2,arch:1},led:'V.A. denials documented and filed.'},
    {t:'NOTHING CAN BE DONE',d:'The veterans will manage as the Mile always has.',e:{trust:-6},led:'Veterans\' benefits go unhonored in Durham.',tone:'loss'}]},
  {yr:1948,era:4,title:'The College on the Hill',type:'note',
+  dynreq:s=>!!s.inst.school,
+  alt:{title:'The College That Never Was',type:'note',
+   text:`Dr. Shepard is gone — dead the year before, still writing letters for a school this board never backed. The state's money went to campuses in other towns. Durham's brightest leave on the morning train and learn to build somebody else's institutions.`,
+   e:{trust:-4},led:['The Training School was never chartered — the college rises elsewhere.'],tone:'loss'},
   text:`Dr. Shepard is gone — dead the year before, mourned like a head of state. His Training School has become <em>North Carolina College at Durham</em>, the state's flagship for Black scholars. Its graduates staff Lincoln Hospital, the Mutual's offices, and the law practice suing Jim Crow. Institutions raise the people who defend institutions.`,
   e:{trust:6},led:['N.C. College thrives — Shepard\'s legacy compounds.'],tone:'gain'},
  {yr:1952,era:4,title:'The Old Guard and the Editor',type:'choice',
@@ -577,9 +716,722 @@ const TIMELINE=[
    ERAS
    ════════════════════════════════════════════════════════════ */
 const ERAS={1:'FOUNDATIONS',2:'THE MAGIC CITY',3:'DEPRESSION & WAR',4:'ZENITH',5:'RENEWAL'};
+/* ════════════════════════════════════════════════════════════
+   THE WORLD — one long street. West: white downtown. Center:
+   the 200-block of W. Parrish (tenants from the 1910 Hill
+   Directory). East across the Southern Ry. tracks: Hayti.
+   ════════════════════════════════════════════════════════════ */
+const GROUND=470, WORLD_W=4650;
+const HAYTI_X0=2460, HAYTI_X1=4470;      // demolition zone bounds
+const RAIL_X=2330;
+
+/* palettes for facades (hand-tinted postcard) */
+const PAL={
+  brick:  {wall:'#8A4A38',wall2:'#7B4030',trim:'#E4D6B4',win:'#2E2620',awn:'#7A2E2E'},
+  brick2: {wall:'#9C5A42',wall2:'#8A4A38',trim:'#EDE0C2',win:'#332A22',awn:'#3E6B5B'},
+  stone:  {wall:'#D9CCA8',wall2:'#C9BA94',trim:'#F2E9D5',win:'#3A3128',awn:'#5C2222'},
+  gray:   {wall:'#B7AFA0',wall2:'#A79F90',trim:'#E8E2D2',win:'#3A362E',awn:'#6B6458'},
+  dark:   {wall:'#6E3B2C',wall2:'#5E3224',trim:'#DCCFA9',win:'#2A231D',awn:'#C9A227'},
+  church: {wall:'#8A4A38',wall2:'#734032',trim:'#EDE0C2',win:'#4A3555',awn:'#7A2E2E'},
+  house:  {wall:'#C9B896',wall2:'#B9A886',trim:'#F2E9D5',win:'#3A3128',awn:'#2E5D42'},
+};
+
+/* SITES — the street itself.
+   kind: 'shop'|'block'|'church'|'tower'|'hospital'|'theater'|'houses'|'lot'
+   inst: game institution id (interactable / demolishable)
+   flavor sites carry the 1910 directory names.                     */
+const SITES=[
+ // ── white downtown, west end ──
+ {id:'kress',  x:140, w:190, fl:3, kind:'block', pal:'gray',  sign:'S.H. KRESS & CO. · 5-10-25¢'},
+ {id:'furn',   x:350, w:150, fl:2, kind:'block', pal:'stone', sign:'FURNITURE CO.'},
+ {id:'wbank',  x:520, w:150, fl:2, kind:'block', pal:'gray',  sign:'FIRST NATIONAL BANK', columns:true},
+ // ── the 200-block of W. Parrish ──
+ {id:'smith',  x:770, w:135, fl:2, kind:'shop',  pal:'brick2',sign:'SMITH & HODGE', awn:true},
+ {id:'royal',  x:920, w:145, fl:2, kind:'block', pal:'dark',  sign:'ROYAL KNIGHTS HALL', est:'No. 204'},
+ {id:'barber', x:1080,w:110, fl:1, kind:'shop',  pal:'brick', sign:'W.M. ALLEN · BARBER', pole:true, est:'No. 206'},
+ {id:'drug',   x:1205,w:145, fl:2, kind:'shop',  pal:'brick2',sign:'BULL CITY DRUG CO.', awn:true, est:'No. 208'},
+ {id:'bankS',  x:1365,w:180, fl:2, kind:'lot',   pal:'stone', inst:'bank', columns:true,
+   builtSign:'MECHANICS & FARMERS BANK', est:'No. 210', lotSign:'LOT · No. 210 W. PARRISH'},
+ {id:'tailor', x:1560,w:110, fl:1, kind:'shop',  pal:'brick', sign:'J.H. ALLEN · TAILOR', awn:true, est:'No. 212'},
+ {id:'grocer', x:1685,w:130, fl:1, kind:'shop',  pal:'brick2',sign:'EUREKA GROCERY CO.', awn:true, est:'No. 216'},
+ {id:'lunch',  x:1830,w:130, fl:1, kind:'shop',  pal:'brick', sign:'CONKLIN BROS · LUNCH', awn:true, est:'No. 222'},
+ {id:'mutual', x:1985,w:270, fl:2, kind:'mutual',pal:'brick', inst:'mutual',
+   sign:"N.C. MUTUAL & PROVIDENT ASS'N"},
+ // ── Southern Ry. tracks at RAIL_X ──
+ // ── HAYTI · Fayetteville Street ──
+ {id:'whiterock',x:2500,w:185,fl:2, kind:'church',pal:'church',inst:'whiterock', sign:'WHITE ROCK BAPTIST', est:'1866'},
+ {id:'hospS',  x:2715,w:205, fl:2, kind:'lot',   pal:'stone', inst:'hospital', hospital:true,
+   builtSign:'LINCOLN HOSPITAL', lotSign:'LOT · PROCTOR ST.'},
+ {id:'schoolS',x:2950,w:215, fl:2, kind:'lot',   pal:'brick2',inst:'school',
+   builtSign:"NAT'L RELIGIOUS TRAINING SCHOOL", lotSign:'LOT · FAYETTEVILLE ST.'},
+ {id:'libS',   x:3195,w:145, fl:1, kind:'lot',   pal:'stone', inst:'library',
+   builtSign:'DURHAM COLORED LIBRARY', lotSign:'LOT · FAYETTEVILLE ST.'},
+ {id:'stjoseph',x:3370,w:175,fl:2, kind:'church',pal:'church',inst:'stjoseph', steeple:true, sign:"ST. JOSEPH'S A.M.E.", est:'1869'},
+ {id:'timesS', x:3575,w:155, fl:1, kind:'lot',   pal:'dark',  inst:'times',
+   builtSign:'THE CAROLINA TIMES', lotSign:'LOT · PETTIGREW ST.'},
+ {id:'biltS',  x:3760,w:310, fl:4, kind:'lot',   pal:'brick2',inst:'biltmore', theater:true,
+   builtSign:'BILTMORE HOTEL', lotSign:'HAYTI BUSINESS BLOCKS'},
+ {id:'houseS', x:4100,w:290, fl:1, kind:'lot',   pal:'house', inst:'housing', houses:true,
+   builtSign:'OWNED HOMES OF HAYTI', lotSign:'RENTAL ROWS'},
+];
+const SITE_BY_INST={}; SITES.forEach(s=>{if(s.inst)SITE_BY_INST[s.inst]=s;});
+SITES.forEach(s=>{
+  s.cx=s.x+s.w/2;
+  s.built = s.kind!=='lot';
+  s.riseT=1; s.rubbleT=-1; s.doomed=false; s.reloc=false; s.condemned=false;
+});
+/* mutual upgrades to the six-story tower in 1923 */
+let towerRise=-1;   // -1 idle, 0..1 animating, 1 done handled via SITES flag
+let mutualTower=false;
 
 /* ════════════════════════════════════════════════════════════
-   RENDER
+   CANVAS + CAMERA
+   ════════════════════════════════════════════════════════════ */
+const cv=document.getElementById('world'), cx2=cv.getContext('2d');
+let CW=0,CH=0,SCALE=1,GY=0,DPR=1;
+function resize(){
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  CW=window.innerWidth||document.documentElement.clientWidth||800;
+  CH=window.innerHeight||document.documentElement.clientHeight||600;
+  if(CW<10)CW=800; if(CH<10)CH=600;
+  cv.width=CW*DPR; cv.height=CH*DPR;
+  cv.style.width=CW+'px'; cv.style.height=CH+'px';
+  cx2.setTransform(DPR,0,0,DPR,0,0);
+  SCALE = CW>CH ? CH/580 : CW/440;
+  GY = CH*0.78;
+}
+window.addEventListener('resize',resize); resize();
+let camX=1270, camTarget=1270, camLockDozer=false;
+const wx=x=>(x-camX)*SCALE+CW/2;
+const wy=y=>(y-GROUND)*SCALE+GY;
+const inView=(x,w)=>wx(x+w)> -80 && wx(x)<CW+80;
+
+/* ════════════════════════════════════════════════════════════
+   ERA LIGHT — sepia postcard skies
+   ════════════════════════════════════════════════════════════ */
+const SKIES={
+ 1:['#F0DCB2','#E3C58C','#D9B478'],
+ 2:['#EDE4C6','#F4EBCF','#E8D9AE'],
+ 3:['#C8C4B8','#B7B2A4','#A9A294'],
+ 4:['#F0DCA8','#E4BE7C','#D9A868'],
+ 5:['#DCA98A','#C0765C','#8E5A50'],
+};
+let skyCur=SKIES[1].slice(), skyGoal=SKIES[1].slice();
+function lerpHex(a,b,t){
+  const pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1),16);
+  const r=(pa>>16)+(((pb>>16)-(pa>>16))*t), g=((pa>>8)&255)+((((pb>>8)&255)-((pa>>8)&255))*t), bl=(pa&255)+(((pb&255)-(pa&255))*t);
+  return 'rgb('+(r|0)+','+(g|0)+','+(bl|0)+')';
+}
+let skyT=1;
+function setSky(era){ skyGoal=SKIES[era].slice(); skyT=0; }
+
+/* ════════════════════════════════════════════════════════════
+   FACADE PAINTER
+   ════════════════════════════════════════════════════════════ */
+function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function brickTexture(c,x,y,w,h,col){
+  c.fillStyle=col; c.fillRect(x,y,w,h);
+  c.strokeStyle='rgba(0,0,0,.08)'; c.lineWidth=1;
+  const rh=7*SCALE;
+  for(let yy=y+rh; yy<y+h; yy+=rh){ c.beginPath(); c.moveTo(x,yy); c.lineTo(x+w,yy); c.stroke(); }
+}
+function drawSign(c,x,y,w,text,fg,bg,size){
+  const fs=Math.max(7,(size||9)*SCALE);
+  c.font='bold '+fs+'px "Courier New",monospace';
+  const tw=c.measureText(text).width;
+  const pw=Math.min(w-6*SCALE, tw+12*SCALE);
+  if(bg){c.fillStyle=bg;c.fillRect(x+w/2-pw/2,y-fs*0.9,pw,fs*1.7);}
+  c.fillStyle=fg; c.textAlign='center'; c.textBaseline='middle';
+  c.save(); c.beginPath(); c.rect(x+2,y-fs,w-4,fs*2); c.clip();
+  c.fillText(text,x+w/2,y);
+  c.restore();
+}
+function drawWindow(c,x,y,w,h,pal,arched,lit){
+  c.fillStyle=lit?'#E8C878':pal.win;
+  if(arched){
+    c.beginPath(); c.moveTo(x,y+h); c.lineTo(x,y+w/2); c.arc(x+w/2,y+w/2,w/2,Math.PI,0); c.lineTo(x+w,y+h); c.closePath(); c.fill();
+    c.strokeStyle=pal.trim; c.lineWidth=1.5*SCALE; c.stroke();
+  } else {
+    c.fillRect(x,y,w,h);
+    c.strokeStyle=pal.trim; c.lineWidth=1.5*SCALE; c.strokeRect(x,y,w,h);
+    c.strokeStyle='rgba(242,233,213,.5)'; c.lineWidth=1;
+    c.beginPath(); c.moveTo(x,y+h/2); c.lineTo(x+w,y+h/2); c.stroke();
+  }
+  // glass sheen
+  c.fillStyle='rgba(255,255,255,.10)';
+  c.beginPath(); c.moveTo(x,y+h*.15); c.lineTo(x+w*.5,y); c.lineTo(x+w*.8,y); c.lineTo(x+w*.25,y+h*.55); c.closePath(); c.fill();
+}
+function drawAwning(c,x,y,w,col){
+  const d=13*SCALE;
+  c.fillStyle=col;
+  c.beginPath(); c.moveTo(x,y); c.lineTo(x+w,y); c.lineTo(x+w-6*SCALE,y+d); c.lineTo(x+6*SCALE,y+d); c.closePath(); c.fill();
+  c.fillStyle='rgba(255,255,255,.28)';
+  const stripes=Math.max(3,(w/(16*SCALE))|0);
+  for(let i=0;i<stripes;i+=2){
+    const sx=x+i*w/stripes, sw=w/stripes;
+    c.beginPath(); c.moveTo(sx,y); c.lineTo(sx+sw,y); c.lineTo(sx+sw-3*SCALE,y+d); c.lineTo(sx-3*SCALE+ (i? 6*SCALE:6*SCALE),y+d); c.closePath(); c.fill();
+  }
+  c.fillStyle='rgba(0,0,0,.15)'; c.fillRect(x+3*SCALE,y+d,w-6*SCALE,2*SCALE);
+}
+function drawRubble(c,s){
+  const x=wx(s.x), w=s.w*SCALE, gy=wy(GROUND);
+  c.fillStyle='#6B5A48';
+  c.beginPath(); c.moveTo(x,gy);
+  let seed=s.x;
+  const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
+  for(let i=0;i<=8;i++){ c.lineTo(x+w*i/8, gy-(6+rnd()*22)*SCALE*(i===0||i===8?0.3:1)); }
+  c.lineTo(x+w,gy); c.closePath(); c.fill();
+  c.fillStyle='#7B6A55';
+  for(let i=0;i<6;i++){ const bx=x+rnd()*w, bw=(5+rnd()*10)*SCALE; c.fillRect(bx,gy-(4+rnd()*10)*SCALE,bw,3*SCALE); }
+  // charred beam
+  c.strokeStyle='#3A2E22'; c.lineWidth=3*SCALE;
+  c.beginPath(); c.moveTo(x+w*.2,gy); c.lineTo(x+w*.38,gy-26*SCALE); c.stroke();
+}
+function bodyH(s){
+  if(s.kind==='church') return 120;
+  if(s.kind==='mutual') return mutualTower?  (34+6*44) : 96;
+  if(s.houses) return 64;
+  if(s.theater) return 34+s.fl*40;
+  let fl=s.fl;
+  if(s.id==='schoolS'&&s.built&&TIMELINE[Math.min(S.turn,TIMELINE.length-1)].era>=4)fl=3; // NC College grows
+  return 34 + fl*40;   // storefront 34 + floors
+}
+function drawBuilding(s,t){
+  if(!inView(s.x-20,s.w+40))return;
+  const pal=PAL[s.pal];
+  const gyv=wy(GROUND);
+  // rubble state
+  if(s.rubbleT>=0 && s.rubbleT>=1){ drawRubble(cx2,s); return; }
+
+  // vacant lot
+  if(!s.built){
+    const x=wx(s.x), w=s.w*SCALE;
+    cx2.fillStyle='#A08A62';
+    cx2.fillRect(x,gyv-3*SCALE,w,3*SCALE);
+    // fence
+    cx2.strokeStyle='#7A6B50'; cx2.lineWidth=1.5*SCALE;
+    for(let fx=x+6*SCALE; fx<x+w-4*SCALE; fx+=11*SCALE){
+      cx2.beginPath(); cx2.moveTo(fx,gyv); cx2.lineTo(fx,gyv-16*SCALE); cx2.stroke();
+    }
+    cx2.beginPath(); cx2.moveTo(x+2*SCALE,gyv-12*SCALE); cx2.lineTo(x+w-2*SCALE,gyv-12*SCALE); cx2.stroke();
+    // lot sign
+    const sx=wx(s.cx);
+    cx2.fillStyle='#5A4A36'; cx2.fillRect(sx-1.5*SCALE,gyv-34*SCALE,3*SCALE,34*SCALE);
+    cx2.fillStyle='#EDE0C2'; cx2.fillRect(sx-40*SCALE,gyv-46*SCALE,80*SCALE,16*SCALE);
+    cx2.strokeStyle='#7A6B50'; cx2.strokeRect(sx-40*SCALE,gyv-46*SCALE,80*SCALE,16*SCALE);
+    cx2.fillStyle='#4A3F33'; cx2.font='bold '+Math.max(6,6.5*SCALE)+'px "Courier New",monospace';
+    cx2.textAlign='center'; cx2.textBaseline='middle';
+    cx2.fillText(s.lotSign||'LOT',sx,gyv-38*SCALE);
+    return;
+  }
+
+  // rise / collapse transforms
+  let rise = s.riseT<1 ? easeOut(s.riseT) : 1;
+  if(s.id==='mutual' && towerRise>=0 && towerRise<1) rise=1; // tower handled by height lerp
+  let collapse = (s.rubbleT>=0 && s.rubbleT<1) ? s.rubbleT : 0;
+
+  const H0=bodyH(s);
+  let H=H0;
+  if(s.id==='mutual' && towerRise>=0){ H = 96 + (bodyHTower()-96)*easeOut(Math.min(1,towerRise)); }
+  H*=rise*(1-collapse*0.92);
+
+  const x=wx(s.x), w=s.w*SCALE, top=gyv-H*SCALE;
+  const shake = collapse>0 ? Math.sin(t*60)*3*SCALE*(1-collapse) : 0;
+
+  cx2.save();
+  cx2.translate(shake,0);
+
+  if(s.houses){ drawHouses(s,gyv,rise,collapse); cx2.restore(); return; }
+  if(s.kind==='church'){ drawChurch(s,gyv,H*SCALE); cx2.restore(); return; }
+
+  // main mass
+  brickTexture(cx2,x,top,w,H*SCALE,pal.wall);
+  cx2.fillStyle='rgba(0,0,0,.10)'; cx2.fillRect(x+w*.72,top,w*.28,H*SCALE);
+  // cornice
+  cx2.fillStyle=pal.trim;
+  cx2.fillRect(x-3*SCALE,top,w+6*SCALE,5*SCALE);
+  cx2.fillStyle='rgba(0,0,0,.15)'; cx2.fillRect(x-3*SCALE,top+5*SCALE,w+6*SCALE,2*SCALE);
+  // dentils
+  cx2.fillStyle=pal.trim;
+  for(let dx=x+3*SCALE;dx<x+w-3*SCALE;dx+=8*SCALE)cx2.fillRect(dx,top+7*SCALE,4*SCALE,3*SCALE);
+
+  const isTower = s.id==='mutual'&&(mutualTower||towerRise>=0);
+  const floors = isTower? Math.max(2,Math.round((H-34)/44)) : Math.max(1,Math.round((bodyH(s)-34)/40));
+  const storeH=34*SCALE, flH=((H*SCALE)-storeH-12*SCALE)/Math.max(1,floors-1||1);
+
+  // upper windows
+  if(floors>1){
+    const cols=Math.max(2,Math.min(5,(s.w/54)|0)+ (isTower?1:0));
+    const wwin=Math.min(16*SCALE, (w-((cols+1)*10*SCALE))/cols);
+    for(let f=1;f<floors;f++){
+      const yy= top+12*SCALE+(f-1)*flH + flH*0.18;
+      for(let ci=0;ci<cols;ci++){
+        const wxp= x + (ci+1)*(w/(cols+1)) - wwin/2;
+        drawWindow(cx2,wxp,yy,wwin,flH*0.62,pal, s.kind==='mutual'&&!isTower&&f===1, false);
+      }
+      if(isTower && (f===2||f===4)){ // balconies like the 1921 tower
+        cx2.fillStyle=pal.trim;
+        cx2.fillRect(x+w*.32,yy+flH*0.62,w*.36,3*SCALE);
+        for(let bx=x+w*.33;bx<x+w*.66;bx+=5*SCALE)cx2.fillRect(bx,yy+flH*0.62-6*SCALE,2*SCALE,6*SCALE);
+      }
+    }
+  }
+
+  // storefront level
+  const sy=gyv-storeH;
+  cx2.fillStyle=pal.wall2; cx2.fillRect(x,sy,w,storeH);
+  if(s.columns||isTower){
+    // arched stone base (M&F / Mutual tower)
+    cx2.fillStyle=pal.trim; cx2.fillRect(x,sy,w,storeH);
+    const arches=isTower?3:2;
+    for(let a=0;a<arches;a++){
+      const aw=w/(arches+0.6), ax=x+ (a+0.5)*(w/arches) - aw/2 + aw*0.08;
+      cx2.fillStyle=pal.win;
+      cx2.beginPath();
+      cx2.moveTo(ax,gyv); cx2.lineTo(ax,sy+storeH*0.45);
+      cx2.arc(ax+aw*0.42,sy+storeH*0.45,aw*0.42,Math.PI,0);
+      cx2.lineTo(ax+aw*0.84,gyv); cx2.closePath(); cx2.fill();
+      cx2.strokeStyle=pal.wall2; cx2.lineWidth=2*SCALE; cx2.stroke();
+    }
+  } else {
+    // glass storefront
+    cx2.fillStyle=pal.win; cx2.fillRect(x+5*SCALE,sy+6*SCALE,w-10*SCALE,storeH-6*SCALE);
+    cx2.fillStyle='rgba(255,255,255,.13)';
+    cx2.beginPath(); cx2.moveTo(x+8*SCALE,gyv); cx2.lineTo(x+w*.4,sy+8*SCALE); cx2.lineTo(x+w*.55,sy+8*SCALE); cx2.lineTo(x+w*.22,gyv); cx2.closePath(); cx2.fill();
+    cx2.fillStyle=pal.trim; cx2.fillRect(x+w*.46,sy+8*SCALE,4*SCALE,storeH-8*SCALE); // door post
+  }
+  if(s.awn) drawAwning(cx2,x+4*SCALE,sy+2*SCALE,w-8*SCALE,pal.awn);
+  if(s.pole){ // barber pole
+    const px=x-2*SCALE;
+    cx2.fillStyle='#EDE0C2'; cx2.fillRect(px,sy-2*SCALE,5*SCALE,22*SCALE);
+    cx2.fillStyle='#8E3B2E';
+    for(let i=0;i<4;i++)cx2.fillRect(px,sy-2*SCALE+i*6*SCALE,5*SCALE,3*SCALE);
+  }
+
+  // signage band
+  const signY= sy-7*SCALE;
+  let signText = s.sign;
+  if(s.kind==='lot'||s.inst){ signText = s.built? (s.builtSign||s.sign) : s.sign; }
+  if(s.id==='mutual') signText = isTower? 'N.C. MUTUAL LIFE INSURANCE CO.' : "N.C. MUTUAL & PROVIDENT ASS'N";
+  if(s.id==='schoolS'&&s.built&&TIMELINE[S.turn]&&TIMELINE[S.turn].era>=4) signText='NORTH CAROLINA COLLEGE';
+  if(isTower){
+    // lettering on the frieze above the arches, like the photograph
+    drawSign(cx2,x,sy-4*SCALE,w,signText,'#5C4A18',pal.trim,7.5);
+  } else if(s.kind==='mutual'){
+    // parapet lettering on the 1906 building, like the photograph
+    drawSign(cx2,x,top+14*SCALE,w,signText,pal.trim,null,8);
+  } else {
+    drawSign(cx2,x,signY,w,signText,'#F2E9D5','#2A231D',8);
+  }
+  if(s.est){
+    cx2.fillStyle='rgba(28,23,18,.55)'; cx2.font=Math.max(6,6*SCALE)+'px "Courier New",monospace';
+    cx2.textAlign='center'; cx2.fillText(s.est,x+w/2,gyv-storeH-18*SCALE<top?gyv-4*SCALE:signY-12*SCALE);
+  }
+  if(s.hospital&&s.built){
+    cx2.fillStyle='#7A2E2E';
+    cx2.fillRect(x+w/2-2.5*SCALE,top+16*SCALE,5*SCALE,15*SCALE);
+    cx2.fillRect(x+w/2-7.5*SCALE,top+21*SCALE,15*SCALE,5*SCALE);
+  }
+  if(s.theater&&s.built){
+    // Regal marquee on the flank
+    const mx=x+w*0.66, mw=w*0.3;
+    cx2.fillStyle='#7A2E2E'; cx2.fillRect(mx,sy-16*SCALE,mw,14*SCALE);
+    cx2.fillStyle='#F5DE9B';
+    cx2.font='bold '+Math.max(6,7*SCALE)+'px "Courier New",monospace';
+    cx2.fillText('REGAL',mx+mw/2,sy-9*SCALE);
+    for(let i=0;i<6;i++){cx2.fillStyle=(((t*4)|0)+i)%2?'#F5DE9B':'#9A7A18';cx2.beginPath();cx2.arc(mx+4*SCALE+i*(mw-8*SCALE)/5,sy-2*SCALE,1.6*SCALE,0,7);cx2.fill();}
+  }
+  // condemned posters (1962+)
+  if(s.condemned && !s.reloc){
+    cx2.save(); cx2.translate(x+w*0.18,sy+8*SCALE); cx2.rotate(-0.05);
+    cx2.fillStyle='#EDE0C2'; cx2.fillRect(0,0,34*SCALE,20*SCALE);
+    cx2.strokeStyle='#8E3B2E'; cx2.lineWidth=1.5; cx2.strokeRect(0,0,34*SCALE,20*SCALE);
+    cx2.fillStyle='#8E3B2E'; cx2.font='bold '+Math.max(5,5.5*SCALE)+'px "Courier New",monospace';
+    cx2.textAlign='center'; cx2.fillText('CONDEMNED',17*SCALE,8*SCALE);
+    cx2.font=Math.max(4,4.5*SCALE)+'px "Courier New",monospace';
+    cx2.fillText('BY ORDER · D.R.A.',17*SCALE,15*SCALE);
+    cx2.restore();
+  }
+  if(s.reloc){
+    cx2.fillStyle='rgba(242,233,213,.85)';
+    cx2.save(); cx2.translate(x+w/2,sy-24*SCALE); cx2.rotate(-0.03);
+    cx2.fillRect(-42*SCALE,-8*SCALE,84*SCALE,16*SCALE);
+    cx2.fillStyle='#2E5D42'; cx2.font='bold '+Math.max(6,6.5*SCALE)+'px "Courier New",monospace';
+    cx2.textAlign='center'; cx2.textBaseline='middle';
+    cx2.fillText('RELOCATED — WE CONTINUE',0,0);
+    cx2.restore();
+  }
+  cx2.restore();
+}
+function bodyHTower(){return 34+6*44;}
+function easeOut(t){return 1-Math.pow(1-t,3);}
+
+function drawChurch(s,gyv,Hpx){
+  const pal=PAL.church, x=wx(s.x), w=s.w*SCALE;
+  const naveW=w*0.72, nx=x+(s.steeple? w*0.28:0);
+  const top=gyv-Hpx*0.78;
+  brickTexture(cx2,nx,top,naveW,Hpx*0.78,pal.wall);
+  // gable
+  cx2.fillStyle=pal.wall2;
+  cx2.beginPath(); cx2.moveTo(nx-3*SCALE,top); cx2.lineTo(nx+naveW/2,top-Hpx*0.2); cx2.lineTo(nx+naveW+3*SCALE,top); cx2.closePath(); cx2.fill();
+  cx2.strokeStyle=pal.trim; cx2.lineWidth=2*SCALE; cx2.stroke();
+  // lancet windows
+  const wn=3, wwin=naveW*0.13;
+  for(let i=0;i<wn;i++){
+    const wxp=nx+(i+1)*(naveW/(wn+1))-wwin/2;
+    drawWindow(cx2,wxp,top+Hpx*0.2,wwin,Hpx*0.38,pal,true,false);
+  }
+  // door
+  cx2.fillStyle=pal.win;
+  const dw=naveW*0.18;
+  cx2.beginPath(); cx2.moveTo(nx+naveW/2-dw/2,gyv); cx2.lineTo(nx+naveW/2-dw/2,gyv-26*SCALE);
+  cx2.arc(nx+naveW/2,gyv-26*SCALE,dw/2,Math.PI,0); cx2.lineTo(nx+naveW/2+dw/2,gyv); cx2.closePath(); cx2.fill();
+  cx2.strokeStyle=pal.trim; cx2.stroke();
+  // tower / steeple
+  const tw=w*0.24, tx=s.steeple? x : x+naveW;
+  const th=Hpx*(s.steeple?0.95:0.9);
+  brickTexture(cx2,tx,gyv-th,tw,th,pal.wall2);
+  cx2.fillStyle=pal.trim; cx2.fillRect(tx-2*SCALE,gyv-th,tw+4*SCALE,4*SCALE);
+  drawWindow(cx2,tx+tw*0.3,gyv-th+10*SCALE,tw*0.4,th*0.2,pal,true,false);
+  if(s.steeple){
+    cx2.fillStyle='#4A3A30';
+    cx2.beginPath(); cx2.moveTo(tx-3*SCALE,gyv-th); cx2.lineTo(tx+tw/2,gyv-th-Hpx*0.42); cx2.lineTo(tx+tw+3*SCALE,gyv-th); cx2.closePath(); cx2.fill();
+    cx2.strokeStyle=pal.trim; cx2.lineWidth=1.5*SCALE;
+    cx2.beginPath(); cx2.moveTo(tx+tw/2,gyv-th-Hpx*0.42); cx2.lineTo(tx+tw/2,gyv-th-Hpx*0.5); cx2.stroke();
+  } else {
+    cx2.fillStyle=pal.trim;
+    for(let bx=tx;bx<tx+tw;bx+=6*SCALE)cx2.fillRect(bx,gyv-th-4*SCALE,3.5*SCALE,4*SCALE); // crenellation
+  }
+  drawSign(cx2,x,gyv-Hpx*0.78-14*SCALE,w,s.sign,'#F2E9D5','#2A231D',7.5);
+  cx2.fillStyle='rgba(28,23,18,.5)'; cx2.font=Math.max(6,6*SCALE)+'px "Courier New",monospace';
+  cx2.textAlign='center'; cx2.fillText('est. '+s.est,x+w/2,gyv-Hpx*0.78-2*SCALE);
+}
+function drawHouses(s,gyv,rise,collapse){
+  const n=3, gap=10*SCALE, hw=(s.w*SCALE-gap*(n-1))/n;
+  for(let i=0;i<n;i++){
+    const hx=wx(s.x)+i*(hw+gap), hh=(46+((i*7)%10))*SCALE*rise*(1-collapse*0.9);
+    const pal=PAL.house;
+    cx2.fillStyle=i%2?pal.wall:pal.wall2;
+    cx2.fillRect(hx,gyv-hh,hw,hh);
+    // porch
+    cx2.fillStyle='rgba(0,0,0,.12)'; cx2.fillRect(hx,gyv-16*SCALE,hw,3*SCALE);
+    cx2.strokeStyle=pal.trim; cx2.lineWidth=1.5*SCALE;
+    for(let p=0;p<3;p++){cx2.beginPath();cx2.moveTo(hx+4*SCALE+p*(hw-8*SCALE)/2,gyv);cx2.lineTo(hx+4*SCALE+p*(hw-8*SCALE)/2,gyv-14*SCALE);cx2.stroke();}
+    // roof
+    cx2.fillStyle='#5E4A3A';
+    cx2.beginPath(); cx2.moveTo(hx-3*SCALE,gyv-hh); cx2.lineTo(hx+hw/2,gyv-hh-14*SCALE*rise); cx2.lineTo(hx+hw+3*SCALE,gyv-hh); cx2.closePath(); cx2.fill();
+    drawWindow(cx2,hx+hw*0.18,gyv-hh+8*SCALE,hw*0.2,hh*0.3,pal,false,false);
+    cx2.fillStyle=pal.win; cx2.fillRect(hx+hw*0.58,gyv-26*SCALE,hw*0.22,26*SCALE);
+  }
+  if(s.built) drawSign(cx2,wx(s.x),gyv-78*SCALE,s.w*SCALE,'OWNED HOMES OF HAYTI','#F2E9D5','#2E5D42',7);
+}
+
+/* ════════════════════════════════════════════════════════════
+   STREET FURNITURE, TRACKS, HIGHWAY
+   ════════════════════════════════════════════════════════════ */
+let highwayBuilt=false, redlined=false, stakes=false;
+function drawGround(t){
+  const gyv=wy(GROUND);
+  // sidewalk
+  cx2.fillStyle='#B9A98A'; cx2.fillRect(0,gyv,CW,14*SCALE);
+  cx2.strokeStyle='rgba(0,0,0,.12)'; cx2.lineWidth=1;
+  for(let x=(-camX*SCALE)%(60*SCALE); x<CW; x+=60*SCALE){ cx2.beginPath();cx2.moveTo(x,gyv);cx2.lineTo(x,gyv+14*SCALE);cx2.stroke(); }
+  // roadway
+  cx2.fillStyle='#8A7A62'; cx2.fillRect(0,gyv+14*SCALE,CW,CH-gyv);
+  cx2.fillStyle='rgba(0,0,0,.06)';
+  for(let x=(-camX*SCALE*1.0)%(90*SCALE); x<CW; x+=90*SCALE) cx2.fillRect(x,gyv+22*SCALE,44*SCALE,3*SCALE);
+  // rail crossing
+  if(inView(RAIL_X-70,140)){
+    const rx=wx(RAIL_X);
+    cx2.fillStyle='#7A6B50'; cx2.fillRect(rx-46*SCALE,gyv,92*SCALE,CH-gyv);
+    cx2.fillStyle='#4A3E30';
+    cx2.fillRect(rx-30*SCALE,gyv,7*SCALE,CH-gyv);
+    cx2.fillRect(rx+23*SCALE,gyv,7*SCALE,CH-gyv);
+    cx2.fillStyle='#5E5040';
+    for(let yy=gyv+4*SCALE; yy<CH; yy+=14*SCALE) cx2.fillRect(rx-42*SCALE,yy,84*SCALE,5*SCALE);
+    // crossbuck
+    cx2.strokeStyle='#3A322A'; cx2.lineWidth=3*SCALE;
+    cx2.beginPath(); cx2.moveTo(rx-56*SCALE,gyv); cx2.lineTo(rx-56*SCALE,gyv-56*SCALE); cx2.stroke();
+    cx2.save(); cx2.translate(rx-56*SCALE,gyv-52*SCALE);
+    cx2.fillStyle='#EDE0C2';
+    cx2.rotate(0.6); cx2.fillRect(-24*SCALE,-4*SCALE,48*SCALE,8*SCALE);
+    cx2.rotate(-1.2); cx2.fillRect(-24*SCALE,-4*SCALE,48*SCALE,8*SCALE);
+    cx2.restore();
+    cx2.fillStyle='rgba(28,23,18,.6)'; cx2.font=Math.max(6,6*SCALE)+'px "Courier New",monospace';
+    cx2.textAlign='center'; cx2.fillText('SOUTHERN RY.',rx,gyv+10*SCALE);
+  }
+  // district plaques painted on sky-level? draw street name posts
+  drawStreetPost(920,'W. PARRISH ST.');
+  drawStreetPost(2560,'FAYETTEVILLE ST. · HAYTI');
+  // survey stakes (1958+)
+  if(stakes){
+    for(let sx=HAYTI_X0+60; sx<HAYTI_X1; sx+=170){
+      if(!inView(sx,4))continue;
+      const px=wx(sx);
+      cx2.fillStyle='#EDE0C2'; cx2.fillRect(px,gyv-10*SCALE,2.5*SCALE,10*SCALE);
+      cx2.fillStyle='#C0392B'; cx2.beginPath();
+      cx2.moveTo(px+2.5*SCALE,gyv-10*SCALE); cx2.lineTo(px+12*SCALE,gyv-7.5*SCALE); cx2.lineTo(px+2.5*SCALE,gyv-5*SCALE); cx2.closePath(); cx2.fill();
+    }
+  }
+}
+function drawStreetPost(x,name){
+  if(!inView(x,10))return;
+  const px=wx(x), gyv=wy(GROUND);
+  cx2.strokeStyle='#3A322A'; cx2.lineWidth=2.5*SCALE;
+  cx2.beginPath(); cx2.moveTo(px,gyv); cx2.lineTo(px,gyv-64*SCALE); cx2.stroke();
+  cx2.fillStyle='#17352A'; 
+  const wpx=Math.max(70,name.length*5.4)*SCALE;
+  cx2.fillRect(px-wpx/2,gyv-76*SCALE,wpx,13*SCALE);
+  cx2.strokeStyle='#C9A227'; cx2.lineWidth=1; cx2.strokeRect(px-wpx/2,gyv-76*SCALE,wpx,13*SCALE);
+  cx2.fillStyle='#C9A227'; cx2.font='bold '+Math.max(6,6.5*SCALE)+'px "Courier New",monospace';
+  cx2.textAlign='center'; cx2.textBaseline='middle';
+  cx2.fillText(name,px,gyv-69.5*SCALE);
+}
+function drawPoles(){
+  const gyv=wy(GROUND);
+  for(let x=260;x<WORLD_W;x+=420){
+    if(x>RAIL_X-90&&x<RAIL_X+90)continue;
+    if(!inView(x,6))continue;
+    const px=wx(x);
+    cx2.strokeStyle='rgba(58,50,42,.85)'; cx2.lineWidth=3*SCALE;
+    cx2.beginPath(); cx2.moveTo(px,gyv); cx2.lineTo(px,gyv-190*SCALE); cx2.stroke();
+    cx2.lineWidth=2*SCALE;
+    cx2.beginPath(); cx2.moveTo(px-16*SCALE,gyv-182*SCALE); cx2.lineTo(px+16*SCALE,gyv-182*SCALE); cx2.stroke();
+    cx2.beginPath(); cx2.moveTo(px-13*SCALE,gyv-170*SCALE); cx2.lineTo(px+13*SCALE,gyv-170*SCALE); cx2.stroke();
+    // sagging wires to next pole
+    cx2.strokeStyle='rgba(58,50,42,.4)'; cx2.lineWidth=1;
+    const nx=wx(x+420);
+    cx2.beginPath(); cx2.moveTo(px,gyv-182*SCALE);
+    cx2.quadraticCurveTo((px+nx)/2,gyv-168*SCALE,nx,gyv-182*SCALE); cx2.stroke();
+  }
+}
+function drawCars(t){
+  const era=TIMELINE[Math.min(S.turn,TIMELINE.length-1)].era;
+  if(era<3)return;
+  const spots=era>=4?[640,1740,2880,3900]:[640,2880];
+  const gyv=wy(GROUND);
+  spots.forEach((sx,i)=>{
+    if(sx>HAYTI_X0&&demolished)return;
+    if(!inView(sx,80))return;
+    const px=wx(sx), y=gyv+20*SCALE;
+    cx2.fillStyle=i%2?'#3A3E44':'#4A3A32';
+    roundRect(cx2,px,y-14*SCALE,66*SCALE,13*SCALE,5*SCALE); cx2.fill();
+    roundRect(cx2,px+14*SCALE,y-24*SCALE,34*SCALE,12*SCALE,5*SCALE); cx2.fill();
+    cx2.fillStyle='#1C1712';
+    cx2.beginPath(); cx2.arc(px+14*SCALE,y-1*SCALE,6*SCALE,0,7); cx2.arc(px+52*SCALE,y-1*SCALE,6*SCALE,0,7); cx2.fill();
+    cx2.fillStyle='#B9AE98';
+    cx2.beginPath(); cx2.arc(px+14*SCALE,y-1*SCALE,2.5*SCALE,0,7); cx2.arc(px+52*SCALE,y-1*SCALE,2.5*SCALE,0,7); cx2.fill();
+    cx2.fillStyle='rgba(255,255,255,.14)'; cx2.fillRect(px+17*SCALE,y-22*SCALE,12*SCALE,8*SCALE);
+  });
+}
+function drawHighway(){
+  if(!highwayBuilt)return;
+  const x0=3500,x1=4470;
+  if(!inView(x0,x1-x0))return;
+  const gyv=wy(GROUND), deckY=wy(GROUND-170);
+  // pylons
+  for(let px=x0+60;px<x1;px+=210){
+    const sx=wx(px);
+    cx2.fillStyle='#9A948A'; cx2.fillRect(sx-11*SCALE,deckY,22*SCALE,gyv-deckY);
+    cx2.fillStyle='rgba(0,0,0,.15)'; cx2.fillRect(sx+2*SCALE,deckY,9*SCALE,gyv-deckY);
+  }
+  // deck
+  cx2.fillStyle='#ABA59A';
+  cx2.fillRect(wx(x0),deckY-16*SCALE,(x1-x0)*SCALE,16*SCALE);
+  cx2.fillStyle='#8F897E'; cx2.fillRect(wx(x0),deckY-2*SCALE,(x1-x0)*SCALE,4*SCALE);
+  // guardrail
+  cx2.strokeStyle='#7A756C'; cx2.lineWidth=2*SCALE;
+  cx2.beginPath(); cx2.moveTo(wx(x0),deckY-22*SCALE); cx2.lineTo(wx(x1),deckY-22*SCALE); cx2.stroke();
+  // shield sign
+  const sx=wx((x0+x1)/2);
+  cx2.fillStyle='#17352A';
+  roundRect(cx2,sx-24*SCALE,deckY-52*SCALE,48*SCALE,24*SCALE,3*SCALE);cx2.fill();
+  cx2.strokeStyle='#EDE0C2';cx2.lineWidth=1.5;cx2.stroke();
+  cx2.fillStyle='#EDE0C2'; cx2.font='bold '+Math.max(7,8*SCALE)+'px "Courier New",monospace';
+  cx2.textAlign='center';cx2.textBaseline='middle';
+  cx2.fillText('N.C. 147',sx,deckY-40*SCALE);
+}
+/* redline wash over Hayti (1937+) */
+function drawRedline(t){
+  if(!redlined)return;
+  const x0=Math.max(0,wx(HAYTI_X0)), x1=Math.min(CW,wx(HAYTI_X1));
+  if(x1<0||x0>CW)return;
+  cx2.fillStyle='rgba(142,59,46,.10)';
+  cx2.fillRect(x0,0,x1-x0,wy(GROUND));
+  // dashed red boundary line
+  cx2.strokeStyle='rgba(142,59,46,.65)'; cx2.lineWidth=3*SCALE;
+  cx2.setLineDash([14*SCALE,10*SCALE]); cx2.lineDashOffset=-t*30;
+  cx2.beginPath(); cx2.moveTo(wx(HAYTI_X0),wy(GROUND-230)); cx2.lineTo(wx(HAYTI_X1),wy(GROUND-230)); cx2.stroke();
+  cx2.setLineDash([]);
+  if(inView(HAYTI_X0+140,60)){
+    cx2.save(); cx2.translate(wx(HAYTI_X0+170),wy(GROUND-244)); cx2.rotate(-0.06);
+    cx2.strokeStyle='rgba(142,59,46,.8)'; cx2.lineWidth=2;
+    cx2.strokeRect(-38*SCALE,-13*SCALE,76*SCALE,26*SCALE);
+    cx2.fillStyle='rgba(142,59,46,.85)'; cx2.font='bold '+Math.max(8,10*SCALE)+'px "Courier New",monospace';
+    cx2.textAlign='center';cx2.textBaseline='middle';
+    cx2.fillText('GRADE D',0,-3*SCALE);
+    cx2.font=Math.max(5,5.5*SCALE)+'px "Courier New",monospace';
+    cx2.fillText('HAZARDOUS · H.O.L.C.',0,7*SCALE);
+    cx2.restore();
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   PARTICLES — smoke, dust, papers
+   ════════════════════════════════════════════════════════════ */
+let parts=[];
+function puff(x,y,n,col,vy,life){
+  for(let i=0;i<n;i++)parts.push({x:x+(Math.random()-0.5)*40,y:y+(Math.random()-0.5)*16,vx:(Math.random()-0.5)*22,vy:vy+(Math.random()-0.5)*10,r:5+Math.random()*9,l:life*(0.6+Math.random()*0.7),t:0,col,kind:'puff'});
+}
+function paperStorm(n){
+  for(let i=0;i<n;i++)parts.push({x:camX+(Math.random()-0.5)*(CW/SCALE),y:GROUND-260-Math.random()*120,vx:30+Math.random()*50,vy:26+Math.random()*30,r:4+Math.random()*3,l:6+Math.random()*3,t:0,rot:Math.random()*7,kind:'paper'});
+}
+let fireUntil=0, fireX=3660;
+function drawParts(dt,t){
+  if(t<fireUntil && Math.random()<0.5) puff(fireX+Math.random()*160-80,GROUND-90,1,'rgba(60,50,44,.5)',-34,4);
+  parts=parts.filter(p=>(p.t+=dt)<p.l);
+  parts.forEach(p=>{
+    p.x+=p.vx*dt; p.y+=p.vy*dt;
+    const a=1-p.t/p.l;
+    if(p.kind==='puff'){
+      p.vy-=6*dt; p.r+=8*dt;
+      cx2.fillStyle=p.col.replace(/\.\d+\)/,(a*0.5).toFixed(2)+')');
+      cx2.beginPath(); cx2.arc(wx(p.x),wy(p.y),p.r*SCALE,0,7); cx2.fill();
+    } else {
+      p.rot+=dt*4; p.vy+=4*dt;
+      cx2.save(); cx2.translate(wx(p.x),wy(p.y)); cx2.rotate(Math.sin(p.rot)*0.9);
+      cx2.fillStyle='rgba(237,224,194,'+(a*0.9)+')';
+      cx2.fillRect(-p.r*SCALE,-p.r*0.65*SCALE,p.r*2*SCALE,p.r*1.3*SCALE);
+      cx2.strokeStyle='rgba(74,63,51,'+(a*0.4)+')'; cx2.lineWidth=1;
+      cx2.beginPath();cx2.moveTo(-p.r*0.6*SCALE,-p.r*0.2*SCALE);cx2.lineTo(p.r*0.6*SCALE,-p.r*0.2*SCALE);cx2.stroke();
+      cx2.restore();
+    }
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   PEOPLE — the sidewalks fill and empty with Trust
+   ════════════════════════════════════════════════════════════ */
+const PTONES=['#5A3A28','#6E4630','#4A2E20','#7A523A','#3E281C'];
+const CTONES=['#3A3E48','#4A3A32','#5C2222','#2E4638','#3E3428','#6B5A3A'];
+let peds=[], queue=[], demolished=false;
+function pedZones(){
+  const z=[[700,2260]];
+  if(!demolished)z.push([2470,4420]);
+  return z;
+}
+function syncPeds(){
+  const target=clamp(Math.round(S.trust/7),2,14);
+  while(peds.length<target){
+    const zs=pedZones(), z=zs[(Math.random()*zs.length)|0];
+    peds.push({x:z[0]+Math.random()*(z[1]-z[0]),dir:Math.random()<0.5?-1:1,sp:26+Math.random()*30,
+      tone:PTONES[(Math.random()*PTONES.length)|0],coat:CTONES[(Math.random()*CTONES.length)|0],
+      hat:Math.random()<0.75,skirt:Math.random()<0.42,ph:Math.random()*7});
+  }
+  if(peds.length>target)peds.length=target;
+}
+function stepPeds(dt){
+  const zs=pedZones();
+  peds.forEach(p=>{
+    p.x+=p.dir*p.sp*dt; p.ph+=dt*p.sp*0.35;
+    let inZ=false; zs.forEach(z=>{if(p.x>z[0]&&p.x<z[1])inZ=true;});
+    if(!inZ){p.dir*=-1;p.x+=p.dir*p.sp*dt*2;}
+    if(Math.random()<0.002)p.dir*=-1;
+  });
+}
+function drawFigure(x,fy,tone,coat,hat,skirt,ph,facing,scaleF){
+  const s=(scaleF||1)*SCALE, px=wx(x), gy=wy(fy);
+  const swing=Math.sin(ph)*4*s;
+  cx2.save(); cx2.translate(px,gy);
+  if(facing<0)cx2.scale(-1,1);
+  // legs
+  cx2.strokeStyle=coat; cx2.lineWidth=2.6*s; cx2.lineCap='round';
+  if(skirt){
+    cx2.fillStyle=coat;
+    cx2.beginPath();cx2.moveTo(-4*s,-13*s);cx2.lineTo(4*s,-13*s);cx2.lineTo(6*s,0);cx2.lineTo(-6*s,0);cx2.closePath();cx2.fill();
+  }else{
+    cx2.beginPath();cx2.moveTo(0,-12*s);cx2.lineTo(swing*0.6,-0.5*s);cx2.stroke();
+    cx2.beginPath();cx2.moveTo(0,-12*s);cx2.lineTo(-swing*0.6,-0.5*s);cx2.stroke();
+  }
+  // torso
+  cx2.fillStyle=coat;
+  roundRect(cx2,-4*s,-23*s,8*s,11*s,2*s);cx2.fill();
+  // arm
+  cx2.strokeStyle=coat;cx2.lineWidth=2.2*s;
+  cx2.beginPath();cx2.moveTo(0,-21*s);cx2.lineTo(swing*0.4+2*s,-13*s);cx2.stroke();
+  // head
+  cx2.fillStyle=tone;
+  cx2.beginPath();cx2.arc(0,-27*s,3.6*s,0,7);cx2.fill();
+  if(hat){
+    cx2.fillStyle='#241E18';
+    cx2.fillRect(-4.6*s,-30.5*s,9.2*s,1.6*s);
+    cx2.fillRect(-3*s,-34*s,6*s,4*s);
+  }
+  cx2.restore();
+}
+function drawPeds(){ peds.forEach(p=>{ if(inView(p.x-14,28)) drawFigure(p.x,GROUND,p.tone,p.coat,p.hat,p.skirt,p.ph,p.dir,0.92); }); }
+/* 1933 — the depositors' line outside M&F */
+let queueUntil=0;
+function drawQueue(t){
+  if(t>queueUntil)return;
+  const b=SITE_BY_INST.bank; if(!b||!b.built)return;
+  for(let i=0;i<9;i++){
+    const qx=b.cx-30-i*22;
+    if(inView(qx-10,20))drawFigure(qx,GROUND,PTONES[i%5],CTONES[i%6],i%3!==1,i%4===2,0,1,0.92);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   PLAYER
+   ════════════════════════════════════════════════════════════ */
+const player={x:1277,dir:1,ph:0,moving:false};
+const keys={};
+addEventListener('keydown',e=>{
+  if(e.key==='l'||e.key==='L'){toggleLedger();return;}
+  keys[e.key]=true;
+  if((e.key==='e'||e.key==='E'||e.key==='Enter'||e.key===' ')&&uiState==='roam')tryAct();
+});
+addEventListener('keyup',e=>keys[e.key]=false);
+let touchL=false,touchR=false;
+function bindHold(el,set){
+  const on=e=>{e.preventDefault();set(true);};
+  const off=e=>{e.preventDefault();set(false);};
+  el.addEventListener('pointerdown',on);
+  el.addEventListener('pointerup',off);
+  el.addEventListener('pointercancel',off);
+  el.addEventListener('pointerleave',off);
+}
+/* ════════════════════════════════════════════════════════════
+   TINY AUDIO — clicks, coins, rumble
+   ════════════════════════════════════════════════════════════ */
+let AC=null;
+function audio(){ if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} return AC; }
+function blip(f,dur,type,vol){
+  const a=audio(); if(!a)return;
+  const o=a.createOscillator(),g=a.createGain();
+  o.type=type||'triangle'; o.frequency.value=f;
+  g.gain.setValueAtTime(vol||0.06,a.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+dur);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+dur);
+}
+function sClick(){blip(660,0.06,'square',0.03);}
+function sCash(){blip(880,0.09,'triangle',0.05);setTimeout(()=>blip(1320,0.12,'triangle',0.05),70);}
+function sBuild(){blip(220,0.15,'triangle',0.06);setTimeout(()=>blip(330,0.12,'triangle',0.05),110);}
+function sThud(){blip(70,0.4,'sawtooth',0.09);}
+let rumbleN=null;
+function rumbleOn(){
+  const a=audio(); if(!a||rumbleN)return;
+  const b=a.createBuffer(1,a.sampleRate*2,a.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.5;
+  const src=a.createBufferSource(); src.buffer=b; src.loop=true;
+  const f=a.createBiquadFilter(); f.type='lowpass'; f.frequency.value=110;
+  const g=a.createGain(); g.gain.value=0.10;
+  src.connect(f);f.connect(g);g.connect(a.destination); src.start(); rumbleN={src,g};
+}
+function rumbleOff(){ if(rumbleN){try{rumbleN.g.gain.linearRampToValueAtTime(0.0001,AC.currentTime+0.5);rumbleN.src.stop(AC.currentTime+0.6);}catch(e){} rumbleN=null; } }
+
+/* ════════════════════════════════════════════════════════════
+   HUD RENDER
    ════════════════════════════════════════════════════════════ */
 const $=id=>document.getElementById(id);
 let _prev={cap:S.cap,trust:S.trust,dep:S.dep,arch:S.arch};
@@ -589,26 +1441,31 @@ function pulse(el,now,before,inverted){
   const good=inverted?now<before:now>before;
   el.classList.add(good?'up':'dn');
 }
+function legacyNow(){
+  const standing=Object.keys(S.inst).filter(id=>!S.inst[id].gone).length;
+  return standing*6+Math.round(S.trust*0.6)+S.arch*5+Math.min(20,Math.round(S.cap*0.2))-Math.round(S.dep*0.4);
+}
+let lowTrustWarned=false;
 function renderRes(){
   pulse($('rCap'),S.cap,_prev.cap);pulse($('rTrust'),S.trust,_prev.trust);
   pulse($('rDep'),S.dep,_prev.dep,true);pulse($('rArch'),S.arch,_prev.arch);
+  if(S.cap>_prev.cap)sCash();
   _prev={cap:S.cap,trust:S.trust,dep:S.dep,arch:S.arch};
   $('rCap').innerHTML='$'+S.cap+'<small>K</small>';
   $('rTrust').textContent=S.trust;
   $('rDep').textContent=S.dep;
   $('rArch').textContent=S.arch;
+  $('rLeg').textContent=legacyNow();
   $('pDep').classList.toggle('warn',S.dep>=40);
+  $('pCap').classList.toggle('warn',S.cap<=2);
+  $('pTrust').classList.toggle('warn',S.trust<=12);
+  if(S.trust<=12&&S.trust>0&&!lowTrustWarned){lowTrustWarned=true;toast('<b>THE PEWS ARE THINNING.</b> If Trust reaches zero at a season\'s close, the Mile unravels.',4200);}
+  if(S.trust>12)lowTrustWarned=false;
+  syncPeds();
 }
 function renderInst(){
-  const g=$('instGrid');let h='',n=0;
-  for(const id in S.inst){
-    const st=S.inst[id],m=INST[id];n+= st.gone?0:1;
-    h+=`<div class="inst ${st.gone?'gone':''}${st.moved?' moved':''}">
-      <div class="iname">${m.name}</div>
-      <div class="iyr">est. ${m.yr||'—'}${m.inHayti?' · HAYTI':''}</div>
-      <div class="ifx">${st.gone?'lost to renewal':m.fx}</div></div>`;
-  }
-  g.innerHTML=h;$('instCount').textContent=n+' STANDING';
+  let n=0; for(const id in S.inst) if(!S.inst[id].gone)n++;
+  $('instCount').textContent=n+' STANDING';
 }
 function setEra(){
   const t=TIMELINE[S.turn];
@@ -616,136 +1473,377 @@ function setEra(){
   $('yearBox').textContent=t.yr;
   $('dockStamp').textContent='No. '+(S.turn+1)+' of '+TIMELINE.length;
   $('trackFill').style.width=Math.round((t.yr-1898)/(1970-1898)*100)+'%';
+  setSky(t.era);
+}
+let toastT=null;
+function toast(msg,ms){
+  const el=$('toast'); el.innerHTML=msg; el.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('on'),ms||2600);
+}
+function toggleLedger(){ $('ledger').classList.toggle('on'); }
+
+/* ════════════════════════════════════════════════════════════
+   WORLD REACTIONS
+   ════════════════════════════════════════════════════════════ */
+function onFound(id){
+  const s=SITE_BY_INST[id]; if(!s)return;
+  s.built=true; s.riseT=0;
+  puff(s.cx,GROUND-20,10,'rgba(150,130,100,.6)',-20,2.2);
+  sBuild();
+}
+/* per-year world effects, fired when the event card is opened */
+function worldFx(yr,t){
+  switch(yr){
+    case 1915: fireUntil=t+9; break;
+    case 1929: paperStorm(26); sThud(); break;
+    case 1907: if(S.aggressive)paperStorm(14); break;
+    case 1923:
+      if(!mutualTower){ towerPending=true; }
+      break;
+    case 1933: if(S.inst.bank)queueUntil=t+22; break;
+    case 1937: redlined=true; break;
+    case 1958: stakes=true; break;
+    case 1962:
+      SITES.forEach(s=>{ if(s.inst&&INST[s.inst]&&INST[s.inst].inHayti&&s.built)s.condemned=true; });
+      break;
+    case 1967: highwayBuilt=true; puff(3900,GROUND-140,20,'rgba(150,140,120,.5)',-14,3); break;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════
-   INCOME PHASE (start of each turn after the first)
+   ACTION → SITE MAP
+   ════════════════════════════════════════════════════════════ */
+function actionSite(a){
+  switch(a.id){
+    case 'agents': case 'reserve': case 'conference': return SITES.find(s=>s.id==='mutual');
+    case 'bank': case 'circulate': return SITES.find(s=>s.id==='bankS');
+    case 'school': return SITES.find(s=>s.id==='schoolS');
+    case 'library': return SITES.find(s=>s.id==='libS');
+    case 'times': case 'organize': return SITES.find(s=>s.id==='timesS');
+    case 'hayti': return SITES.find(s=>s.id==='biltS');
+    case 'housing': return SITES.find(s=>s.id==='houseS');
+    case 'youth': return S.inst.school? SITES.find(s=>s.id==='schoolS') : SITES.find(s=>s.id==='whiterock');
+  }
+  return SITES.find(s=>s.id==='mutual');
+}
+function availableActions(){
+  const era=TIMELINE[S.turn].era;
+  return ACTIONS.filter(a=>a.eras.includes(era)&&(!a.req||a.req(S))&&!(a.once&&a.used));
+}
+let markers=[]; // {site, actions[]}
+function buildMarkers(){
+  const by=new Map();
+  availableActions().forEach(a=>{
+    const s=actionSite(a);
+    if(!by.has(s))by.set(s,[]);
+    by.get(s).push(a);
+  });
+  markers=[...by.entries()].map(([site,actions])=>({site,actions}));
+}
+function drawMarkers(t){
+  if(uiState!=='roam')return;
+  const gyv=wy(GROUND);
+  let leftOff=null,rightOff=null;
+  markers.forEach(m=>{
+    const s=m.site, bob=Math.sin(t*3+s.x)*4*SCALE;
+    const my=gyv-(bodyH(s)*(s.built?1:0.35)+46)*SCALE+bob;
+    const mx=wx(s.cx);
+    if(mx<-30){ if(leftOff===null||s.cx<leftOff)leftOff=s.cx; return; }
+    if(mx>CW+30){ if(rightOff===null||s.cx>rightOff)rightOff=s.cx; return; }
+    // brass seal
+    cx2.save();
+    cx2.translate(mx,my);
+    cx2.fillStyle='#C9A227';
+    cx2.strokeStyle='#7A6112'; cx2.lineWidth=1.5*SCALE;
+    cx2.beginPath(); cx2.arc(0,0,11*SCALE,0,7); cx2.fill(); cx2.stroke();
+    cx2.fillStyle='#241B06'; cx2.font='bold '+Math.max(9,11*SCALE)+'px Georgia,serif';
+    cx2.textAlign='center'; cx2.textBaseline='middle';
+    cx2.fillText('✦',0,0.5);
+    // ribbon
+    cx2.fillStyle='#C9A227';
+    cx2.beginPath(); cx2.moveTo(-4*SCALE,10*SCALE); cx2.lineTo(4*SCALE,10*SCALE); cx2.lineTo(0,18*SCALE); cx2.closePath(); cx2.fill();
+    cx2.restore();
+    // count tag when several proposals at one site
+    if(m.actions.length>1){
+      cx2.fillStyle='#7A2E2E'; cx2.beginPath(); cx2.arc(mx+11*SCALE,my-9*SCALE,6*SCALE,0,7); cx2.fill();
+      cx2.fillStyle='#F2E9D5'; cx2.font='bold '+Math.max(7,7.5*SCALE)+'px "Courier New",monospace';
+      cx2.textAlign='center';cx2.textBaseline='middle';
+      cx2.fillText(m.actions.length,mx+11*SCALE,my-8.6*SCALE);
+    }
+  });
+  // edge arrows to off-screen proposals
+  const gy2=wy(GROUND-120);
+  const arrow=(x,dir)=>{
+    cx2.fillStyle='rgba(201,162,39,.9)';
+    cx2.beginPath();
+    cx2.moveTo(x,gy2); cx2.lineTo(x+dir*18,gy2-11); cx2.lineTo(x+dir*18,gy2+11); cx2.closePath(); cx2.fill();
+  };
+  if(leftOff!==null)arrow(16,1);
+  if(rightOff!==null)arrow(CW-16,-1);
+}
+
+/* proximity — nearest marker within reach */
+function nearMarker(){
+  let best=null,bd=1e9;
+  markers.forEach(m=>{
+    const d=Math.abs(player.x-m.site.cx);
+    if(d<Math.max(100,m.site.w*0.62)&&d<bd){bd=d;best=m;}
+  });
+  return best;
+}
+
+/* ════════════════════════════════════════════════════════════
+   ACTION CARD
+   ════════════════════════════════════════════════════════════ */
+let cardMarker=null, cardIdx=0, cardDismissed=null;
+function showActCard(m){
+  cardMarker=m; cardIdx=Math.min(cardIdx,m.actions.length-1);
+  const a=m.actions[cardIdx];
+  $('actDock').textContent= m.actions.length>1? `PROPOSAL ${cardIdx+1} OF ${m.actions.length} — TAP TITLE FOR NEXT` : 'PROPOSED INITIATIVE';
+  $('actTitle').textContent=a.name;
+  $('actDesc').textContent=a.d.replace(/<[^>]+>/g,'');
+  $('actFx').textContent=fxLabel(a.e)||'—';
+  const afford = !(a.e && a.e.cap<0 && S.cap < -a.e.cap);
+  $('actGo').disabled=!afford;
+  $('actGo').textContent= afford? (a.go||'UNDERTAKE IT') : 'INSUFFICIENT CAPITAL';
+  $('actCard').classList.add('on');
+  $('pAct').classList.remove('on');
+}
+$('actTitle').addEventListener('click',()=>{
+  if(cardMarker&&cardMarker.actions.length>1){cardIdx=(cardIdx+1)%cardMarker.actions.length;sClick();showActCard(cardMarker);}
+});
+function hideActCard(dismiss){
+  if(dismiss&&cardMarker)cardDismissed=cardMarker.site;
+  $('actCard').classList.remove('on');
+  cardMarker=null;cardIdx=0;
+}
+$('actGo').addEventListener('click',()=>{
+  if(!cardMarker)return;
+  const a=cardMarker.actions[cardIdx];
+  doAction(a);
+});
+function tryAct(){
+  const m=nearMarker();
+  if(m){cardDismissed=null;cardIdx=0;showActCard(m);sClick();}
+}
+function doAction(a){
+  if(a.id==='tut'){ sClick(); finishTutorial(); return; }
+  a.used=true; sClick();
+  fx(a.e); ledger(TIMELINE[S.turn].yr,a.led,a.tone);
+  toast('<b>ENTERED:</b> '+a.led);
+  hideActCard();
+  endInitiative();
+}
+function passSeason(){
+  sClick(); fx({cap:1});
+  ledger(TIMELINE[S.turn].yr,'Held in reserve — the books rest.');
+  endInitiative();
+}
+function endInitiative(){
+  uiState='wait';
+  markers=[]; hideActCard();
+  $('objective').classList.remove('on');
+  $('passBtn').classList.remove('on');
+  $('pAct').classList.remove('on');
+  setTimeout(nextTurn,650);
+}
+
+/* ════════════════════════════════════════════════════════════
+   INCOME  (ported verbatim)
    ════════════════════════════════════════════════════════════ */
 function income(){
   let cap=0,trust=0;const rep=[];
+  const era=TIMELINE[S.turn].era;
   if(S.inst.mutual&&!S.inst.mutual.gone){cap+=3;rep.push('+$3K Mutual premiums');}
   if(S.inst.bank&&!S.inst.bank.gone){const i=Math.min(5,Math.max(1,Math.round(S.cap*0.1)));cap+=i;rep.push('+$'+i+'K M&F circulation');}
   if(S.inst.biltmore&&!S.inst.biltmore.gone){cap+=2;rep.push('+$2K Hayti commerce');}
   if(S.inst.housing&&!S.inst.housing.gone){cap+=1;trust+=1;rep.push('+$1K, +1 Trust homeowners');}
+  /* dependence pays — white Durham's contracts, referrals, and credit */
+  if(S.dep>=20){cap+=2;rep.push('+$2K white Durham patronage (dependence pays)');}
+  /* and everything costs — the buildings must be kept */
+  const standing=Object.keys(S.inst).filter(id=>!S.inst[id].gone).length;
+  let ops=Math.ceil(standing/3); if(era===3)ops*=2; if(era===5)ops+=1;
+  cap-=ops;rep.push('−$'+ops+'K operating costs'+(era===3?' (hard times)':era===5?' (aging buildings)':''));
   let ct=0;
   for(const id of['whiterock','stjoseph'])if(S.inst[id]&&!S.inst[id].gone)ct+=1;
   if(S.inst.hospital&&!S.inst.hospital.gone)ct+=2;
   for(const id of['school','library','times'])if(S.inst[id]&&!S.inst[id].gone)ct+=1;
   if(ct){trust+=ct;rep.push('+'+ct+' Trust from churches & civic institutions');}
-  // trust decays each season — harder eras bleed faster; dependence quietly costs
-  const decay=(TIMELINE[S.turn].era>=3?4:3)+(S.dep>=50?2:0);
-  trust-=decay;rep.push('−'+decay+' Trust seasonal drift'+(S.dep>=50?' (dependence weighs)':''));
-  S.cap+=cap;S.trust=clamp(S.trust+trust,0,100);
+  /* dependence weighs — graduated, the more you owe the faster faith drains */
+  const depDrag=S.dep>=70?4:S.dep>=50?2:S.dep>=30?1:0;
+  const decay=(era>=3?5:3)+depDrag;
+  trust-=decay;rep.push('−'+decay+' Trust seasonal drift'+(depDrag?' (dependence weighs: −'+depDrag+')':''));
+  S.cap=Math.max(0,S.cap+cap);S.trust=clamp(S.trust+trust,0,100);
   renderRes();
   return rep;
 }
 
 /* ════════════════════════════════════════════════════════════
-   TURN FLOW:  scripted event  →  player action  →  next turn
+   TURN FLOW — event modal → walk & act → next
    ════════════════════════════════════════════════════════════ */
+let uiState='title'; // title|brief|modal|roam|wait|cine|epi
 function startGame(){
+  audio();
   $('title').style.display='none';
   $('brief').classList.add('on');
+  uiState='brief';
 }
 function closeBrief(){
+  sClick();
   $('brief').classList.remove('on');
-  $('game').classList.add('on');
+  $('hud').classList.add('on');
+  $('ledTab').classList.add('on');
+  if(matchMedia('(pointer:coarse)').matches)$('pad').classList.add('on');
   renderRes();renderInst();
   ledger(1898,'THE LEDGER IS OPENED.');
+  startTutorial();
+}
+
+/* ════════════════════════════════════════════════════════════
+   TUTORIAL — a guided first morning, 1898
+   ════════════════════════════════════════════════════════════ */
+let tut=-1, tutStartX=0;
+const TUT_ACTION={id:'tut',name:'Call the meeting to order',
+  d:'Seven men in the back room of a drugstore, about to charter an insurance company. John Merrick presiding. The board awaits your voice.',
+  e:{},go:'SO MOVED · BEGIN 1898',led:null};
+function coarse(){return matchMedia('(pointer:coarse)').matches;}
+function tutRibbon(html,withNext){
+  const o=$('objective');
+  o.innerHTML=html+(withNext?'<br><button class="tutBtn" onclick="tutNext()">NEXT</button>':'')+
+    '<button class="tutSkip" onclick="tutSkip()">skip the walkthrough</button>';
+  o.classList.add('on');
+}
+function startTutorial(){
+  uiState='roam';
+  tut=0; tutStartX=player.x;
+  tutRibbon('<b>DURHAM · 1898</b> — You stand on West Parrish Street, outside the Bull City Drug Co. '+
+    (coarse()?'Hold ◀ ▶ below to walk the block.':'Walk with the arrow keys or A / D.'));
+}
+function tutNext(){
+  sClick();
+  tut++;
+  if(tut===2){
+    $('res').classList.add('hl');
+    tutRibbon('<b>THE PLAQUES</b> — Capital builds, but the buildings cost to keep. Trust fills the sidewalks and drains every season. Dependence is white Durham\'s goodwill — past 20 it pays a dividend, and the deeper you owe, the faster Trust bleeds. If either Trust or the treasury hits bottom, the Mile falls.',true);
+  }
+  else if(tut===3){
+    $('res').classList.remove('hl');
+    $('ledTab').classList.add('hl');
+    tutRibbon('<b>THE LEDGER</b> — every decision you make is written down at the tab below left'+(coarse()?'':' (or press L)')+'. At the close of 1970, your record is set beside the one history actually wrote.',true);
+  }
+  else if(tut===4){
+    $('ledTab').classList.remove('hl');
+    markers=[{site:SITES.find(s=>s.id==='mutual'),actions:[TUT_ACTION]}];
+    tutRibbon('<b>YOUR MOVE</b> — when the board acts, brass seals ✦ mark where business can be done. Walk east to the seal over the Mutual office and '+(coarse()?'tap ACT.':'press E.'));
+  }
+}
+function tutSkip(){ if(tut<0)return; sClick(); finishTutorial(); }
+function finishTutorial(){
+  tut=-1; markers=[]; hideActCard();
+  $('res').classList.remove('hl'); $('ledTab').classList.remove('hl');
+  $('objective').classList.remove('on');
   showEvent();
 }
 function resolveEvent(t){
-  // normalize a timeline entry (handles dyn / alt variants)
   let ev=Object.assign({},t);
   if(t.dyn){Object.assign(ev,t.dyn(S));ev.type='note';}
   if(t.dynreq&&!t.dynreq(S)){Object.assign(ev,t.alt);}
   return ev;
 }
 function showEvent(){
+  uiState='modal';
   setEra();
+  const yr=TIMELINE[S.turn].yr;
+  worldFx(yr,nowT);
   const rep=S.turn>0?income():null;
+  if(rep){
+    if(S.trust<=0){ failEpilogue(yr,'trust'); return; }
+    if(S.cap<=0){
+      S.brokeStreak=(S.brokeStreak||0)+1;
+      if(S.brokeStreak>=2){ failEpilogue(yr,'capital'); return; }
+      ledger(yr,'The treasury stands empty — the board covers the shortfall from their own pockets. It cannot happen twice.','loss');
+      toast('<b>THE TREASURY IS EMPTY.</b> The board covers it — once. A second empty season means receivership.',4600);
+    } else S.brokeStreak=0;
+  }
   const ev=resolveEvent(TIMELINE[S.turn]);
   $('dockLabel').textContent= ev.type==='doc'?'ENTERED INTO EVIDENCE':'MINUTES OF THE MEETING';
   $('evTitle').textContent=ev.title;
   $('evText').innerHTML=ev.text||'';
-  const old=document.getElementById('seasonBox');if(old)old.remove();
-  if(rep){
-    const sb=document.createElement('div');sb.className='season';sb.id='seasonBox';
-    sb.innerHTML='<b>SEASON REPORT · '+TIMELINE[S.turn].yr+'</b>'+rep.join('<br>');
-    $('evTitle').before(sb);
-  }
+  $('seasonSlot').innerHTML= rep? '<div class="season"><b>SEASON REPORT · '+yr+'</b>'+rep.join('<br>')+'</div>':'';
   $('exhibitBox').innerHTML= ev.ex?`<div class="exhibit"><span class="exlabel">${ev.ex.label}</span>${ev.ex.body}<span class="exsrc">— ${ev.ex.src}</span></div>`:'';
+  $('explSlot').innerHTML='';
   const ch=$('choices');ch.innerHTML='';
+  $('modal').classList.add('on');
+  $('mScroll').scrollTop=0;
 
   if(ev.type==='note'){
     if(ev.e)fx(ev.e);
     if(ev.flag)S[ev.flag]=true;
     const leds=Array.isArray(ev.led)?ev.led:[ev.led];
-    leds.filter(Boolean).forEach(l=>ledger(TIMELINE[S.turn].yr,l,ev.tone));
-    const b=document.createElement('button');b.className='contbtn';
-    b.textContent='RECORD & CONTINUE';b.onclick=()=>afterEvent();
-    $('main').appendChild(b);
+    leds.filter(Boolean).forEach(l=>ledger(yr,l,ev.tone));
+    const b=document.createElement('button');b.className='mcont';
+    b.textContent='RECORD & CONTINUE';b.onclick=()=>{sClick();afterEvent();};
+    ch.appendChild(b);
   }
   else if(ev.type==='choice'){
-    if(ev.ex===undefined)$('exhibitBox').innerHTML='';
     ev.choices.forEach(c=>{
       const dis=c.req&&!c.req(S);
       const b=document.createElement('button');b.className='chc';b.disabled=!!dis;
       b.innerHTML=`<b>${c.t}${dis?' — (requires more capital or the bank)':''}</b>${c.d}<span class="fx">${fxLabel(c.e||{})}</span>`;
-      b.onclick=()=>{fx(c.e||{});if(c.e&&c.e.flag)S[c.e.flag]=true;
-        ledger(TIMELINE[S.turn].yr,c.led,c.tone);afterEvent();};
+      b.onclick=()=>{sClick();fx(c.e||{});if(c.e&&c.e.flag)S[c.e.flag]=true;
+        ledger(yr,c.led,c.tone);afterEvent();};
       ch.appendChild(b);
     });
   }
   else if(ev.type==='doc'){
-    ev.choices.forEach(c=>{
+    ev.choices.forEach((c,ci)=>{
       const b=document.createElement('button');b.className='chc';
       b.innerHTML=`<b>${c.t}</b>${c.d}`;
       b.onclick=()=>{
+        sClick();
         [...ch.children].forEach(x=>x.disabled=true);
         b.classList.add(c.ok?'correct':'wrong');
-        if(!c.ok)[...ch.children].find((x,i)=>ev.choices[i].ok)?.classList.add('correct');
+        if(!c.ok){const corr=[...ch.children].filter(x=>x.classList.contains('chc'))[ev.choices.findIndex(cc=>cc.ok)];if(corr)corr.classList.add('correct');}
         const gain= c.ok?(S.inst.library?3:2):1;
         if(c.ok)S.docsRight++;
         fx({arch:gain});
-        const p=document.createElement('div');
-        p.style.cssText='padding:10px 18px 0;font-size:13.5px;line-height:1.7;color:var(--ink-soft);font-style:italic;';
-        p.textContent=(c.ok?'✓ ':'The stronger reading: ')+ev.expl+`  (+${gain} Archive${S.inst.library&&c.ok?' — the Library sharpens the work':''})`;
-        ch.appendChild(p);
+        $('explSlot').innerHTML='<div class="expl">'+(c.ok?'✓ ':'The stronger reading: ')+ev.expl+`  (+${gain} Archive${S.inst.library&&c.ok?' — the Library sharpens the work':''})</div>`;
         const leds=Array.isArray(ev.led)?ev.led:[ev.led];
-        leds.filter(Boolean).forEach(l=>ledger(TIMELINE[S.turn].yr,l));
-        const cb=document.createElement('button');cb.className='contbtn';cb.style.margin='12px 0 4px';
-        cb.textContent='RECORD & CONTINUE';cb.onclick=()=>afterEvent();
+        leds.filter(Boolean).forEach(l=>ledger(yr,l));
+        const cb=document.createElement('button');cb.className='mcont';cb.style.margin='6px 0 2px';
+        cb.textContent='RECORD & CONTINUE';cb.onclick=()=>{sClick();afterEvent();};
         ch.appendChild(cb);
+        $('mScroll').scrollTop=$('mScroll').scrollHeight;
       };
       ch.appendChild(b);
     });
   }
 }
+let towerPending=false;
 function afterEvent(){
-  document.querySelectorAll('#main .contbtn').forEach(b=>b.remove());
-  // Act V demolition happens at 1965 resolution
-  if(TIMELINE[S.turn].yr===1965)demolish();
-  showActions();
+  $('modal').classList.remove('on');
+  if(TIMELINE[S.turn].yr===1965){ demolishAndFilm(); return; }
+  if(towerPending){ towerPending=false; towerRise=0; sBuild(); }
+  beginInitiative();
 }
-function showActions(){
-  const t=TIMELINE[S.turn];
-  $('dockLabel').textContent='YOUR MOVE — CHOOSE ONE INITIATIVE';
-  $('evTitle').textContent='The Board Acts';
-  $('evText').innerHTML='History has moved. Now the Mile answers — capital and attention allow <em>one</em> initiative this season.';
-  $('exhibitBox').innerHTML='';
-  const ch=$('choices');ch.innerHTML='';
-  drawActions().forEach(a=>{
-    const b=document.createElement('button');b.className='chc';
-    b.innerHTML=`<b>${a.name}</b>${a.d}<span class="fx">${fxLabel(a.e)}</span>`;
-    b.onclick=()=>{a.used=true;fx(a.e);ledger(t.yr,a.led,a.tone);nextTurn();};
-    ch.appendChild(b);
-  });
-  // always allow passing
-  const p=document.createElement('button');p.className='chc';
-  p.innerHTML=`<b>HOLD IN RESERVE</b>No initiative this season — let the books rest.<span class="fx">+$1K</span>`;
-  p.onclick=()=>{fx({cap:1});nextTurn();};
-  ch.appendChild(p);
+const ERA_GOALS={
+  1:'ERA GOAL — charter the institutions while capital is cheap. The bank above all.',
+  2:'ERA GOAL — build Hayti out. The Magic City is watching what you do with its money.',
+  3:'ERA GOAL — hold Trust through panic and depression. Survival is the victory here.',
+  4:'ERA GOAL — the zenith. Build deep, read the documents, bank Trust against what is coming.',
+  5:'ERA GOAL — the bulldozers are coming. Save what can be saved. Record what cannot.',
+};
+function beginInitiative(){
+  if(S.turn>=TIMELINE.length-1){
+    // final entry (1970) has no initiative — straight to the epilogue
+    uiState='wait'; setTimeout(epilogue,800); return;
+  }
+  buildMarkers();
+  uiState='roam';
+  cardDismissed=null;
+  $('objective').innerHTML='<b>YOUR MOVE</b> — one initiative this season. Walk to a brass seal ✦ and act, or hold in reserve.<br><span style="font-size:11px;font-family:\'Courier New\',monospace;letter-spacing:.08em;color:var(--oxblood);">'+ERA_GOALS[TIMELINE[S.turn].era]+'</span>';
+  $('objective').classList.add('on');
+  $('passBtn').classList.add('on');
 }
 function nextTurn(){
   S.turn++;
@@ -754,8 +1852,10 @@ function nextTurn(){
 }
 
 /* ════════════════════════════════════════════════════════════
-   ACT V — DEMOLITION
+   ACT V — DEMOLITION  (ledger logic ported verbatim; the
+   street pays the price on camera)
    ════════════════════════════════════════════════════════════ */
+let dozer=null;
 function demolish(){
   const yr=1965;
   for(const id in S.inst){
@@ -777,12 +1877,110 @@ function demolish(){
   if(S.savedEquity)ledger(yr,'Contested appraisals win families fuller payment.','gain');
   renderInst();renderRes();
 }
+function demolishAndFilm(){
+  demolish();
+  // stage the visuals from the verdicts
+  SITES.forEach(s=>{
+    if(!s.inst||!INST[s.inst]||!INST[s.inst].inHayti)return;
+    const st=S.inst[s.inst];
+    if(!st){ return; }                    // never founded — nothing to raze
+    if(st.gone){ s.doomed=true; }
+    else if(st.moved){ s.reloc = (s.inst!=='stjoseph'); } // St Joseph's stands untouched
+  });
+  uiState='cine';
+  $('objective').innerHTML='<b>1965</b> — the bulldozers reach Hayti.';
+  $('objective').classList.add('on');
+  $('passBtn').classList.remove('on');
+  dozer={x:HAYTI_X0-140,v:118};
+  camLockDozer=true;
+  rumbleOn();
+}
+function stepDozer(dt){
+  if(!dozer)return;
+  dozer.x+=dozer.v*dt;
+  camTarget=dozer.x+90;
+  SITES.forEach(s=>{
+    if(s.doomed&&s.built&&s.rubbleT<0&&dozer.x>s.cx-30){
+      s.rubbleT=0; sThud();
+      puff(s.cx,GROUND-40,16,'rgba(120,105,85,.6)',-26,2.6);
+    }
+  });
+  if(dozer.x>HAYTI_X1+140){
+    dozer=null; camLockDozer=false; rumbleOff();
+    demolished=true; syncPeds();
+    $('objective').classList.remove('on');
+    toast('What could be saved was saved. What could not, the ledger records.',3600);
+    setTimeout(beginInitiative,900);
+  }
+}
+function drawDozer(){
+  if(!dozer||!inView(dozer.x-60,120))return;
+  const x=wx(dozer.x), gy=wy(GROUND)+8*SCALE;
+  cx2.save();
+  cx2.translate(x,gy);
+  // tracks
+  cx2.fillStyle='#2A251E';
+  roundRect(cx2,-30*SCALE,-12*SCALE,60*SCALE,14*SCALE,7*SCALE);cx2.fill();
+  cx2.fillStyle='#4A4238';
+  for(let i=0;i<5;i++){cx2.beginPath();cx2.arc(-22*SCALE+i*11*SCALE,-5*SCALE,4*SCALE,0,7);cx2.fill();}
+  // body
+  cx2.fillStyle='#8F8433';
+  cx2.fillRect(-24*SCALE,-30*SCALE,44*SCALE,19*SCALE);
+  cx2.fillStyle='#6E651F';
+  cx2.fillRect(-12*SCALE,-44*SCALE,22*SCALE,15*SCALE); // cab
+  cx2.fillStyle='#2A251E'; cx2.fillRect(-8*SCALE,-41*SCALE,14*SCALE,9*SCALE);
+  // exhaust
+  cx2.fillStyle='#3A342C'; cx2.fillRect(6*SCALE,-52*SCALE,3.5*SCALE,9*SCALE);
+  if(Math.random()<0.4)puff(dozer.x+8,GROUND-56,1,'rgba(60,56,48,.45)',-24,1.4);
+  // blade
+  cx2.fillStyle='#7A756C';
+  cx2.beginPath(); cx2.moveTo(22*SCALE,-2*SCALE); cx2.lineTo(38*SCALE,-6*SCALE); cx2.lineTo(38*SCALE,-30*SCALE); cx2.lineTo(30*SCALE,-28*SCALE); cx2.closePath(); cx2.fill();
+  cx2.strokeStyle='#57534B'; cx2.lineWidth=2*SCALE;
+  cx2.beginPath(); cx2.moveTo(16*SCALE,-18*SCALE); cx2.lineTo(34*SCALE,-20*SCALE); cx2.stroke();
+  cx2.restore();
+}
 
 /* ════════════════════════════════════════════════════════════
-   EPILOGUE
+   FAILURE — the community walks away
    ════════════════════════════════════════════════════════════ */
+function failEpilogue(yr,kind){
+  uiState='epi';
+  $('modal').classList.remove('on');
+  $('hud').classList.remove('on');$('ledTab').classList.remove('on');
+  $('ledger').classList.remove('on');
+  $('epi').classList.add('on');
+  $('epiH2').textContent= kind==='capital'? 'RECEIVERSHIP':'THE LEDGER CLOSES EARLY';
+  $('epiSub').textContent='DURHAM · '+yr;
+  const standing=Object.keys(S.inst).filter(id=>!S.inst[id].gone).length;
+  $('scoreCard').innerHTML=`
+    <div class="scoreRow"><span>Year the ledger closed</span><span>${yr}</span></div>
+    <div class="scoreRow"><span>Institutions chartered</span><span>${standing}</span></div>
+    <div class="scoreRow"><span>Community trust</span><span>${S.trust}</span></div>
+    <div class="scoreRow"><span>Capital remaining</span><span>$${S.cap}K</span></div>
+    <div class="scoreRow"><span>Dependence carried</span><span>${S.dep}</span></div>
+    <div class="scoreRow"><span>LEGACY</span><span>—</span></div>`;
+  if(kind==='capital'){
+    $('verdict').innerHTML=`<h3>RECEIVERSHIP · ${yr}</h3>
+      <p>The charter is surrendered. The assets are assigned. White Durham's newspapers run the story with something between sympathy and satisfaction, and the depositors line up for what fraction can be paid.</p>
+      <p>In the winter of 1899 this nearly happened to the Mutual itself — death claims came due and the treasury could not meet them. Merrick and Moore reached into their own pockets and covered every claim. Your board did the same, once. The second winter, there were no pockets left.</p>
+      <p><em>Look at where the money went — and look at the dividend you did or didn't take from white Durham's goodwill. Patronage pays real dollars. The question this game asks is what it costs, and when the bill arrives.</em></p>`;
+  } else {
+    $('verdict').innerHTML=`<h3>THE MILE UNRAVELS · ${yr}</h3>
+      <p>Not for want of money. The Mutual's books could always be rebuilt — they were, in 1899, when Merrick and Moore covered the death claims out of their own pockets. What cannot be rebuilt by two men's pockets is faith. Premiums lapsed. Deposits walked across town. The pews emptied, and the sidewalks with them.</p>
+      <p>An institution is a promise the community has decided to believe. When Trust reached zero, there was no one left to believe it — and no initiative, however well capitalized, that could call them back.</p>
+      <p><em>Notice how much of the drain was dependence. White Durham's patronage pays a dividend every season — and every season it weighs on the community's faith. That balance is the game. It was also the balance Merrick, Moore, and Spaulding walked for fifty years.</em></p>`;
+  }
+  $('history').innerHTML=`<h3>WHAT HISTORY'S LEDGER SAYS</h3>
+    <p>In history, both books balanced. The Mutual took white Durham's goodwill — Washington Duke's early encouragement, downtown's tolerance — and never let it become the foundation. Mechanics & Farmers came through the 1933 bank holiday without losing a dollar of its depositors' money. The faith held because the institutions kept earning it, season after season, in both currencies at once.</p>`;
+  window.scrollTo(0,0);
+}
+
+
 function epilogue(){
-  $('game').classList.remove('on');$('epi').classList.add('on');
+  uiState='epi';
+  $('hud').classList.remove('on');$('ledTab').classList.remove('on');
+  $('ledger').classList.remove('on');
+  $('epi').classList.add('on');
   const standing=Object.keys(S.inst).filter(id=>!S.inst[id].gone).length;
   const instPts=standing*6, trustPts=Math.round(S.trust*0.6), archPts=S.arch*5;
   const depPen=Math.round(S.dep*0.4);
@@ -807,6 +2005,118 @@ function epilogue(){
     <p>And the Royal Ice Cream Seven of 1957? Durham's sit-in came three years before Greensboro's. The students lost every appeal — and won the future anyway.</p>`;
   window.scrollTo(0,0);
 }
+
+/* ════════════════════════════════════════════════════════════
+   MAIN LOOP
+   ════════════════════════════════════════════════════════════ */
+let nowT=0,lastTS=0;
+function frame(ts){
+  requestAnimationFrame(frame);
+  const dt=Math.min(0.05,(ts-lastTS)/1000||0.016); lastTS=ts; nowT+=dt;
+  const t=nowT;
+  // viewport can arrive late or change without firing resize (embedded views, rotation)
+  if((window.innerWidth&&window.innerWidth!==CW)||(window.innerHeight&&window.innerHeight!==CH))resize();
+  if(!isFinite(camX))camX=player.x;
+  if(!isFinite(camTarget))camTarget=player.x;
+
+  // ── update ──
+  if(skyT<1)skyT=Math.min(1,skyT+dt*0.7);
+  if(towerRise>=0&&towerRise<1){
+    towerRise=Math.min(1,towerRise+dt*0.28);
+    if(Math.random()<0.3)puff(SITES.find(s=>s.id==='mutual').cx+(Math.random()-0.5)*160,GROUND-40-towerRise*220,1,'rgba(150,130,100,.4)',-16,1.6);
+    if(towerRise>=1){mutualTower=true;towerRise=-1;toast('Six stories of steel, marble, and audacity.',3200);}
+  }
+  SITES.forEach(s=>{
+    if(s.riseT<1)s.riseT=Math.min(1,s.riseT+dt*0.9);
+    if(s.rubbleT>=0&&s.rubbleT<1)s.rubbleT=Math.min(1,s.rubbleT+dt*1.4);
+  });
+  if(uiState==='cine')stepDozer(dt);
+
+  const canMove = uiState==='roam';
+  player.moving=false;
+  if(canMove){
+    let dir=0;
+    if(keys['ArrowLeft']||keys['a']||keys['A']||touchL)dir=-1;
+    if(keys['ArrowRight']||keys['d']||keys['D']||touchR)dir=1;
+    if(dir){player.dir=dir;player.x=clamp(player.x+dir*185*dt,70,WORLD_W-70);player.ph+=dt*11;player.moving=true;}
+    if(tut===0 && Math.abs(player.x-tutStartX)>130){
+      tut=1;
+      tutRibbon('<b>THE STREET</b> — Parrish Street runs west into white downtown. East, past the Southern Ry. tracks, lies Hayti — churches, homes, and the heart of Black Durham. Everything you build will stand somewhere on this mile.',true);
+    }
+    // action affordance
+    const m=nearMarker();
+    if(m&&cardMarker!==m&&cardDismissed!==m.site){
+      if(matchMedia('(pointer:coarse)').matches){$('pAct').classList.add('on');}
+      else showActCard(m);
+    }
+    if(!m){ $('pAct').classList.remove('on'); if(cardMarker)hideActCard(); cardDismissed=null; }
+  } else {
+    $('pAct').classList.remove('on');
+  }
+  if(!camLockDozer){
+    camTarget=(towerRise>=0&&towerRise<1)? SITES.find(s=>s.id==='mutual').cx : player.x;
+  }
+  camX+=(camTarget-camX)*Math.min(1,dt*5);
+  camX=clamp(camX,CW/(2*SCALE),WORLD_W-CW/(2*SCALE));
+  stepPeds(dt);
+
+  // ── draw ──
+  // sky
+  const era=TIMELINE[Math.min(S.turn,TIMELINE.length-1)].era;
+  const goal=SKIES[era];
+  const g=cx2.createLinearGradient(0,0,0,wy(GROUND));
+  for(let i=0;i<3;i++){
+    skyCur[i]=skyCur[i]||goal[i];
+    g.addColorStop(i/2, lerpHex(skyCur[i].startsWith('#')?skyCur[i]:goal[i], goal[i], skyT));
+  }
+  if(skyT>=1)skyCur=goal.slice();
+  cx2.fillStyle=g; cx2.fillRect(0,0,CW,CH);
+  // sun haze
+  cx2.fillStyle='rgba(255,244,214,.18)';
+  cx2.beginPath(); cx2.arc(CW*0.72,wy(GROUND-330),90*SCALE,0,7); cx2.fill();
+  // far skyline (tobacco warehouses + smokestacks, parallax)
+  drawFarSkyline();
+  drawGround(t);
+  drawPoles();
+  drawHighway();
+  SITES.forEach(s=>drawBuilding(s,t));
+  drawRedline(t);
+  drawCars(t);
+  drawQueue(t);
+  drawPeds();
+  drawDozer();
+  if(uiState!=='title'&&uiState!=='brief'&&uiState!=='epi')
+    drawFigure(player.x,GROUND,'#5A3A28','#243430',true,false,player.moving?player.ph:0,player.dir,1.06);
+  drawMarkers(t);
+  drawParts(dt,t);
+  // vignette + grain
+  const vg=cx2.createRadialGradient(CW/2,CH*0.5,CH*0.35,CW/2,CH*0.5,CH*0.95);
+  vg.addColorStop(0,'rgba(30,20,10,0)'); vg.addColorStop(1,'rgba(30,20,10,.34)');
+  cx2.fillStyle=vg; cx2.fillRect(0,0,CW,CH);
+}
+function drawFarSkyline(){
+  const gyv=wy(GROUND);
+  cx2.fillStyle='rgba(120,95,80,.28)';
+  const par=camX*0.35;
+  for(let i=0;i<20;i++){
+    const bx=((i*430-par)% (WORLD_W*0.7)+WORLD_W*0.7)%(WORLD_W*0.7)-200;
+    const sx=(bx)*SCALE;
+    if(sx>CW+100||sx<-260)continue;
+    const h=(70+((i*53)%80))*SCALE, w=(120+((i*37)%120))*SCALE;
+    cx2.fillRect(sx,gyv-h-40*SCALE,w,h);
+    if(i%3===0){cx2.fillRect(sx+w*0.7,gyv-h-88*SCALE,10*SCALE,48*SCALE);} // smokestack
+  }
+  cx2.fillStyle='rgba(120,95,80,.18)';
+  cx2.fillRect(0,gyv-42*SCALE,CW,42*SCALE);
+}
+requestAnimationFrame(frame);
+
+/* touch bindings */
+bindHold($('pL'),v=>touchL=v);
+bindHold($('pR'),v=>touchR=v);
+$('pAct').addEventListener('pointerdown',e=>{e.preventDefault();tryAct();});
+/* prevent scroll on iOS */
+document.addEventListener('touchmove',e=>{ if(!e.target.closest('#mScroll,#ledEntries,.briefBody,#epi'))e.preventDefault(); },{passive:false});
 </script>
 </body>
 </html>
