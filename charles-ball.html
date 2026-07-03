@@ -15,11 +15,14 @@
    ════════════════════════════════════════════════════════════ */
 :root{--night:#0A0F22;--gold:#E8C55A;--paper:#F1E8D2;--ink:#1E1810;--danger:#D95C4A;--aid:#5FB379;--food:#E0913A;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
-html,body{height:100%;overflow:hidden;background:#000;}
+html,body{height:100%;overflow:hidden;background:#000;overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 body{font-family:Georgia,serif;color:var(--paper);}
 button{font-family:Georgia,serif;cursor:pointer;}
 button:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
-#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;touch-action:none;}
+#cv{touch-action:none;display:block;}
 canvas{display:block;max-width:100vw;max-height:100dvh;}
 
 /* overlays */
@@ -63,7 +66,8 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
 .dlgHint{color:#7f8db5;font-family:'Courier New',monospace;font-size:10px;letter-spacing:.1em;margin-top:7px;text-align:right;}
 
 /* HUD */
-#hud{position:fixed;top:0;left:0;right:0;z-index:10;display:none;padding:8px 10px;pointer-events:none;
+#hud{position:fixed;top:0;left:0;right:0;z-index:10;display:none;pointer-events:none;
+  padding:calc(8px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) 8px calc(10px + env(safe-area-inset-left));
   font-family:'Courier New',monospace;}
 #hud.on{display:block;}
 .hrow{display:flex;justify-content:space-between;gap:6px;max-width:640px;margin:0 auto;align-items:center;flex-wrap:wrap;}
@@ -136,7 +140,7 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
   <div class="ofact">MOVE BY NIGHT · HIDE BY DAY · EAT WHEN YOU CAN · THE STAR IS THE ONLY MAP</div>
   <div class="osub" style="margin-top:10px;font-size:.82em;opacity:.82">The sky strobes — a short night to run, then a brief, killing daylight. When <b style="color:#F5C542">DAY</b> breaks you must already be hidden — inside a shelter, or under dense canopy — or a hand closes on your collar. Shelters and cover are scattered and hard to find, so mark them as you go.</div>
   <button class="obtn" onclick="showChap()">STEP INTO THE DARK</button>
-  <div class="okeys">MOVE — WASD / arrows / stick &nbsp;·&nbsp; CREEP — hold SHIFT (quiet, unseen in cover)<br>ACT — E / SPACE (talk · gather · eat corn · enter shelter) &nbsp;·&nbsp; the ✦ at the top of the sky is NORTH<br>THE NIGHT CLOCK NEVER RESETS — crossing a county line does not buy you time.<br>HUNGER SLOWS YOU. Shelters hide you through the day. Choose when to move.</div>
+  <div class="okeys">MOVE — WASD / arrows / on-screen stick &nbsp;·&nbsp; CREEP — hold SHIFT or tap CREEP (quiet, unseen in cover)<br>ACT — E / SPACE or tap ACT (talk · gather · eat corn · enter shelter) &nbsp;·&nbsp; the ✦ at the top of the sky is NORTH<br>THE SKY STROBES — 14-18s of night to run, then a 3s daylight that takes you in the open.<br>BE HIDDEN WHEN DAY BREAKS — a shelter or dense canopy. Hunger slows you. Cover is scattered and hard to find.</div>
   <div class="onote">Drawn from Ball's narrative, published 1836 and reissued as <em>Fifty Years in Chains</em>. The people who help you on this road — enslaved, free, and a few whites — stand for the thousands the record names and the many more it never could. What they risk in these pages, people truly risked.</div>
 </div>
 
@@ -739,22 +743,31 @@ addEventListener('keydown',e=>{
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();});
 addEventListener('keyup',e=>{keys[e.code]=false;});
 
-/* touch: stick + buttons */
+/* touch: stick + buttons — tracks each finger by identifier so the
+   joystick and the ACT/CREEP buttons work simultaneously (true multitouch) */
 const T={x:0,y:0,on:false,creep:false};
 (function(){
   const st=document.getElementById('stick'),nub=document.getElementById('nub');
-  function pos(e){const r=st.getBoundingClientRect();const t=e.touches[0];
+  let sid=null;                                   /* id of the finger on the stick */
+  function setNub(dx,dy){nub.style.left=(45+dx)+'px';nub.style.top=(45+dy)+'px';}
+  function fromTouch(t){
+    const r=st.getBoundingClientRect();
     let dx=t.clientX-r.left-70,dy=t.clientY-r.top-70;
     const m=Math.hypot(dx,dy);if(m>50){dx*=50/m;dy*=50/m;}
-    nub.style.left=(45+dx)+'px';nub.style.top=(45+dy)+'px';
-    T.x=dx/50;T.y=dy/50;T.on=true;}
-  st.addEventListener('touchstart',e=>{e.preventDefault();initAudio();pos(e);},{passive:false});
-  st.addEventListener('touchmove',e=>{e.preventDefault();pos(e);},{passive:false});
-  st.addEventListener('touchend',()=>{T.on=false;T.x=T.y=0;nub.style.left='38px';nub.style.top='38px';});
+    const dead=8;if(m<dead){T.x=0;T.y=0;}else{T.x=dx/50;T.y=dy/50;}
+    setNub(dx,dy);T.on=true;
+  }
+  const find=list=>{for(let i=0;i<list.length;i++)if(list[i].identifier===sid)return list[i];return null;};
+  st.addEventListener('touchstart',e=>{e.preventDefault();initAudio();
+    const t=e.changedTouches[0];sid=t.identifier;fromTouch(t);},{passive:false});
+  st.addEventListener('touchmove',e=>{e.preventDefault();const t=find(e.touches);if(t)fromTouch(t);},{passive:false});
+  function release(e){if(sid!==null&&!find(e.touches)){sid=null;T.on=false;T.x=T.y=0;setNub(0,0);}}
+  st.addEventListener('touchend',release);
+  st.addEventListener('touchcancel',release);
   const bA=document.getElementById('bAct');
-  bA.addEventListener('touchstart',e=>{e.preventDefault();act();},{passive:false});
+  bA.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();initAudio();act();},{passive:false});
   const bC=document.getElementById('bCrouch');
-  bC.addEventListener('touchstart',e=>{e.preventDefault();T.creep=!T.creep;bC.style.background=T.creep?'rgba(232,197,90,.3)':'rgba(10,14,30,.55)';},{passive:false});
+  bC.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();T.creep=!T.creep;bC.style.background=T.creep?'rgba(232,197,90,.3)':'rgba(10,14,30,.55)';},{passive:false});
 })();
 
 const tile=(cx,cy)=>(cx<0||cy<0||cx>=Wd||cy>=Ht)?'#':grid[cy][cx];
