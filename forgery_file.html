@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE FORGERY FILE — An Archival Trivia Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,400&family=Special+Elite&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EFE6D0; --paper-2:#E0D4B6; --news:#F4EEDC;
+  --ink:#221E19; --mimeo:#6E4E9E; --red:#A8342A;
+  --tan:#C9B891; --good:#3E6B3A; --gold:#8a6d1f; --p2:#1F4E63;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper-2);
+  background-image:radial-gradient(ellipse at 30% 8%, rgba(255,255,255,.4), transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(34,30,25,.015) 3px 4px);
+  color:var(--ink); font-family:'Libre Franklin',sans-serif;
+  font-size:16px; line-height:1.5; min-height:100vh;
+}
+.wrap{max-width:820px;margin:0 auto;padding:16px 14px 60px}
+header{text-align:center;border-bottom:4px double var(--ink);padding:16px 8px 12px;margin-bottom:16px;position:relative}
+.eyebrow{font-family:'Special Elite',monospace;font-size:.74rem;letter-spacing:.14em;color:var(--mimeo);text-transform:uppercase}
+h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2rem,8vw,3.8rem);letter-spacing:.05em;line-height:.95;text-transform:uppercase}
+h1 .sign{display:inline-block;background:var(--ink);color:var(--paper);padding:.04em .2em;transform:rotate(-1deg)}
+.subhead{font-family:'Special Elite',monospace;font-size:.82rem;margin-top:8px}
+#muteBtn{position:absolute;right:0;top:0;background:var(--paper);border:2px solid var(--ink);font-family:'Special Elite',monospace;font-size:.68rem;padding:4px 8px;cursor:pointer}
+.panel{background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 rgba(34,30,25,.25);padding:16px;margin-bottom:16px;position:relative}
+.panel h2{font-family:'Oswald',sans-serif;font-weight:500;text-transform:uppercase;letter-spacing:.08em;font-size:1rem;border-bottom:1px solid var(--ink);padding-bottom:6px;margin-bottom:12px}
+.stamp{float:right;font-family:'Special Elite',monospace;font-size:.66rem;color:var(--red);border:2px solid var(--red);padding:2px 7px;transform:rotate(3deg);letter-spacing:.1em;opacity:.85}
+.modegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.modegrid{grid-template-columns:1fr}}
+.modebtn{border:2px solid var(--ink);background:var(--news);padding:16px;text-align:left;cursor:pointer;box-shadow:2px 2px 0 rgba(34,30,25,.2);transition:transform .12s}
+.modebtn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(34,30,25,.3)}
+.modebtn .mt{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:1rem}
+.modebtn .md{font-size:.8rem;color:#4d453a;margin-top:4px}
+.seriesgrid{display:grid;gap:8px;max-height:60vh;overflow-y:auto;padding-right:4px}
+.seriesbtn{border:2px solid var(--ink);background:var(--news);padding:10px 12px 10px 50px;text-align:left;cursor:pointer;position:relative;box-shadow:2px 2px 0 rgba(34,30,25,.2);transition:transform .12s}
+.seriesbtn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(34,30,25,.3)}
+.seriesbtn .tab{position:absolute;left:0;top:0;bottom:0;width:38px;border-right:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;color:var(--paper)}
+.seriesbtn .st{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.9rem}
+.seriesbtn .sd{font-size:.74rem;color:#4d453a;margin-top:2px;font-family:'Special Elite',monospace}
+.countgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:480px){.countgrid{grid-template-columns:1fr}}
+.countbtn{border:2px solid var(--ink);background:var(--news);padding:14px 10px;text-align:center;cursor:pointer;box-shadow:2px 2px 0 rgba(34,30,25,.2)}
+.countbtn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(34,30,25,.3)}
+.countbtn .cn{font-family:'Playfair Display',serif;font-weight:900;font-size:1.7rem}
+.countbtn .cd{font-family:'Special Elite',monospace;font-size:.68rem;color:#4d453a;margin-top:2px}
+.countnote{font-family:'Special Elite',monospace;font-size:.72rem;color:#6b6152;margin-top:10px}
+.scorebar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-family:'Special Elite',monospace;font-size:.84rem}
+.scorebar .big{font-family:'Playfair Display',serif;font-weight:900;font-size:1.5rem}
+.pscore{padding:4px 10px;border:2px solid transparent}
+.pscore.active{border-color:var(--ink);background:var(--news)}
+.pscore .who{font-family:'Oswald',sans-serif;font-size:.68rem;letter-spacing:.1em;display:block}
+.p1c{color:var(--red)} .p2c{color:var(--p2)}
+.streakflag{font-family:'Oswald',sans-serif;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--red)}
+.turnbanner{text-align:center;font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:8px;margin-bottom:12px;border:2px solid var(--ink);color:var(--paper)}
+.turnbanner.p1{background:var(--red)} .turnbanner.p2{background:var(--p2)}
+.casehead{font-family:'Special Elite',monospace;font-size:.78rem;color:#4d453a;margin-bottom:4px}
+.casetitle{font-family:'Playfair Display',serif;font-weight:900;font-size:1.3rem;margin-bottom:10px}
+.brief{font-size:.86rem;color:#4d453a;margin-bottom:14px;font-style:italic}
+.cards{display:grid;gap:12px}
+.doccard{position:relative;border:2px solid var(--ink);background:var(--news);padding:16px 16px 14px 52px;cursor:pointer;text-align:left;width:100%;font-family:'Special Elite',monospace;font-size:.88rem;line-height:1.6;color:#33291f;box-shadow:2px 2px 0 rgba(34,30,25,.2);transition:transform .12s}
+.doccard:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(34,30,25,.3)}
+.doccard:disabled{cursor:default}
+.doccard .tab{position:absolute;left:0;top:0;bottom:0;width:38px;background:var(--tan);border-right:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;font-size:1.1rem}
+.doccard .clip{position:absolute;right:12px;top:-9px;width:26px;height:16px;border:3px solid #8a8172;border-bottom:none;border-radius:12px 12px 0 0}
+.doccard.picked{outline:4px solid var(--mimeo);outline-offset:2px}
+.doccard .verdict{position:absolute;right:10px;bottom:8px;font-family:'Special Elite',monospace;font-size:.78rem;letter-spacing:.16em;padding:3px 10px;border:3px solid;transform:rotate(-6deg);opacity:0;background:rgba(244,238,220,.9)}
+.doccard.revealed .verdict{animation:slam .4s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes slam{0%{opacity:0;transform:rotate(-6deg) scale(2.4)}100%{opacity:1;transform:rotate(-6deg) scale(1)}}
+.doccard .verdict.true{color:var(--good);border-color:var(--good)}
+.doccard .verdict.forg{color:var(--red);border-color:var(--red)}
+.doccard.dimmed{opacity:.55}
+.wagerbox{margin-top:14px;border-top:1px dashed var(--ink);padding-top:12px}
+.wagerbox .wlabel{font-family:'Oswald',sans-serif;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.wagers{display:flex;gap:8px;flex-wrap:wrap}
+.wagers button{flex:1;min-width:105px;padding:10px 8px;border:2px solid var(--ink);background:var(--paper);font-family:'Special Elite',monospace;font-size:.82rem;cursor:pointer}
+.wagers button.on{background:var(--ink);color:var(--paper)}
+.wagers button small{display:block;font-size:.64rem;opacity:.75;font-family:'Libre Franklin',sans-serif}
+.bigbtn{display:block;width:100%;margin-top:14px;padding:14px;background:var(--red);color:var(--paper);border:2px solid var(--ink);font-family:'Oswald',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.bigbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.bigbtn:disabled{background:#8a8172;cursor:not-allowed}
+.bigbtn.alt{background:var(--ink)}
+.stories{margin-top:14px;display:grid;gap:10px}
+.story{border-left:4px solid var(--tan);padding:8px 12px;background:rgba(255,255,255,.4);font-size:.85rem}
+.story.true{border-left-color:var(--good)} .story.forg{border-left-color:var(--red)}
+.story h4{font-family:'Oswald',sans-serif;font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.story.true h4{color:var(--good)} .story.forg h4{color:var(--red)}
+.pointflash{text-align:center;font-family:'Playfair Display',serif;font-weight:900;font-size:1.4rem;margin-top:10px;animation:rise .5s ease}
+.pointflash.gain{color:var(--good)} .pointflash.loss{color:var(--red)}
+@keyframes rise{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
+.overlay{position:fixed;inset:0;background:rgba(34,30,25,.82);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
+.overlay .card{max-width:640px;width:100%;max-height:90vh;overflow-y:auto}
+.hidden{display:none !important}
+.introcopy p{margin-bottom:12px;font-size:.92rem}
+.introcopy .flag{font-family:'Special Elite',monospace;font-size:.78rem;color:var(--mimeo);border:1px dashed var(--mimeo);padding:8px 10px;margin-bottom:12px}
+.endtitle{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.7rem;text-transform:uppercase;letter-spacing:.06em;text-align:center;margin-bottom:8px}
+.rank{text-align:center;font-family:'Playfair Display',serif;font-weight:900;font-size:1.3rem;color:var(--mimeo);border:3px double var(--mimeo);padding:10px;margin:12px 0;transform:rotate(-1deg)}
+.finalstats{font-family:'Special Elite',monospace;font-size:.84rem}
+.finalstats .row{display:flex;justify-content:space-between;border-bottom:1px dotted #8a8172;padding:5px 0}
+.lesson{font-family:'Special Elite',monospace;font-size:.82rem;border-top:1px dashed var(--ink);margin-top:14px;padding-top:12px;color:#4d453a}
+.progress{display:flex;gap:3px;margin-bottom:12px}
+.progress .pip{flex:1;height:8px;border:1px solid var(--ink);background:var(--news)}
+.progress .pip.done.right{background:var(--good)}
+.progress .pip.done.wrong{background:var(--red)}
+.progress .pip.now{background:var(--tan)}
+.passcard{text-align:center}
+.passcard .who{font-family:'Playfair Display',serif;font-weight:900;font-size:1.8rem;margin:10px 0}
+.clockchip{position:absolute;right:14px;top:44px;font-family:'Special Elite',monospace;font-size:1.05rem;letter-spacing:.08em;border:2px solid var(--ink);background:var(--news);padding:4px 12px;transform:rotate(2deg)}
+.clockchip.low{color:var(--red);border-color:var(--red);animation:tickpulse .5s steps(2) infinite}
+@keyframes tickpulse{50%{background:rgba(168,52,42,.12)}}
+.clockbar{height:6px;border:1px solid var(--ink);background:var(--news);margin-bottom:10px;overflow:hidden}
+.clockbar .cfill{height:100%;background:var(--mimeo);transition:width 1s linear}
+.clockbar .cfill.low{background:var(--red)}
+@media (prefers-reduced-motion: reduce){.doccard.revealed .verdict,.pointflash{animation:none;opacity:1}}
+button:focus-visible{outline:3px solid var(--mimeo);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <button id="muteBtn" onclick="toggleSound()">SOUND: ON</button>
+  <div class="eyebrow">Bureau of Historical Records &mdash; Authentication Division</div>
+  <h1><span class="sign">THE FORGERY FILE</span></h1>
+  <div class="subhead">Two documents are genuine. One is planted. Find the forgery.</div>
+</header>
+
+<div class="overlay" id="intro">
+  <div class="panel card introcopy">
+    <span class="stamp">EYES ONLY</span>
+    <h2>Memorandum to the New Examiners</h2>
+    <div class="flag">RE: PLANTED FORGERIES IN THE AFRICAN AMERICAN HISTORY COLLECTION</div>
+    <p>Someone has been slipping forgeries into the files — claims that sound right, cite plausibly, and are entirely false. Each case file contains <strong>three claims</strong>. Two are documented history. One is a fabrication built from half-truths. Wager your reputation, then rule.</p>
+    <div class="modegrid">
+      <button class="modebtn" onclick="chooseMode(1)">
+        <div class="mt">Solo Examiner</div>
+        <div class="md">Work the case files alone. Build a streak. Earn your rank.</div>
+      </button>
+      <button class="modebtn" onclick="chooseMode(2)">
+        <div class="mt">Versus &mdash; Two Examiners</div>
+        <div class="md">Pass and play. Alternate case files. Highest reputation takes the desk by the window.</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="seriesPick">
+  <div class="panel card">
+    <span class="stamp" style="color:var(--mimeo);border-color:var(--mimeo)">ASSIGNMENT</span>
+    <h2>Choose Your Cabinet</h2>
+    <div class="seriesgrid" id="seriesList"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="countPick">
+  <div class="panel card">
+    <span class="stamp" style="color:var(--mimeo);border-color:var(--mimeo)">CASELOAD</span>
+    <h2 id="countTitle">How Many Case Files?</h2>
+    <div class="countgrid">
+      <button class="countbtn" onclick="chooseCount(10)"><div class="cn">10</div><div class="cd">A morning\u2019s work</div></button>
+      <button class="countbtn" onclick="chooseCount(15)"><div class="cn">15</div><div class="cd">A full shift</div></button>
+      <button class="countbtn" onclick="chooseCount(20)"><div class="cn">20</div><div class="cd">Overtime, no pay</div></button>
+    </div>
+    <div class="countnote" id="countNote"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="clockPick">
+  <div class="panel card">
+    <span class="stamp" style="color:var(--mimeo);border-color:var(--mimeo)">REGULATIONS</span>
+    <h2>The Clock</h2>
+    <div class="countgrid" style="grid-template-columns:repeat(2,1fr)">
+      <button class="countbtn" onclick="chooseClock(0)"><div class="cn">OFF</div><div class="cd">No clock \u2014 the archive is patient</div></button>
+      <button class="countbtn" onclick="chooseClock(90)"><div class="cn">1:30</div><div class="cd">Leisurely \u2014 read twice, rule once</div></button>
+      <button class="countbtn" onclick="chooseClock(60)"><div class="cn">1:00</div><div class="cd">Standard \u2014 the recommended shift</div></button>
+      <button class="countbtn" onclick="chooseClock(45)"><div class="cn">0:45</div><div class="cd">Brisk \u2014 trust your first read</div></button>
+      <button class="countbtn" onclick="chooseClock(30)"><div class="cn">0:30</div><div class="cd">Expert \u2014 the forger works fast</div></button>
+    </div>
+    <div class="countnote">If the clock runs out before a ruling, the case is stamped unresolved \u2014 scored as a wrong ruling at your current wager.</div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="passScreen">
+  <div class="panel card passcard">
+    <h2>Pass the File</h2>
+    <p style="font-family:'Special Elite',monospace;font-size:.85rem">The next case is assigned to</p>
+    <div class="who" id="passWho"></div>
+    <p style="font-size:.85rem;color:#4d453a">The other examiner looks away from the desk. No coaching. No coughing at option B.</p>
+    <button class="bigbtn" onclick="beginTurn()">Take the File</button>
+  </div>
+</div>
+
+<section class="panel hidden" id="scorePanel">
+  <div class="scorebar" id="scorebarSolo">
+    <span>REPUTATION: <span class="big" id="score">100</span></span>
+    <span class="streakflag" id="streakNote"></span>
+    <span id="caseCount"></span>
+  </div>
+  <div class="scorebar hidden" id="scorebarVs">
+    <span class="pscore" id="ps1"><span class="who p1c">EXAMINER ONE</span><span class="big p1c" id="score1">100</span></span>
+    <span id="caseCountVs" style="text-align:center"></span>
+    <span class="pscore" id="ps2"><span class="who p2c">EXAMINER TWO</span><span class="big p2c" id="score2">100</span></span>
+  </div>
+</section>
+
+<section class="panel hidden" id="gamePanel">
+  <span class="stamp">AUTHENTICATE</span>
+  <div class="clockchip hidden" id="clockChip">1:00</div>
+  <div class="turnbanner hidden" id="turnBanner"></div>
+  <div class="progress" id="progress"></div>
+  <div class="clockbar hidden" id="clockBar"><div class="cfill" id="clockFill"></div></div>
+  <div class="casehead" id="caseHead"></div>
+  <div class="casetitle" id="caseTitle"></div>
+  <div class="brief" id="caseBrief"></div>
+  <div class="cards" id="cards"></div>
+  <div class="wagerbox" id="wagerBox">
+    <div class="wlabel">Stake your reputation on your ruling</div>
+    <div class="wagers">
+      <button id="w10" onclick="setWager(10)">CAUTIOUS &mdash; 10<small>lose 5 if wrong</small></button>
+      <button id="w20" onclick="setWager(20)" class="on">CONFIDENT &mdash; 20<small>lose 10 if wrong</small></button>
+      <button id="w30" onclick="setWager(30)">CERTAIN &mdash; 30<small>lose 15 if wrong</small></button>
+    </div>
+    <button class="bigbtn" id="ruleBtn" onclick="rule()" disabled>Select the Forgery Above</button>
+  </div>
+  <div class="stories hidden" id="stories"></div>
+  <div id="pointflash"></div>
+  <button class="bigbtn alt hidden" id="nextBtn" onclick="nextCase()">Next Case File</button>
+</section>
+
+<div class="overlay hidden" id="endOverlay">
+  <div class="panel card">
+    <div class="endtitle" id="endTitle">Case Files Closed</div>
+    <div class="rank" id="rankBox"></div>
+    <div class="finalstats" id="finalStats"></div>
+    <div class="lesson">Every forgery in this file was built the way real misinformation is built — a true name attached to the wrong deed, a real event moved to the wrong place, a happy ending arriving decades early. The skill you practiced here is called source criticism, and it works outside this game too.</div>
+    <button class="bigbtn alt" onclick="location.reload()" style="margin-top:16px">Reopen the Files</button>
+  </div>
+</div>
+
+<script>
+/* ============ SOUND ============ */
+let AC=null,soundOn=true;
+function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC}
+function tone(f,d,t,v,w=0){if(!soundOn)return;try{const a=ac(),o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,a.currentTime+w);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+w+d);o.connect(g);g.connect(a.destination);o.start(a.currentTime+w);o.stop(a.currentTime+w+d+.05)}catch(e){}}
+const sfx={
+  click:()=>tone(1400,.03,'square',.05),
+  slam:()=>{tone(120,.12,'square',.12);tone(80,.18,'square',.09,.03)},
+  good:()=>{tone(523,.12,'triangle',.09);tone(784,.2,'triangle',.09,.11)},
+  bad:()=>{tone(170,.25,'sawtooth',.1);tone(115,.3,'sawtooth',.08,.12)},
+  shuffle:()=>{for(let i=0;i<4;i++)tone(600+Math.random()*400,.02,'square',.04,i*.06)}
+};
+function toggleSound(){soundOn=!soundOn;document.getElementById('muteBtn').textContent='SOUND: '+(soundOn?'ON':'OFF')}
+document.addEventListener('click',()=>{if(soundOn)ac()},{once:true});
+
+/* ============ CASE LIBRARY ============ */
+const SERIES=[
+/* ---------- 1. CAROLINA ---------- */
+{key:'carolina',color:'var(--red)',name:'The Carolina Files',desc:'Durham, Greensboro, Wilmington, Tryon.',cases:[
+ {title:'The Parrish Street File',brief:'Black Wall Street, as the documents tell it.',claims:[
+  {text:'By the early twentieth century, North Carolina Mutual Life Insurance Company of Durham had grown into the largest Black-owned business in the United States.',forged:false,reveal:'GENUINE. Founded in 1898 on Parrish Street, "the Mutual" anchored a district of Black enterprise that made Durham a national byword for Black business success.'},
+  {text:'Both Booker T. Washington and W. E. B. Du Bois — rivals on nearly everything else — visited Durham and publicly praised its Black business district.',forged:false,reveal:'GENUINE. The two men agreed on almost nothing, yet both wrote admiringly of Durham in the early 1900s. When Washington and Du Bois concur, historians take notice.'},
+  {text:'Mechanics and Farmers Bank was founded with a personal loan from the Duke tobacco family, who held a controlling stake for its first decade.',forged:true,reveal:'FORGERY. M&F Bank (1907) was founded and controlled by Black Durhamites — that was the entire point. The forger borrowed the Duke name\u2019s plausibility; the achievement belonged to Parrish Street.'}]},
+ {title:'The Lunch Counter File',brief:'The sit-ins. Read the dates closely.',claims:[
+  {text:'Nearly three years before Greensboro, seven young people staged a sit-in at the Royal Ice Cream parlor in Durham in June 1957 and were arrested.',forged:false,reveal:'GENUINE. The Royal Ice Cream protest is the neglected forerunner of the sit-in movement — proof the tactic was tried, punished, and remembered before it caught fire.'},
+  {text:'The four students who began the Greensboro sit-in on February 1, 1960 were freshmen at North Carolina A&T.',forged:false,reveal:'GENUINE. Four first-year students — the youngest people at the counter — started a movement that spread to dozens of cities within weeks.'},
+  {text:'The Greensboro Woolworth desegregated its lunch counter within one week of the first sit-in, once national reporters arrived.',forged:true,reveal:'FORGERY. The counter did not serve Black customers until July 1960 — nearly six months of sustained pressure later. The forger sold you the happy ending arriving early. It rarely did.'}]},
+ {title:'The Wilmington File',brief:'1898. The heaviest folder in the cabinet.',claims:[
+  {text:'In November 1898, armed white supremacists overthrew the elected biracial government of Wilmington — the only successful coup d\u2019\u00e9tat against a sitting American municipal government.',forged:false,reveal:'GENUINE. Officeholders were forced to resign at gunpoint, Black residents were killed and banished, and the coup\u2019s leaders faced no punishment. For a century it was politely called a "race riot."'},
+  {text:'Before 1898, Wilmington was a majority-Black city with a substantial Black professional class and a Black-owned daily newspaper, Alexander Manly\u2019s Daily Record.',forged:false,reveal:'GENUINE. Manly\u2019s press was burned by the mob — the destruction of a Black newspaper being, as ever, an early order of business.'},
+  {text:'Within a month, federal troops restored Wilmington\u2019s elected government and returned exiled residents to their homes.',forged:true,reveal:'FORGERY. No federal intervention ever came. The coup government stayed. The exiles did not return. The forger wrote the ending the Constitution promised and the government declined to deliver.'}]},
+ {title:'The Shaw File',brief:'Raleigh, Easter weekend, 1960.',claims:[
+  {text:'The Student Nonviolent Coordinating Committee was founded at a conference held at Shaw University in Raleigh in April 1960.',forged:false,reveal:'GENUINE. The sit-in generation organized itself on an HBCU campus in North Carolina — worth remembering when the movement\u2019s geography gets redrawn around Atlanta.'},
+  {text:'Ella Baker, who convened the Shaw conference, was raised in North Carolina and graduated from Shaw as class valedictorian.',forged:false,reveal:'GENUINE. Baker urged the students to keep their independence from the older organizations — "strong people don\u2019t need strong leaders" — and they took the advice.'},
+  {text:'SNCC was founded at a meeting in Atlanta chaired by Martin Luther King Jr., who served as its first chairman.',forged:true,reveal:'FORGERY. King spoke at Shaw, but the students founded and led SNCC themselves — Marion Barry was its first chairman. The forger handed the students\u2019 work to the most famous man in the room.'}]},
+ {title:'The Hardwood File',brief:'Basketball in the Jim Crow South.',claims:[
+  {text:'In 1944, a Duke medical school team and the North Carolina College Eagles played a secret, illegal integrated game behind locked doors in Durham on a Sunday morning.',forged:false,reveal:'GENUINE. "The Secret Game" was played while the town was in church — and won decisively by the Eagles.'},
+  {text:'The Eagles\u2019 coach, John McLendon, had learned the game at Kansas under its inventor, James Naismith, and became a pioneer of the fast break.',forged:false,reveal:'GENUINE. McLendon studied under Naismith himself, and his up-tempo style reshaped the sport from an HBCU campus.'},
+  {text:'Michael Jordan was born in Wilmington, North Carolina, where a statue marks his birthplace.',forged:true,reveal:'FORGERY. Jordan was born in Brooklyn, New York; the family moved to Wilmington when he was a toddler. Half-true is the forger\u2019s favorite flavor.'}]},
+ {title:'The Freedom Colony File',brief:'Towns the freedpeople built.',claims:[
+  {text:'Princeville, North Carolina, incorporated in 1885, is recognized as the oldest town in America incorporated by Black citizens.',forged:false,reveal:'GENUINE. Founded as Freedom Hill by freedpeople at the war\u2019s end, on low flood-prone land nobody else wanted — and held ever since.'},
+  {text:'During the Civil War, a Freedmen\u2019s Colony of formerly enslaved people was established on Roanoke Island under Union protection.',forged:false,reveal:'GENUINE. Thousands built churches, schools, and homes there — an early rehearsal for Reconstruction, largely dismantled after the war.'},
+  {text:'Princeville was founded before the American Revolution by free Black tradesmen operating under a royal charter.',forged:true,reveal:'FORGERY. Princeville\u2019s founding is a Reconstruction story, not a colonial one. The forger aged the deed a century to make it romantic; the true story needs no varnish.'}]},
+ {title:'The Tryon File',brief:'A church pianist from Polk County.',claims:[
+  {text:'Nina Simone was born Eunice Waymon in Tryon, North Carolina, where she began playing piano in her mother\u2019s church as a small child.',forged:false,reveal:'GENUINE. The High Priestess of Soul was a Carolina church prodigy first — her hometown raised money to further her classical training.'},
+  {text:'Simone applied to Philadelphia\u2019s Curtis Institute of Music and was rejected — a decision she attributed to her race for the rest of her life. Curtis awarded her an honorary diploma days before her death.',forged:false,reveal:'GENUINE. The rejection rerouted her from concert halls to nightclubs, where "Nina Simone" was invented so her mother wouldn\u2019t learn she was playing secular music.'},
+  {text:'Simone later joined the Juilliard School\u2019s faculty as its first Black professor of piano.',forged:true,reveal:'FORGERY. Simone studied briefly at Juilliard while preparing for the Curtis audition, but never taught there. The forger promoted a summer of lessons into a professorship.'}]},
+ {title:'The Proud Shoes File',brief:'A Durham childhood, a legal revolution.',claims:[
+  {text:'Pauli Murray, raised in Durham, was denied admission to the University of North Carolina\u2019s graduate school in 1938 on account of race.',forged:false,reveal:'GENUINE. Murray\u2019s public fight over the rejection made newspapers statewide — an early shot in the legal war on segregated education.'},
+  {text:'Murray\u2019s book States\u2019 Laws on Race and Color was so useful to civil rights litigators that Thurgood Marshall reportedly called it the bible of the movement\u2019s lawyers; Murray later became the first Black woman ordained an Episcopal priest.',forged:false,reveal:'GENUINE. Murray also coined the term "Jane Crow" for the double bind of race and sex discrimination — a generation ahead of the scholarship.'},
+  {text:'Murray personally argued Brown v. Board of Education before the Supreme Court alongside Marshall.',forged:true,reveal:'FORGERY. Murray never argued Brown — but a Murray paper arguing that segregation itself was unconstitutional helped shape the strategy behind it. The forger confused the architect of an idea with the counsel of record.'}]},
+ {title:'The Chapel Hill Poet File',brief:'Verse for sale on Franklin Street.',claims:[
+  {text:'George Moses Horton, an enslaved man from Chatham County, composed and sold love poems to University of North Carolina students, dictating verses before he could write.',forged:false,reveal:'GENUINE. Students paid by the poem; Horton composed acrostics on their sweethearts\u2019 names. He taught himself to read from spelling books and hymnals.'},
+  {text:'Horton\u2019s 1829 collection The Hope of Liberty made him the first Black author to publish a book in the South.',forged:false,reveal:'GENUINE. The book was published in Raleigh partly in hope of buying his freedom.'},
+  {text:'Proceeds from the book purchased Horton\u2019s freedom in 1830, and he spent his remaining years as a free man of letters in Chapel Hill.',forged:true,reveal:'FORGERY. The book did not earn enough, and no purchase was permitted. Horton remained enslaved until Union cavalry reached North Carolina in 1865 — publishing, petitioning, and waiting thirty-six more years. The forger wrote the ending his readers deserved; history withheld it.'}]},
+ {title:'The Scholar File',brief:'A history department in Durham.',claims:[
+  {text:'John Hope Franklin wrote his landmark survey From Slavery to Freedom while teaching at North Carolina College in Durham in the 1940s.',forged:false,reveal:'GENUINE. The book has sold millions of copies and remains in print — a discipline-defining work produced on an HBCU teaching load.'},
+  {text:'Franklin was awarded the Presidential Medal of Freedom in 1995.',forged:false,reveal:'GENUINE. He also led the American Historical Association and chaired President Clinton\u2019s Initiative on Race — the profession\u2019s highest offices, all of them earned twice over.'},
+  {text:'Franklin capped his career as the first Black president of Harvard University.',forged:true,reveal:'FORGERY. Franklin never led Harvard — his historic chairmanship was of Brooklyn College\u2019s history department, the first Black scholar to chair a department at a majority-white American college. The forger reached for the grander title and missed the real first.'}]}
+]},
+/* ---------- 2. FREEDOM ---------- */
+{key:'freedom',color:'var(--good)',name:'The Freedom Files',desc:'Slavery, escape, revolt, war, Reconstruction.',cases:[
+ {title:'The Escape File',brief:'How people freed themselves. Mind the arithmetic.',claims:[
+  {text:'In 1849, Henry Brown had himself sealed in a wooden crate and shipped from Richmond to abolitionists in Philadelphia, emerging a free man.',forged:false,reveal:'GENUINE. Twenty-seven hours in the box, part of it upside down. He toured afterward as Henry "Box" Brown.'},
+  {text:'In 1848, Ellen Craft escaped from Georgia disguised as a white male planter, with her husband William posing as her servant.',forged:false,reveal:'GENUINE. A thousand miles by train and steamship, in first-class accommodations, hiding in plain sight.'},
+  {text:'Harriet Tubman made more than three hundred trips into the South and personally led over three thousand people to freedom.',forged:true,reveal:'FORGERY. Tubman made roughly thirteen trips and guided about seventy people directly, with instructions helping dozens more. The inflated numbers trace to an early biography — proof that even heroes attract forgers, and that the true count is heroic enough.'}]},
+ {title:'The Douglass File',brief:'The most photographed American of his century.',claims:[
+  {text:'Frederick Douglass sat for more photographic portraits than any other American of the nineteenth century.',forged:false,reveal:'GENUINE. Douglass used photography deliberately, believing the accurate image of a Black man was itself an argument against slavery\u2019s caricatures.'},
+  {text:'Douglass founded and edited the abolitionist newspaper The North Star in Rochester, New York, beginning in 1847.',forged:false,reveal:'GENUINE. Its masthead read: "Right is of no Sex — Truth is of no Color."'},
+  {text:'Douglass escaped slavery by way of the Underground Railroad\u2019s Ohio River route, carried between safe houses over several months.',forged:true,reveal:'FORGERY. Douglass escaped from Baltimore in under twenty-four hours, riding trains and a ferry dressed as a free Black sailor, carrying borrowed seaman\u2019s papers. The forger swapped his daring for the more familiar story.'}]},
+ {title:'The Narrative File',brief:'The books that testified.',claims:[
+  {text:'Charles Ball\u2019s narrative of his enslavement in Maryland, South Carolina, and Georgia was published in 1836 and became one of the era\u2019s widely read slave narratives.',forged:false,reveal:'GENUINE. Ball\u2019s account of forced marches, cotton fields, and escape remains a key source on the domestic slave trade — and worth reading today.'},
+  {text:'Olaudah Equiano\u2019s 1789 autobiography became a bestseller, running through multiple editions in his lifetime and fueling the British abolition movement.',forged:false,reveal:'GENUINE. Equiano promoted the book on speaking tours across Britain — author, activist, and his own best publicist.'},
+  {text:'Solomon Northup\u2019s Twelve Years a Slave was published after the Civil War as a memoir looking back on the war years.',forged:true,reveal:'FORGERY. Northup published in 1853 — before the war — and the book was an antislavery bombshell in its own moment, selling thousands of copies within months. The forger moved it to a safer decade.'}]},
+ {title:'The Revolt File',brief:'Uprisings, real and inflated.',claims:[
+  {text:'In January 1811, hundreds of enslaved people on Louisiana\u2019s German Coast rose and marched on New Orleans — the largest slave revolt in United States history.',forged:false,reveal:'GENUINE. Led in part by Charles Deslondes, the marchers were crushed by militia and federal troops, and the reprisals were made deliberately gruesome as a warning. For generations the largest revolt in American history went nearly untaught.'},
+  {text:'Nat Turner\u2019s 1831 rebellion in Southampton County, Virginia, set off a wave of repressive laws across the South restricting Black literacy, preaching, and assembly.',forged:false,reveal:'GENUINE. The rebellion terrified the slaveholding South into tightening every screw — evidence of how well the enslavers understood what literacy and organization could do.'},
+  {text:'Denmark Vesey\u2019s 1822 uprising seized control of Charleston for three days before federal forces retook the city.',forged:true,reveal:'FORGERY. Vesey\u2019s plot was betrayed and suppressed before it began; he and dozens of others were executed. The forger gave the conspiracy the battle it never got to fight.'}]},
+ {title:'The Conductor File',brief:'The Railroad\u2019s paperwork — and its folklore.',claims:[
+  {text:'William Still of Philadelphia interviewed and recorded hundreds of escapees, publishing his records after the war as The Underground Rail Road.',forged:false,reveal:'GENUINE. Still\u2019s ledgers are among the richest sources on the Railroad — kept at mortal risk so that separated families might one day find each other.'},
+  {text:'Among the escapees who came through Still\u2019s office was a man who proved to be his own brother, left behind decades earlier when their mother fled.',forged:false,reveal:'GENUINE. Peter Still walked into the Anti-Slavery office and told his story to a clerk who slowly realized it was his family\u2019s own. Even the Railroad\u2019s keeper of records got one miracle.'},
+  {text:'Escapees navigated by coded quilt patterns hung on fences along the routes — a signaling system documented in period sources.',forged:true,reveal:'FORGERY — or at least, unproven legend. The quilt code appears in no period document, narrative, or interview; it surfaced in the 1990s from a single oral account. Historians of the Railroad have found nothing to support it. A beautiful story is not the same as a documented one — that distinction is this entire game.'}]},
+ {title:'The Sojourner File',brief:'A voice from New York, transcribed in Ohio.',claims:[
+  {text:'Sojourner Truth went to court in 1828 to recover her son Peter, illegally sold south — and won, one of the earliest such victories by a Black woman against a white man in an American court.',forged:false,reveal:'GENUINE. Truth\u2019s first public battle was a legal one, and she took it all the way to victory.'},
+  {text:'Truth delivered her famous extemporaneous speech on women\u2019s rights at the Akron convention of 1851.',forged:false,reveal:'GENUINE. The speech electrified the convention and has never left the canon since.'},
+  {text:'The version of the speech beginning "Ain\u2019t I a woman?" — rendered in Southern plantation dialect — is a verbatim transcript taken down that day.',forged:true,reveal:'FORGERY. That famous version was published twelve years later by Frances Gage, in a dialect Truth never spoke — she was born in New York and her first language was Dutch. A contemporaneous 1851 report contains no such refrain. The most quoted words are the least reliable ones; even icons get forged.'}]},
+ {title:'The Sanctuary File',brief:'Freedom, under a different flag.',claims:[
+  {text:'In 1738, Spanish Florida established Gracia Real de Santa Teresa de Mose — Fort Mose — the first legally sanctioned free Black settlement in what is now the United States.',forged:false,reveal:'GENUINE. A free Black town with its own militia, decades before the Declaration of Independence.'},
+  {text:'Spain offered freedom to enslaved people who escaped British colonies, converted to Catholicism, and pledged militia service — making Florida a southern destination on the map of escape.',forged:false,reveal:'GENUINE. Before the North Star, some escape routes ran south. Geography follows policy.'},
+  {text:'Fort Mose was established by the British as a buffer colony to lure escapees away from Spanish territory.',forged:true,reveal:'FORGERY. Exactly backwards — Mose was Spain\u2019s answer to British slavery, not the reverse. The forger flipped the flags and hoped nobody checked the direction of escape.'}]},
+ {title:'The War File',brief:'Black soldiers and the Union. The pay stub tells the truth.',claims:[
+  {text:'Harriet Tubman guided the 1863 Combahee River Raid in South Carolina, an operation that freed more than 700 enslaved people.',forged:false,reveal:'GENUINE. Tubman worked as a scout and spy for the Union and guided the gunboats past the mines.'},
+  {text:'Sergeant William H. Carney of the 54th Massachusetts was awarded the Medal of Honor for carrying the flag at Fort Wagner despite multiple wounds.',forged:false,reveal:'GENUINE. "The old flag never touched the ground," Carney said. The action was 1863; the medal, disgracefully, arrived in 1900.'},
+  {text:'From their first enlistments, Black Union soldiers received the same pay as white soldiers, a condition Frederick Douglass negotiated with Lincoln personally.',forged:true,reveal:'FORGERY. Black soldiers were paid $10 a month against white soldiers\u2019 $13 — minus a clothing deduction — until protest forced equalization in 1864. Whole regiments refused any pay rather than accept insult as wages.'}]},
+ {title:'The Reconstruction File',brief:'The first generation of Black elected officials.',claims:[
+  {text:'In 1870, Hiram Revels of Mississippi was sworn in as the first Black member of the United States Senate.',forged:false,reveal:'GENUINE. Revels — born free in Fayetteville, North Carolina — took a seat once held by Jefferson Davis, a fact the newspapers of 1870 did not fail to notice.'},
+  {text:'During Reconstruction, sixteen Black men served in the United States Congress, with hundreds more in state legislatures.',forged:false,reveal:'GENUINE. A democratic experiment violently reversed, then nearly erased from the textbooks — which is why the forger finds this era such easy hunting.'},
+  {text:'Georgia elected a Black governor during Reconstruction, who served a full four-year term before Redemption.',forged:true,reveal:'FORGERY. No state elected a Black governor in the era. P. B. S. Pinchback served as acting governor of Louisiana for about five weeks — by succession, not election, and not in Georgia.'}]},
+ {title:'The Emancipation File',brief:'Freedom\u2019s paperwork, and its fine print.',claims:[
+  {text:'On June 19, 1865, Union General Gordon Granger announced in Galveston, Texas that the enslaved were free — the origin of Juneteenth.',forged:false,reveal:'GENUINE. Two and a half years after the Emancipation Proclamation, freedom finally arrived in Texas with an army attached.'},
+  {text:'Slavery was not abolished nationwide until the Thirteenth Amendment was ratified in December 1865.',forged:false,reveal:'GENUINE. The Proclamation was a war measure with limits; the Amendment finished what it started — eight months after Appomattox.'},
+  {text:'The Emancipation Proclamation freed the enslaved people of Kentucky and Delaware on the day it took effect.',forged:true,reveal:'FORGERY. The Proclamation applied only to areas in rebellion — loyal border states like Kentucky and Delaware were exempt, and slavery persisted there until the Thirteenth Amendment. The forger counts on nobody reading past the title.'}]}
+]},
+/* ---------- 3. MIGRATION ERA ---------- */
+{key:'migration',color:'var(--gold)',name:'The Migration Files',desc:'1900\u20131955 \u2014 movement, Renaissance, and resistance.',cases:[
+ {title:'The Exodus File',brief:'Six million one-way tickets.',claims:[
+  {text:'Between roughly 1910 and 1970, some six million Black Southerners moved to the cities of the North, Midwest, and West — the Great Migration.',forged:false,reveal:'GENUINE. One of the largest internal migrations in world history, and it remade American music, politics, food, and every city it touched.'},
+  {text:'Southern authorities tried to stop the migration — confiscating Northern newspapers, arresting labor recruiters, and pulling migrants off trains.',forged:false,reveal:'GENUINE. The South fought to keep the labor force it terrorized. People left anyway, often in secret, often at night.'},
+  {text:'The federal government organized and funded the migration through a Resettlement Bureau that assigned families to Northern cities.',forged:true,reveal:'FORGERY. No such bureau existed. The migration was self-organized — letters, kin networks, church connections, and the Defender\u2019s train schedules. The forger cannot imagine six million people organizing themselves. They did.'}]},
+ {title:'The Greenwood File',brief:'Tulsa, 1921.',claims:[
+  {text:'In 1921, a white mob destroyed the Greenwood district of Tulsa — a prosperous Black business community known as Black Wall Street — burning some thirty-five square blocks.',forged:false,reveal:'GENUINE. Estimates run to three hundred dead; thousands were left homeless and interned. No one was ever convicted for the destruction.'},
+  {text:'Insurance companies denied Greenwood residents\u2019 claims after the massacre, citing riot-exclusion clauses.',forged:false,reveal:'GENUINE. The community rebuilt largely with its own resources — which is the part of the story the word "massacre" doesn\u2019t capture.'},
+  {text:'A federal compensation program in the 1920s repaid Greenwood\u2019s property owners for their losses.',forged:true,reveal:'FORGERY. No compensation came — not federal, not state, not municipal. Survivors were still petitioning courts for redress a full century later. The forger settled a bill that remains unpaid.'}]},
+ {title:'The Red Summer File',brief:'1919, city by city.',claims:[
+  {text:'In the summer and fall of 1919, white mobs attacked Black communities in dozens of American cities — a season of violence named the Red Summer.',forged:false,reveal:'GENUINE. Returning Black veterans, who had been told the war was for democracy, were frequent targets — and frequent organizers of armed self-defense.'},
+  {text:'Chicago\u2019s violence began when a Black teenager, Eugene Williams, drifted across an invisible line at a segregated beach and was stoned until he drowned.',forged:false,reveal:'GENUINE. The officer on the scene refused to arrest the stone-thrower. Thirty-eight died in the week that followed.'},
+  {text:'Congress responded to the Red Summer by passing a federal anti-lynching law in 1922.',forged:true,reveal:'FORGERY. The Dyer anti-lynching bill passed the House in 1922 and was killed by Senate filibuster — a fate every such bill met for decades. A federal anti-lynching law did not pass until 2022, a century later. The forger closed in one year a fight that took a hundred.'}]},
+ {title:'The Crusader File',brief:'A Memphis editor with a pistol by the door.',claims:[
+  {text:'After a mob destroyed her Memphis newspaper in 1892, Ida B. Wells documented lynching across the South in works like Southern Horrors, demolishing the pretexts offered for it.',forged:false,reveal:'GENUINE. Wells did the data work — names, dates, alleged causes — and showed lynching for what it was: economic terror against Black success.'},
+  {text:'Wells was among the founders of the NAACP in 1909.',forged:false,reveal:'GENUINE. Characteristically, she also feuded with it — Wells was nobody\u2019s committee woman.'},
+  {text:'Wells sued a railroad for ejecting her from a first-class car, won at trial, and the Tennessee Supreme Court upheld her damages on appeal.',forged:true,reveal:'FORGERY — half of one. She did sue, and she did win at trial in 1884. But Tennessee\u2019s Supreme Court reversed the verdict and made her pay costs. The forger let the first ruling stand; the country did not.'}]},
+ {title:'The Renaissance File',brief:'Harlem in the twenties.',claims:[
+  {text:'Langston Hughes wrote "The Negro Speaks of Rivers" as a teenager, on a train crossing the Mississippi.',forged:false,reveal:'GENUINE. Seventeen years old, on the back of an envelope, on his way to see his father in Mexico. Some careers announce themselves early.'},
+  {text:'Zora Neale Hurston trained as an anthropologist under Franz Boas and collected Black Southern folklore on funded research expeditions.',forged:false,reveal:'GENUINE. Hurston was a scientist of culture before and during her career as a novelist — her fiction is built on her fieldwork.'},
+  {text:'By 1926 the Renaissance\u2019s leading writers had collectively relocated to Paris, ending the movement\u2019s Harlem period.',forged:true,reveal:'FORGERY. Some figures spent time abroad, but the movement\u2019s center held in Harlem well beyond 1926 — the journals, salons, and publishers were there. The forger confused a few steamship tickets with an exodus.'}]},
+ {title:'The Brotherhood File',brief:'Organizing the sleeping cars.',claims:[
+  {text:'A. Philip Randolph organized the Brotherhood of Sleeping Car Porters in 1925, and after a twelve-year fight it won a contract with the Pullman Company.',forged:false,reveal:'GENUINE. The first major contract won by a Black-led union against a large American corporation — and the training ground for a generation of civil rights organizers.'},
+  {text:'In 1941, Randolph\u2019s threat of a mass march on Washington pushed President Roosevelt to issue Executive Order 8802, barring discrimination in defense industries.',forged:false,reveal:'GENUINE. The march never had to happen; the threat was organized well enough to work. Randolph filed the idea away for 1963.'},
+  {text:'Pullman voluntarily recognized the Brotherhood within a year of its founding, eager for stable labor relations.',forged:true,reveal:'FORGERY. Pullman fought the union with spies, firings, and a company union for over a decade. "Voluntarily" is not a word that appears anywhere in this file.'}]},
+ {title:'The Garvey File',brief:'The Black Star Line and its ledger.',claims:[
+  {text:'Marcus Garvey\u2019s Universal Negro Improvement Association grew into what is often called the largest mass movement in African American history, with chapters across the world.',forged:false,reveal:'GENUINE. Millions took out membership or marched under the red, black, and green — a scale of organization the country had never seen.'},
+  {text:'Garvey was convicted of mail fraud in connection with Black Star Line stock sales and deported in 1927.',forged:false,reveal:'GENUINE. The prosecution was pursued with unmistakable political enthusiasm — a young J. Edgar Hoover took a particular interest — but the shipping line\u2019s books were genuinely ruinous.'},
+  {text:'Before his deportation, Garvey led a first fleet of settlers — some one hundred thousand — to establish a colony in Liberia.',forged:true,reveal:'FORGERY. No mass settlement ever sailed; the Liberia plan collapsed in negotiation. The forger confused the movement\u2019s dream with its shipping schedule.'}]},
+ {title:'The History Week File',brief:'Who put February on the calendar.',claims:[
+  {text:'Carter G. Woodson founded the Association for the Study of Negro Life and History in 1915 and launched Negro History Week in 1926 — the seed of Black History Month.',forged:false,reveal:'GENUINE. Woodson, the son of formerly enslaved parents and the second Black American to earn a Harvard history PhD, built the scholarly infrastructure of a field the academy refused to recognize.'},
+  {text:'Woodson chose the February week to encompass the birthdays of Abraham Lincoln and Frederick Douglass, which Black communities already celebrated.',forged:false,reveal:'GENUINE. The date was strategy — building on commemorations people already kept.'},
+  {text:'February was assigned by white publishers who agreed to observe the week only if it fell in the year\u2019s shortest month.',forged:true,reveal:'FORGERY — and a popular modern one. Woodson himself picked February, for Lincoln and Douglass. The shortest-month story is a latter-day invention; the real choice was made by the founder, for good reasons. Even grievances need fact-checking.'}]},
+ {title:'The Double V File',brief:'Two fronts, one war.',claims:[
+  {text:'The Pittsburgh Courier\u2019s 1942 Double V campaign called for victory over fascism abroad and racism at home, spreading through the Black press nationwide.',forged:false,reveal:'GENUINE. Started by a letter from a twenty-six-year-old cafeteria worker, James G. Thompson. The wartime FBI monitored the Black press for less.'},
+  {text:'The 6888th Central Postal Directory Battalion — the only Black Women\u2019s Army Corps unit deployed overseas — cleared a crushing backlog of undelivered mail in England ahead of schedule.',forged:false,reveal:'GENUINE. "No mail, low morale" was their motto; six-day weeks in unheated warehouses was their method. Congressional Gold Medal, 2022 — better late.'},
+  {text:'The armed forces were desegregated in 1943, midway through the war, to meet manpower needs.',forged:true,reveal:'FORGERY. Desegregation came by Truman\u2019s executive order in 1948, three years after the war ended — and implementation dragged into the Korean War. Black Americans fought the Second World War in a segregated military. The forger moved the date because the true one is an indictment.'}]},
+ {title:'The Till File',brief:'Chicago and Mississippi, 1955.',claims:[
+  {text:'Mamie Till-Mobley insisted on an open-casket funeral for her murdered fourteen-year-old son Emmett, saying she wanted the world to see what had been done to him.',forged:false,reveal:'GENUINE. Tens of thousands filed past the casket in Chicago. Movement veterans for decades afterward dated their commitment to that photograph.'},
+  {text:'Jet magazine published photographs of Emmett Till\u2019s body, carrying the image into Black households nationwide.',forged:false,reveal:'GENUINE. The mainstream press mostly would not run the pictures. The Black press did — which is a lesson about who tells which truths.'},
+  {text:'Till\u2019s killers were convicted of murder and sentenced to life imprisonment by a Mississippi jury.',forged:true,reveal:'FORGERY. The all-white jury acquitted them in sixty-seven minutes. Protected by double jeopardy, the killers then confessed in a paid magazine interview months later. The forger delivered the verdict the evidence demanded and the jury refused.'}]}
+]},
+/* ---------- 4. MOVEMENT ---------- */
+{key:'movement',color:'var(--mimeo)',name:'The Movement Files',desc:'Montgomery to Memphis \u2014 the long campaign.',cases:[
+ {title:'The Montgomery File',brief:'A boycott, a seamstress, and a myth.',claims:[
+  {text:'The Montgomery bus boycott lasted 381 days, sustained by an elaborate carpool system with dispatch stations and volunteer drivers.',forged:false,reveal:'GENUINE. The boycott was a logistics operation as much as a moral one \u2014 station wagons, insurance battles, and treasurers, for over a year.'},
+  {text:'Nine months before Rosa Parks, fifteen-year-old Claudette Colvin was arrested in Montgomery for refusing to give up her bus seat.',forged:false,reveal:'GENUINE. Colvin later became a plaintiff in Browder v. Gayle, the case that actually struck down bus segregation.'},
+  {text:'Rosa Parks was a tired seamstress with no prior movement involvement who acted on the spur of the moment.',forged:true,reveal:'FORGERY. Parks was secretary of the Montgomery NAACP and had trained at the Highlander Folk School months earlier. "The only tired I was," she wrote, "was tired of giving in." This forgery is the most successful one in the file \u2014 check your own textbook.'}]},
+ {title:'The Little Rock File',brief:'Nine students and one photograph.',claims:[
+  {text:'In September 1957, President Eisenhower sent the 101st Airborne to escort nine Black students into Little Rock Central High after the governor used the National Guard to keep them out.',forged:false,reveal:'GENUINE. Federal paratroopers walked children to class \u2014 the photograph of the century\u2019s constitutional crisis in miniature.'},
+  {text:'The Nine were recruited, organized, and defended by Daisy Bates, president of the Arkansas NAACP and co-publisher of the Arkansas State Press.',forged:false,reveal:'GENUINE. Bates\u2019s home was the campaign\u2019s command post \u2014 and a regular target for rocks and bombs.'},
+  {text:'All nine students went on to graduate together from Central High in the spring of 1958.',forged:true,reveal:'FORGERY. Only Ernest Green graduated in 1958 \u2014 with Dr. King in the audience. The governor then closed Little Rock\u2019s high schools entirely for a year rather than continue integration. The forger graduated a class that segregation dispersed.'}]},
+ {title:'The Birmingham File',brief:'Spring 1963, on newspaper margins.',claims:[
+  {text:'In May 1963, Birmingham\u2019s campaign turned to the Children\u2019s Crusade \u2014 and images of school-age marchers met with fire hoses and police dogs circled the world.',forged:false,reveal:'GENUINE. The children filled the jails the adults could not afford to fill, and the photographs broke the city\u2019s resistance within weeks.'},
+  {text:'That September, a bomb at Sixteenth Street Baptist Church killed four girls \u2014 Addie Mae Collins, Denise McNair, Carole Robertson, and Cynthia Wesley.',forged:false,reveal:'GENUINE. Convictions of the klansmen responsible took until 1977, 2001, and 2002 \u2014 the pace of Alabama justice measured in decades.'},
+  {text:'King composed his Letter from Birmingham Jail in his Atlanta office in the weeks after his release, in response to press criticism.',forged:true,reveal:'FORGERY. King wrote it in the jail itself \u2014 begun in the margins of a smuggled newspaper, continued on scraps supplied by a trusty, answering eight white clergymen\u2019s call for patience. The forger moved the writing desk; the point of the letter is where it stood.'}]},
+ {title:'The March File',brief:'Washington, August 1963.',claims:[
+  {text:'The 1963 March on Washington was conceived by A. Philip Randolph and organized in a matter of weeks by Bayard Rustin.',forged:false,reveal:'GENUINE. Rustin\u2019s operation moved a quarter million people without incident \u2014 down to the mimeographed instructions on sandwich fillings that would survive the heat.'},
+  {text:'Midway through King\u2019s address, gospel singer Mahalia Jackson called out to him to "tell them about the dream."',forged:false,reveal:'GENUINE. King pushed his prepared text aside and preached. The most famous passage of the century was, in that sense, requested from the audience.'},
+  {text:'The "I have a dream" sequence appeared word for word in King\u2019s prepared text, drafted the night before at the Willard Hotel.',forged:true,reveal:'FORGERY. The prepared text did not contain the dream sequence \u2014 King improvised it, drawing on material he had preached before. The forger prefers history typed in advance; it rarely is.'}]},
+ {title:'The Freedom Ride File',brief:'Buses, burnings, and who kept riding.',claims:[
+  {text:'In May 1961, a Freedom Riders\u2019 bus was firebombed outside Anniston, Alabama, and the fleeing riders were beaten by the waiting mob.',forged:false,reveal:'GENUINE. The photograph of the burning bus traveled around the world \u2014 which was precisely what the rides were designed to force into view.'},
+  {text:'When violence halted the original rides, Diane Nash and Nashville students insisted on continuing them, arguing that stopping would teach the mob that violence works.',forged:false,reveal:'GENUINE. "If we do, the movement is dead," Nash said. The rides continued into Mississippi\u2019s jails.'},
+  {text:'The Freedom Rides were organized by the NAACP\u2019s legal office as test cases for its courtroom strategy.',forged:true,reveal:'FORGERY. CORE launched the rides, and students carried them forward \u2014 direct action, not litigation. The NAACP\u2019s leadership was in fact wary of them. The forger filed the movement\u2019s boldest gamble under its most cautious letterhead.'}]},
+ {title:'The Selma File',brief:'Three marches, one bridge.',claims:[
+  {text:'On March 7, 1965 \u2014 Bloody Sunday \u2014 marchers led by John Lewis and Hosea Williams were beaten by state troopers at the Edmund Pettus Bridge; Lewis\u2019s skull was fractured.',forged:false,reveal:'GENUINE. Television networks interrupted programming to show the footage. The calculus in Washington changed within days.'},
+  {text:'The Voting Rights Act was signed into law in August 1965, five months after Bloody Sunday.',forged:false,reveal:'GENUINE. The most effective civil rights statute in American history, written in Selma\u2019s aftermath and in its image.'},
+  {text:'The march from Selma reached Montgomery on its first attempt, escorted by federal troops from the bridge onward.',forged:true,reveal:'FORGERY. It took three attempts. The first ended in blood; the second turned around at the bridge; only the third, under federal protection two weeks later, reached Montgomery. History is mostly stories where you have to keep coming back.'}]},
+ {title:'The Organizer File',brief:'The movement\u2019s working parts.',claims:[
+  {text:'Septima Clark\u2019s citizenship schools taught reading, writing, and the mechanics of voter registration to thousands across the South.',forged:false,reveal:'GENUINE. Clark, a fired schoolteacher, built the movement\u2019s education wing. The paperwork of freedom was her classroom subject.'},
+  {text:'In 1964, Fannie Lou Hamer\u2019s televised testimony about the beatings she endured for registering voters so alarmed President Johnson that he called an impromptu press conference to knock her off the air.',forged:false,reveal:'GENUINE. The networks re-ran her testimony that evening anyway. "I question America," she said \u2014 and America heard it twice.'},
+  {text:'The sit-in campaigns of 1960 were directed week to week from SCLC headquarters in Atlanta, which assigned targets to each campus.',forged:true,reveal:'FORGERY. The sit-ins were student-led and locally organized \u2014 coordination without command. The forger cannot imagine a movement without a headquarters. The students could, and that was the innovation.'}]},
+ {title:'The Memphis File',brief:'Sanitation workers, spring 1968.',claims:[
+  {text:'Striking Memphis sanitation workers in 1968 marched behind signs reading I AM A MAN, after two workers were crushed to death in a malfunctioning truck.',forged:false,reveal:'GENUINE. Echol Cole and Robert Walker died sheltering from rain in the compactor \u2014 the city\u2019s rules gave them nowhere else to sit. Four words on a placard carried the whole argument.'},
+  {text:'Dr. King was assassinated at the Lorraine Motel on April 4, 1968, in Memphis to support the strike.',forged:false,reveal:'GENUINE. His last campaign was a labor campaign \u2014 a fact both his admirers and his critics still routinely forget.'},
+  {text:'The strike collapsed after King\u2019s death, and the sanitation workers returned without a contract.',forged:true,reveal:'FORGERY. Twelve days after the assassination, the city recognized the union and raised wages. The men finished what they and King had started. The forger ended the story at its darkest hour; the workers did not.'}]},
+ {title:'The Black Power File',brief:'Oakland, Greenwood, and a phrase.',claims:[
+  {text:'Stokely Carmichael\u2019s call for "Black Power" during the June 1966 march through Greenwood, Mississippi, put the phrase at the center of national debate.',forged:false,reveal:'GENUINE. The phrase was older, but Greenwood made it a headline \u2014 and a referendum inside the movement itself.'},
+  {text:'The Black Panther Party\u2019s free breakfast program fed thousands of children daily at its height, a model that prefigured expanded federal school breakfast programs.',forged:false,reveal:'GENUINE. J. Edgar Hoover privately identified the breakfasts \u2014 not the guns \u2014 as the program most worth destroying. Read that twice.'},
+  {text:'The Black Panther Party was founded in New York by Malcolm X in the final year of his life.',forged:true,reveal:'FORGERY. Huey Newton and Bobby Seale founded the party in Oakland in October 1966, the year after Malcolm\u2019s assassination \u2014 influenced by him, founded without him. The forger attached the era\u2019s most famous name to an organization he never saw.'}]},
+ {title:'The Verdict File',brief:'Law, courts, and the pace of change.',claims:[
+  {text:'Thurgood Marshall argued Brown v. Board of Education before the Supreme Court and later became the Court\u2019s first Black justice.',forged:false,reveal:'GENUINE. Marshall argued thirty-two cases before the Court and won twenty-nine before joining it in 1967.'},
+  {text:'In 1968, Shirley Chisholm of New York became the first Black woman elected to the United States Congress.',forged:false,reveal:'GENUINE. "Unbought and unbossed." Four years later she ran for president and collected 152 delegates.'},
+  {text:'Following Brown v. Board in 1954, Southern schools desegregated within the year, with full compliance achieved by the fall of 1955.',forged:true,reveal:'FORGERY. The Court ordered desegregation only "with all deliberate speed," and massive resistance kept most Southern Black students in segregated schools for over a decade. Beware any document in which justice arrives on schedule.'}]}
+]},
+/* ---------- 5. POLITICS ---------- */
+{key:'politics',color:'var(--p2)',name:'The Politics Files',desc:'Ballots, benches, and firsts.',cases:[
+ {title:'The First Ballots File',brief:'Convention floors of the Gilded Age.',claims:[
+  {text:'At the 1888 Republican convention, Frederick Douglass received a vote for the presidential nomination \u2014 the first Black American to appear in a major party\u2019s roll call for president.',forged:false,reveal:'GENUINE. One vote, on one ballot \u2014 and a marker laid down eighty years before the campaigns that followed.'},
+  {text:'Blanche K. Bruce of Mississippi became the first Black senator to serve a full term, and later received votes for the vice-presidential nomination.',forged:false,reveal:'GENUINE. Bruce also presided over the Senate \u2014 a formerly enslaved man wielding the gavel over the chamber, within twenty years of emancipation.'},
+  {text:'Bruce went on to be elected governor of Mississippi at the close of Reconstruction.',forged:true,reveal:'FORGERY. No Black governor was elected in the era \u2014 in Mississippi or anywhere else. Redemption ended such possibilities for a century. The forger keeps trying to elect that governor; keep catching him.'}]},
+ {title:'The Trailblazer File',brief:'The class of the late sixties.',claims:[
+  {text:'In 1966, Edward Brooke of Massachusetts became the first Black senator since Reconstruction \u2014 and the first ever elected by popular vote.',forged:false,reveal:'GENUINE. An eighty-five-year gap between Black senators is itself a document \u2014 read it carefully.'},
+  {text:'In 1967, Carl Stokes of Cleveland became the first Black mayor of a major American city.',forged:false,reveal:'GENUINE. Elected the same night Richard Hatcher won Gary, Indiana \u2014 the Great Migration arriving at city hall.'},
+  {text:'Jesse Jackson won the 1988 Democratic presidential nomination before losing the general election.',forged:true,reveal:'FORGERY. Jackson won a string of primaries and caucuses and finished a strong second, but the nomination went to Michael Dukakis. The forger promoted a historic campaign into a victory it never claimed \u2014 the real showing needs no help.'}]},
+ {title:'The Jordan File',brief:'A voice from Texas.',claims:[
+  {text:'Barbara Jordan\u2019s televised statement during the 1974 Watergate hearings \u2014 "My faith in the Constitution is whole" \u2014 became one of the most celebrated speeches in congressional history.',forged:false,reveal:'GENUINE. A first-term congresswoman delivered the proceedings\u2019 definitive constitutional argument.'},
+  {text:'In 1976, Jordan became the first Black American and the first woman to deliver a keynote address at a Democratic National Convention.',forged:false,reveal:'GENUINE. Two firsts in one speech \u2014 and it polled as the convention\u2019s highlight.'},
+  {text:'Jordan was the first Black woman ever elected to the United States Congress.',forged:true,reveal:'FORGERY. That was Shirley Chisholm, in 1968. Jordan and Andrew Young, elected in 1972, were the first Black members from the South since Reconstruction \u2014 a different first, and its own kind of milestone. The forger swapped one pioneer\u2019s medal onto another\u2019s coat.'}]},
+ {title:'The Cabinet File',brief:'Foggy Bottom firsts.',claims:[
+  {text:'In 2001, Colin Powell became the first Black Secretary of State.',forged:false,reveal:'GENUINE. Powell had already been the first Black chairman of the Joint Chiefs \u2014 two of the government\u2019s most senior posts.'},
+  {text:'In 2005, Condoleezza Rice became the first Black woman to serve as Secretary of State.',forged:false,reveal:'GENUINE. Rice had been the first woman to serve as National Security Advisor before that.'},
+  {text:'Before joining the Supreme Court, Thurgood Marshall served as Attorney General of the United States under President Johnson.',forged:true,reveal:'FORGERY. Marshall was Solicitor General \u2014 the government\u2019s advocate before the Court, not the head of the Justice Department. The forger promoted him one office too far; the real r\u00e9sum\u00e9 was historic enough.'}]},
+ {title:'The Obama File',brief:'2004 to 2008.',claims:[
+  {text:'Barack Obama\u2019s keynote address at the 2004 Democratic convention \u2014 delivered while still a state senator \u2014 made him a national figure overnight.',forged:false,reveal:'GENUINE. Four years from state legislature to the presidency \u2014 the fastest such ascent in modern American politics.'},
+  {text:'In November 2008, Obama was elected the first Black president of the United States.',forged:false,reveal:'GENUINE. He carried states no Democrat had won in decades \u2014 including, by fourteen thousand votes, North Carolina.'},
+  {text:'Obama was the first Black candidate ever to win a presidential primary.',forged:true,reveal:'FORGERY. Jesse Jackson won primaries and caucuses in both 1984 and 1988, and Shirley Chisholm collected delegates in 1972. The forger erased the shoulders being stood on \u2014 which is the oldest forgery of all.'}]},
+ {title:'The Judiciary File',brief:'The bench before the bench.',claims:[
+  {text:'Constance Baker Motley argued ten civil rights cases before the Supreme Court \u2014 including James Meredith\u2019s admission to Ole Miss \u2014 and won nine of them.',forged:false,reveal:'GENUINE. Motley was the first Black woman to argue at the Court. Her win rate speaks for itself.'},
+  {text:'In 1966, Motley became the first Black woman appointed to the federal bench.',forged:false,reveal:'GENUINE. Senate opposition delayed her confirmation for months \u2014 the price of arriving first.'},
+  {text:'President Reagan appointed Motley to the Supreme Court in 1981, where she served one term before retiring.',forged:true,reveal:'FORGERY. The 1981 appointment was Sandra Day O\u2019Connor. No Black woman sat on the Supreme Court until Ketanji Brown Jackson in 2022 \u2014 a gap of two hundred thirty-three years that the forger quietly shortened by four decades.'}]},
+ {title:'The City Hall File',brief:'Mayors of the biggest rooms.',claims:[
+  {text:'Harold Washington was elected Chicago\u2019s first Black mayor in 1983, after a registration drive added over one hundred thousand new voters.',forged:false,reveal:'GENUINE. The white-majority city council then fought him for years in what the papers called Council Wars \u2014 winning office and wielding it proved to be separate battles.'},
+  {text:'David Dinkins was elected New York City\u2019s first Black mayor in 1989.',forged:false,reveal:'GENUINE. The nation\u2019s largest city, a century and a half after emancipation.'},
+  {text:'No city of the former Confederacy elected a Black mayor until the 1990s.',forged:true,reveal:'FORGERY. Maynard Jackson won Atlanta in 1973 \u2014 and used the office to route city contracts toward Black businesses at unprecedented scale. New Orleans followed with Dutch Morial in 1977. The forger moved the South\u2019s clock twenty years slow.'}]},
+ {title:'The Voting File',brief:'Registration, before and after.',claims:[
+  {text:'Before the Voting Rights Act, fewer than seven percent of eligible Black Mississippians were registered to vote; within a few years of the Act, the figure approached sixty percent.',forged:false,reveal:'GENUINE. The statute worked \u2014 immediately and measurably \u2014 which is precisely why its enforcement provisions have been fought over ever since.'},
+  {text:'In 1992, Carol Moseley Braun of Illinois became the first Black woman elected to the United States Senate.',forged:false,reveal:'GENUINE. One hundred and three years after the Senate\u2019s first Black member, its first Black woman.'},
+  {text:'The Voting Rights Act passed both houses of Congress unanimously, reflecting a national consensus.',forged:true,reveal:'FORGERY. The Act passed by large majorities, but dozens of members \u2014 overwhelmingly from the states it targeted \u2014 voted no. The forger\u2019s "unanimous" erases exactly which colleagues stood where, which is worth remembering when the same rooms vote today.'}]},
+ {title:'The Chisholm File',brief:'1972, unbought and unbossed.',claims:[
+  {text:'Shirley Chisholm\u2019s 1972 campaign made her the first Black candidate and the first woman to seek the Democratic presidential nomination in the primary era, and she took 152 delegates to the convention.',forged:false,reveal:'GENUINE. She ran on a shoestring against the party\u2019s entire establishment. "I ran because somebody had to do it first."'},
+  {text:'When rival George Wallace was shot during the campaign, Chisholm visited him in the hospital \u2014 to the fury of many supporters.',forged:false,reveal:'GENUINE. Wallace never forgot it; years later his influence helped pass her bill extending wage protections to domestic workers. Politics is long.'},
+  {text:'The Democratic Party awarded Chisholm the vice-presidential slot at the 1972 convention in recognition of her campaign.',forged:true,reveal:'FORGERY. No such offer came \u2014 she was largely frozen out, barred initially even from the televised debates until she fought her way in by complaint to the FCC. The forger imagined a party gracious in ways the record does not show.'}]},
+ {title:'The Long Game File',brief:'Redistricting, retirements, and returns.',claims:[
+  {text:'After Reconstruction\u2019s Black congressmen were forced out, George Henry White of North Carolina \u2014 the last of them \u2014 left office in 1901; no Black member from the South would serve again until 1972.',forged:false,reveal:'GENUINE. White\u2019s farewell address promised a return: "Phoenix-like he will rise up some day and come again." The wait was seventy-one years.'},
+  {text:'The Congressional Black Caucus was founded in 1971 with thirteen members.',forged:false,reveal:'GENUINE. Thirteen members then; several times that today \u2014 the Great Migration, the Voting Rights Act, and redistricting litigation all written in the roster.'},
+  {text:'George Henry White returned to Congress in his old age, fulfilling his farewell prophecy in person.',forged:true,reveal:'FORGERY. White never returned \u2014 he moved north, founded a bank and a Black town in New Jersey, and died in 1918. The prophecy was fulfilled by others, half a century on. The forger wanted the poetry complete; history assigns the sequel to different authors.'}]}
+]},
+/* ---------- 6. SPORTS ---------- */
+{key:'sports',color:'var(--red)',name:'The Sporting Files',desc:'Champions, barriers, and box scores.',cases:[
+ {title:'The Heavyweight File',brief:'Champions, and one team that never fielded him.',claims:[
+  {text:'In 1908, Jack Johnson became the first Black heavyweight champion of the world, setting off a frantic search for a "great white hope."',forged:false,reveal:'GENUINE. Johnson\u2019s 1910 defeat of Jim Jeffries triggered riots across the country. His crime, in many eyes, was winning without apology.'},
+  {text:'Jesse Owens won four gold medals at the 1936 Berlin Olympics, held under Hitler\u2019s regime.',forged:false,reveal:'GENUINE. Owens returned to a country where he rode freight elevators to his own banquets. "Hitler didn\u2019t snub me," he said. "It was our president who snubbed me."'},
+  {text:'Jackie Robinson began his professional career with the Harlem Globetrotters before the Dodgers signed him away from basketball.',forged:true,reveal:'FORGERY. Robinson played baseball for the Kansas City Monarchs of the Negro leagues before the Dodgers\u2019 organization signed him. The forger shuffled two true things into one false sentence.'}]},
+ {title:'The Ali File',brief:'The title, the draft, and the river.',claims:[
+  {text:'In 1967, Muhammad Ali was stripped of his heavyweight title and banned from boxing for refusing induction into the Army on religious grounds.',forged:false,reveal:'GENUINE. He lost three and a half prime years \u2014 the cost of the most famous act of conscientious objection in American sport.'},
+  {text:'In 1971, the Supreme Court unanimously overturned Ali\u2019s conviction.',forged:false,reveal:'GENUINE. Clay v. United States, 8\u20130. Vindication, though nobody returned the years.'},
+  {text:'After being refused service at a Louisville diner, Ali threw his Olympic gold medal into the Ohio River \u2014 an act witnessed and reported at the time.',forged:true,reveal:'FORGERY \u2014 at least as stated. The story appears only in Ali\u2019s ghostwritten 1975 autobiography; no contemporary account exists, friends doubted it, and the likelier truth is the medal was simply lost. He received a replacement at the 1996 Atlanta Games. A story\u2019s fame is not its documentation \u2014 even when the teller is the subject.'}]},
+ {title:'The Gibson File',brief:'Tennis whites at Wimbledon, 1957.',claims:[
+  {text:'In 1956, Althea Gibson became the first Black player to win a Grand Slam tournament, taking the French championship.',forged:false,reveal:'GENUINE. Wimbledon and the U.S. title followed in 1957 and 1958 \u2014 twice each.'},
+  {text:'Gibson received a ticker-tape parade in New York after her 1957 Wimbledon victory.',forged:false,reveal:'GENUINE. Then she went home to a sport with no prize money and a country with segregated hotels along her touring routes.'},
+  {text:'Gibson retired wealthy from tennis endorsements, the first Black athlete to command national sponsorship deals.',forged:true,reveal:'FORGERY. Amateur-era tennis paid nothing, and endorsements never came \u2014 Gibson struggled financially for much of her life, later trying professional golf to make a living. The forger paid her what the era owed and withheld.'}]},
+ {title:'The Rudolph File',brief:'Rome, 1960.',claims:[
+  {text:'Wilma Rudolph, who wore a leg brace as a child after polio, won three gold medals at the 1960 Rome Olympics.',forged:false,reveal:'GENUINE. Doctors doubted she would walk unassisted; she became the fastest woman in the world \u2014 the first American woman to take three golds in a single Games.'},
+  {text:'Rudolph insisted that her hometown victory celebration in Clarksville, Tennessee be integrated \u2014 and it became the town\u2019s first integrated municipal event.',forged:false,reveal:'GENUINE. She used the leverage of the medals immediately, and at home, where it was hardest.'},
+  {text:'Rudolph went on to compete in five Olympic Games, adding medals across three decades.',forged:true,reveal:'FORGERY. She competed in two \u2014 1956 and 1960 \u2014 and retired at twenty-two, at the top. The forger stretched a lightning strike into a weather pattern.'}]},
+ {title:'The Ashe File',brief:'Centre Court and beyond.',claims:[
+  {text:'In 1975, Arthur Ashe became the first Black man to win the Wimbledon singles title, upsetting Jimmy Connors.',forged:false,reveal:'GENUINE. He dismantled the heavy favorite with a match plan of soft angles and patience \u2014 chess at ninety miles an hour.'},
+  {text:'Ashe was arrested protesting apartheid outside the South African embassy, and after contracting HIV from a blood transfusion, founded a health foundation and addressed the UN on AIDS.',forged:false,reveal:'GENUINE. He treated his final illness as one more organizing problem. "From what we get, we can make a living; what we give, however, makes a life."'},
+  {text:'Ashe completed a calendar-year Grand Slam in 1975, winning all four majors.',forged:true,reveal:'FORGERY. Ashe won three majors across his career \u2014 no man completed a calendar Slam in the open era until it remained unfinished business for everyone. The forger awarded the sport\u2019s rarest feat as a bonus.'}]},
+ {title:'The Negro Leagues File',brief:'The other major leagues.',claims:[
+  {text:'Rube Foster founded the Negro National League in 1920, creating the first stable Black professional baseball league.',forged:false,reveal:'GENUINE. Foster ran the league, managed a team, and had been the era\u2019s dominant pitcher \u2014 founder, commissioner, and franchise in one man.'},
+  {text:'Satchel Paige became the oldest rookie in major league history when he debuted for Cleveland in 1948 at age 42 \u2014 and helped pitch them to a pennant.',forged:false,reveal:'GENUINE. He had already been perhaps the most famous pitcher in America for two decades \u2014 in the leagues the majors pretended not to see.'},
+  {text:'Major League Baseball counted Negro League statistics in its official records from the beginning, treating the leagues as equals on paper.',forged:true,reveal:'FORGERY. MLB designated the Negro Leagues as major leagues only in 2020, and merged the statistics into its official records in 2024 \u2014 a full century after Foster\u2019s founding. Josh Gibson\u2019s batting title arrived seventy-seven years after his death. The forger backdated a respect that took a hundred years.'}]},
+ {title:'The Gridiron File',brief:'Professional football\u2019s closed and opened doors.',claims:[
+  {text:'Fritz Pollard became the NFL\u2019s first Black head coach in 1921, while still playing.',forged:false,reveal:'GENUINE. Player-coach in the league\u2019s founding years. The second Black head coach would not be hired until 1989 \u2014 sit with that gap.'},
+  {text:'In January 1988, Doug Williams became the first Black quarterback to start and win a Super Bowl, earning MVP honors with four touchdown passes in one quarter.',forged:false,reveal:'GENUINE. The performance answered a generation of coaches who had moved Black quarterbacks to other positions "for their own good."'},
+  {text:'The NFL never formally excluded Black players; participation simply declined naturally during the Depression.',forged:true,reveal:'FORGERY. The league operated a color ban from 1934 to 1946 \u2014 unwritten but airtight, and reintegration came only when the Rams needed a public stadium lease in Los Angeles. "Naturally" is doing criminal work in that sentence.'}]},
+ {title:'The Court File',brief:'Boston and El Paso, 1966.',claims:[
+  {text:'Bill Russell won eleven NBA championships with the Celtics and in 1966 became the first Black head coach in modern major American professional sports.',forged:false,reveal:'GENUINE. He coached the team while still playing center for it \u2014 and won two more titles that way.'},
+  {text:'In 1966, Texas Western started five Black players in the NCAA final and beat Adolph Rupp\u2019s all-white Kentucky team for the championship.',forged:false,reveal:'GENUINE. Recruiting in the South was never the same \u2014 the game\u2019s own logic finished what principle had not.'},
+  {text:'Russell won five Finals MVP awards across his championship runs.',forged:true,reveal:'FORGERY. The Finals MVP award was created only in 1969, Russell\u2019s final season, and he never won it. The league later fixed the irony by naming the trophy after him. The forger gave him the hardware; history gave him the nameplate.'}]},
+ {title:'The Mexico City File',brief:'One podium, two fists, fifty years of argument.',claims:[
+  {text:'At the 1968 Olympics, sprinters Tommie Smith and John Carlos raised gloved fists during the medal ceremony and were expelled from the Olympic Village within days.',forged:false,reveal:'GENUINE. The silver medalist, Australia\u2019s Peter Norman, wore their protest badge in solidarity \u2014 and paid for it at home too. Smith and Carlos were pallbearers at his funeral.'},
+  {text:'Twenty years earlier, high jumper Alice Coachman had become the first Black woman from any country to win an Olympic gold medal, at the 1948 London Games.',forged:false,reveal:'GENUINE. The mayor of her Georgia hometown attended her celebration \u2014 and refused to shake her hand.'},
+  {text:'Smith and Carlos were stripped of their medals by the International Olympic Committee.',forged:true,reveal:'FORGERY \u2014 and one of the most repeated in all of sports. They kept their medals; the IOC forced their expulsion from the Village, but no medal was ever revoked. Half a century of retellings upgraded the punishment. Even outrage should be fact-checked.'}]},
+ {title:'The Sisters File',brief:'Compton to Centre Court.',claims:[
+  {text:'Venus Williams led the public campaign that won equal prize money for women at Wimbledon, achieved in 2007 \u2014 and won the title that year.',forged:false,reveal:'GENUINE. She made the argument in the press, in meetings, and then, for emphasis, on the grass.'},
+  {text:'Serena Williams won twenty-three Grand Slam singles titles, the most of any player in the open era.',forged:false,reveal:'GENUINE. The last of them won, as the world later learned, in the early weeks of pregnancy.'},
+  {text:'Serena completed the calendar-year Grand Slam in 2015, sweeping all four majors in a single season.',forged:true,reveal:'FORGERY \u2014 narrowly. Serena held all four titles at once across 2014\u201315 (the "Serena Slam") and came two matches from the calendar Slam in 2015 before a semifinal upset. The forger rounded the near-miss up; the true record is unbelievable enough without it.'}]}
+]},
+/* ---------- 7. PIONEER ---------- */
+{key:'pioneer',color:'var(--ink)',name:'The Pioneer Files',desc:'Invention, medicine, flight, space, letters.',cases:[
+ {title:'The Patent File',brief:'Invention and attribution. The forger loves a famous name.',claims:[
+  {text:'Garrett Morgan patented a three-position traffic signal in 1923 and had earlier invented a safety hood used in a dramatic tunnel rescue.',forged:false,reveal:'GENUINE. Morgan sold his signal patent to General Electric. His safety hood saved lives in the 1916 Cleveland waterworks rescue \u2014 which he attended in person.'},
+  {text:'Madam C. J. Walker built a haircare empire that made her one of the wealthiest self-made women in America, widely cited as the first self-made female millionaire.',forged:false,reveal:'GENUINE. Walker built manufacturing, a sales-agent network, and a philanthropy from nothing.'},
+  {text:'Lewis Latimer held the original patent for the incandescent light bulb, which he later licensed to Thomas Edison.',forged:true,reveal:'FORGERY. Edison held the famous patent. Latimer\u2019s real achievement \u2014 a superior carbon filament and expertise that made him invaluable to Edison\u2019s own company \u2014 needs no exaggeration.'}]},
+ {title:'The Press File',brief:'The Black press made and moved history.',claims:[
+  {text:'Freedom\u2019s Journal, established in New York in 1827, was the first Black-owned and operated newspaper in the United States.',forged:false,reveal:'GENUINE. Its opening editorial declared the mission: "We wish to plead our own cause."'},
+  {text:'Pullman porters smuggled the Chicago Defender into the South, where its pages urging migration north helped fuel the Great Migration.',forged:false,reveal:'GENUINE. Banned in parts of the South, the Defender traveled the rails in porters\u2019 bags and was read aloud in barbershops and churches.'},
+  {text:'Frederick Douglass founded the Chicago Defender in his final years as a voice for the coming migration.',forged:true,reveal:'FORGERY. Robert S. Abbott founded the Defender in 1905, a decade after Douglass died. Douglass\u2019s paper was The North Star \u2014 a fact the forger counted on you half-remembering.'}]},
+ {title:'The Campus File',brief:'Three claims about HBCUs. One never happened.',claims:[
+  {text:'The institution now known as Cheyney University of Pennsylvania, founded in 1837, is generally recognized as the nation\u2019s oldest HBCU.',forged:false,reveal:'GENUINE. Founded as the Institute for Colored Youth with a Quaker bequest, decades before the Civil War.'},
+  {text:'The college founded by James E. Shepard in Durham in 1910 became the nation\u2019s first state-supported liberal arts college for Black students.',forged:false,reveal:'GENUINE. Shepard\u2019s school became North Carolina College \u2014 today North Carolina Central University \u2014 and holds that distinction in the history of public higher education.'},
+  {text:'Howard University was founded by Frederick Douglass in 1867 and named in his honor after his death.',forged:true,reveal:'FORGERY. Howard was named for General Oliver O. Howard of the Freedmen\u2019s Bureau, who helped found it. The forger swapped in the era\u2019s most famous name \u2014 the oldest trick in the file.'}]},
+ {title:'The Flight File',brief:'Aviators, licensed and legendary.',claims:[
+  {text:'Unable to find an American flight school that would admit her, Bessie Coleman learned French, sailed to France, and earned an international pilot\u2019s license in 1921.',forged:false,reveal:'GENUINE. The first African American woman to hold a pilot\u2019s license got it in a language she learned for the purpose. She refused to perform at airshows that barred Black spectators.'},
+  {text:'The Tuskegee Airmen flew bomber-escort missions over Europe in the Second World War and compiled a combat record that helped force the military\u2019s desegregation.',forged:false,reveal:'GENUINE. The "Red Tails" flew hundreds of escort missions; Truman\u2019s 1948 desegregation order had their record in the argument.'},
+  {text:'Bessie Coleman flew combat reconnaissance missions for France during the First World War before earning her civilian license.',forged:true,reveal:'FORGERY. Coleman\u2019s license came in 1921, after the war, and her flying was barnstorming, not combat. The forger promoted her to a war she never fought \u2014 as if her true story lacked nerve.'}]},
+ {title:'The Medical File',brief:'Two surgeons, one stubborn myth.',claims:[
+  {text:'In 1893, Dr. Daniel Hale Williams performed one of the first successful surgeries on the pericardium \u2014 the sac around the heart \u2014 at Provident Hospital in Chicago, which he founded.',forged:false,reveal:'GENUINE. Provident was also the nation\u2019s first Black-owned hospital, training the Black doctors and nurses the profession excluded.'},
+  {text:'Dr. Charles Drew pioneered large-scale blood banking and directed the Blood for Britain program early in the Second World War.',forged:false,reveal:'GENUINE. Drew resigned in protest when the military ordered blood segregated by the donor\u2019s race \u2014 a policy with no scientific basis, as he pointedly said.'},
+  {text:'Charles Drew bled to death in 1950 after a whites-only North Carolina hospital refused him a transfusion following his car accident.',forged:true,reveal:'FORGERY \u2014 and the most famous one in this cabinet. Drew was treated by the doctors at Alamance General; his injuries were unsurvivable. The legend spread because it was so plausible \u2014 Black patients were routinely turned away, and some died for it. The myth borrows a real injustice and pins it on the wrong ghost.'}]},
+ {title:'The Frontier File',brief:'Poles, orbits, and a surveyor\u2019s legend.',claims:[
+  {text:'Matthew Henson stood with Robert Peary\u2019s 1909 North Pole expedition \u2014 and by several accounts, including his own, was the first of the party to reach the pole.',forged:false,reveal:'GENUINE. Henson, the expedition\u2019s most skilled sledge driver and translator, broke trail ahead of Peary. Recognition took most of a century.'},
+  {text:'Before John Glenn\u2019s 1962 orbital flight, he asked that mathematician Katherine Johnson personally recheck the computer\u2019s trajectory calculations.',forged:false,reveal:'GENUINE. "If she says they\u2019re good, then I\u2019m ready to go." The machine was new; her arithmetic was proven.'},
+  {text:'After Pierre L\u2019Enfant was dismissed, Benjamin Banneker redrew the complete plans for Washington, D.C. from memory, saving the capital\u2019s design.',forged:true,reveal:'FORGERY. Banneker was a genuine astronomer and almanac author who assisted Andrew Ellicott\u2019s boundary survey of the federal district \u2014 a real distinction. The from-memory rescue is legend layered on later. His almanacs, and his letter confronting Jefferson on slavery, are the better boast.'}]},
+ {title:'The Letters File',brief:'First books and first prizes.',claims:[
+  {text:'In 1773, Phillis Wheatley became the first African American to publish a book of poetry \u2014 after a panel of Boston notables examined her to verify she had written it.',forged:false,reveal:'GENUINE. An enslaved teenager interrogated by eighteen men to prove her own genius. The book was published in London; Boston printers declined.'},
+  {text:'In 1950, Gwendolyn Brooks became the first Black writer to win a Pulitzer Prize, for her poetry collection Annie Allen.',forged:false,reveal:'GENUINE. Brooks wrote of Bronzeville\u2019s kitchens and corners and made the committee see literature there.'},
+  {text:'Ralph Ellison\u2019s Invisible Man was suppressed on publication and won no literary recognition until after his death.',forged:true,reveal:'FORGERY. Invisible Man won the National Book Award in 1953, beating Hemingway\u2019s The Old Man and the Sea. The forger likes martyrdom stories; sometimes the honest record contains a triumph.'}]},
+ {title:'The Stage & Screen File',brief:'Oscar night, with seating chart.',claims:[
+  {text:'Hattie McDaniel became the first Black Oscar winner in 1940 \u2014 and was seated at a segregated table at the ceremony itself.',forged:false,reveal:'GENUINE. The hotel hosting the banquet had a no-Blacks policy; the studio arranged a special exception, at a table apart. The award and the insult arrived the same evening.'},
+  {text:'In 1964, Sidney Poitier became the first Black man to win the Academy Award for Best Actor, for Lilies of the Field.',forged:false,reveal:'GENUINE. It would be thirty-eight years before a second Black man won the category.'},
+  {text:'Paul Robeson won the Academy Award for Best Actor for the 1936 film Show Boat.',forged:true,reveal:'FORGERY. Robeson\u2019s "Ol\u2019 Man River" is immortal, but no Oscar came \u2014 he was never even nominated, and his passport was later revoked for his politics. The forger awarded him the honor his country withheld; history should record that it was withheld.'}]},
+ {title:'The Space File',brief:'Orbits achieved and orbits denied.',claims:[
+  {text:'In 1983, Guion Bluford became the first African American in space, aboard the shuttle Challenger.',forged:false,reveal:'GENUINE. An Air Force combat veteran with a doctorate in aerospace engineering \u2014 he flew four shuttle missions in all.'},
+  {text:'In 1992, Dr. Mae Jemison became the first Black woman in space \u2014 a physician who began each shift on orbit with a salute borrowed from Star Trek.',forged:false,reveal:'GENUINE. Lieutenant Uhura had helped put the idea in her head; Jemison later appeared on the show. The loop closed.'},
+  {text:'Ed Dwight, selected for astronaut training in the early 1960s, flew on a Gemini mission in 1965 as the program\u2019s first Black astronaut.',forged:true,reveal:'FORGERY \u2014 with a bitter true half. Dwight was put forward for training in 1961, subjected to open hostility, and never assigned a flight; he left the program and became a sculptor of memorials. He finally reached space in 2024, at ninety, aboard a private flight \u2014 sixty years late. The forger gave him the mission the sixties refused.'}]},
+ {title:'The Boardroom File',brief:'Balance sheets and firsts.',claims:[
+  {text:'In 1987, Reginald Lewis acquired Beatrice International in a leveraged buyout, creating the first Black-owned company to top a billion dollars in revenue.',forged:false,reveal:'GENUINE. Lewis\u2019s memoir title asked the operative question: Why Should White Guys Have All the Fun?'},
+  {text:'John H. Johnson, publisher of Ebony and Jet, became the first Black American to appear on the Forbes 400 list of the wealthiest Americans.',forged:false,reveal:'GENUINE. He started the company in 1942 with a $500 loan secured on his mother\u2019s furniture. Jet\u2019s decision to publish the Emmett Till photographs is part of this same ledger.'},
+  {text:'Johnson also founded Essence magazine as a companion to Ebony.',forged:true,reveal:'FORGERY. Essence was founded in 1970 by a separate group of Black entrepreneurs \u2014 competitors, not subsidiaries. The forger merged two publishing empires that history kept distinct.'}]}
+]},
+/* ---------- 8. JAZZ & BLUES ---------- */
+{key:'jazz',color:'var(--p2)',name:'The Jazz & Blues Files',desc:'From Storyville to Birdland.',cases:[
+ {title:'The Concert File',brief:'A contralto, a saxophonist, and a borrowed name.',claims:[
+  {text:'After the Daughters of the American Revolution barred her from Constitution Hall in 1939, Marian Anderson sang from the steps of the Lincoln Memorial before a crowd of 75,000.',forged:false,reveal:'GENUINE. Eleanor Roosevelt resigned from the DAR over the insult. Anderson opened with "My Country, \u2019Tis of Thee" \u2014 a choice that was itself an argument.'},
+  {text:'John Coltrane was born in Hamlet, North Carolina, and spent his boyhood in the state before moving north.',forged:false,reveal:'GENUINE. Born in Hamlet in 1926, raised in High Point. North Carolina\u2019s claim on the saxophone is secure.'},
+  {text:'Duke Ellington was born in Durham, North Carolina, and took his nickname from Duke University, where his father worked.',forged:true,reveal:'FORGERY. Ellington was born in Washington, D.C., and earned "Duke" from a boyhood friend for his elegant manner. The forger built this one entirely from a coincidence of names.'}]},
+ {title:'The Strange Fruit File',brief:'The song a label refused.',claims:[
+  {text:'When Columbia declined to record "Strange Fruit," Billie Holiday cut it for the small Commodore label in 1939; clubs would dim the lights and stop service while she sang it.',forged:false,reveal:'GENUINE. Caf\u00e9 Society made it her closing number: lights down, waiters still, no encore. A protest song staged as a verdict.'},
+  {text:'"Strange Fruit" was written by Abel Meeropol, a Bronx schoolteacher, first as a poem published under a pen name.',forged:false,reveal:'GENUINE. Meeropol and his wife later adopted the sons of Julius and Ethel Rosenberg \u2014 a life spent adjacent to the century\u2019s storms.'},
+  {text:'Holiday wrote the song herself after witnessing a lynching while touring the South.',forged:true,reveal:'FORGERY. Holiday made the song immortal but did not write it, and no such witnessed event is documented. The forger fused the singer with the song \u2014 an error her own ghostwritten memoir helped along.'}]},
+ {title:'The Satchmo File',brief:'New Orleans, a cornet, and a boys\u2019 home.',claims:[
+  {text:'Louis Armstrong learned cornet in the band of the Colored Waif\u2019s Home for Boys in New Orleans, where he had been sent at about eleven years old.',forged:false,reveal:'GENUINE. A New Year\u2019s arrest put a horn in his hands. The twentieth century\u2019s most influential musician was trained in a reform school band.'},
+  {text:'Armstrong\u2019s 1920s recordings with his Hot Five and Hot Seven \u2014 including pioneering scat vocals \u2014 reshaped jazz around the improvising soloist.',forged:false,reveal:'GENUINE. Before Armstrong, jazz was ensemble music; after him, it had a lead voice. Nearly everything since descends from those sides.'},
+  {text:'Armstrong invented jazz itself in the Chicago clubs of the early 1920s.',forged:true,reveal:'FORGERY. Jazz was born in New Orleans before Armstrong\u2019s career \u2014 in the music of Buddy Bolden, King Oliver, and dozens of uncredited others. Armstrong transformed the music; no one person invented it. The forger prefers a single hero to a whole culture.'}]},
+ {title:'The Empress File',brief:'Bessie Smith, and a myth with a familiar shape.',claims:[
+  {text:'Bessie Smith, the Empress of the Blues, was the highest-paid Black entertainer of the 1920s, touring in her own railroad car.',forged:false,reveal:'GENUINE. The private car was both luxury and necessity \u2014 Southern hotels would not have her. Her record sales helped keep Columbia solvent.'},
+  {text:'Smith died in 1937 from injuries sustained in a car crash on Highway 61 in Mississippi.',forged:false,reveal:'GENUINE. She was gravely injured near Clarksdale and did not survive surgery.'},
+  {text:'Smith bled to death after a whites-only hospital refused to admit her \u2014 a refusal documented by the attending ambulance driver.',forged:true,reveal:'FORGERY \u2014 the same shape as the Charles Drew legend. She was taken directly to Clarksdale\u2019s Black hospital; the refusal story spread from a magazine account later disputed by those present, and Edward Albee built a play on it. The myth persists because such refusals truly happened to others \u2014 which is exactly why the record must stay precise.'}]},
+ {title:'The First Records File',brief:'Who got on wax, and when.',claims:[
+  {text:'W. C. Handy published "St. Louis Blues" in 1914, carrying the blues from Southern streets into national sheet music and the concert hall.',forged:false,reveal:'GENUINE. "The Father of the Blues" was really its great codifier \u2014 he wrote down what the Delta already knew.'},
+  {text:'Mamie Smith\u2019s 1920 recording "Crazy Blues" \u2014 the first blues record by a Black singer \u2014 sold tens of thousands of copies within weeks and opened the "race records" market.',forged:false,reveal:'GENUINE. The industry discovered, to its surprise, that Black customers bought records. Every label scrambled to sign blues women for a decade.'},
+  {text:'Record companies found no commercial market for blues recordings until the 1940s, when wartime audiences discovered the genre.',forged:true,reveal:'FORGERY. The blues sold spectacularly from 1920 onward \u2014 that is the whole point of the Mamie Smith story. The forger delayed by twenty years a gold rush that made careers and labels overnight.'}]},
+ {title:'The Birdland File',brief:'Bebop after midnight.',claims:[
+  {text:'Charlie Parker, Dizzy Gillespie, and Thelonious Monk worked out the harmonic language of bebop in after-hours sessions at Harlem clubs like Minton\u2019s Playhouse in the early 1940s.',forged:false,reveal:'GENUINE. The music was built after the paying customers went home \u2014 a laboratory disguised as a jam session.'},
+  {text:'A 1942\u201344 musicians\u2019 union recording ban means bebop\u2019s crucial development years are barely documented on record.',forged:false,reveal:'GENUINE. The revolution happened largely off-tape \u2014 one reason it seemed to arrive fully formed, and one of history\u2019s great missing archives.'},
+  {text:'Bebop was commissioned by the big ballrooms as faster dance music for the jitterbug craze.',forged:true,reveal:'FORGERY. Bebop was a deliberate turn away from dance-band commerce \u2014 music for listening, made by musicians tired of being entertainment. The ballrooms mostly hated it. The forger got the direction of the revolt exactly backwards.'}]},
+ {title:'The Kind of Blue File',brief:'March and April, 1959.',claims:[
+  {text:'Miles Davis\u2019s Kind of Blue became the best-selling jazz album of all time.',forged:false,reveal:'GENUINE. It still sells, every week, sixty-five years on \u2014 the record shops file it under "gateway."'},
+  {text:'The album was recorded in just two studio sessions, with the band playing from sketches Davis brought in \u2014 several tracks are first takes.',forged:false,reveal:'GENUINE. Davis wanted discovery on tape, not polish. The most studied album in jazz was made in hours.'},
+  {text:'Kind of Blue took six months of sessions to perfect, with Davis demanding dozens of takes of each track.',forged:true,reveal:'FORGERY. Two sessions, minimal takes \u2014 the opposite method entirely. The forger assumed a masterpiece must be labored; this one was trusted into existence.'}]},
+ {title:'The Crossroads File',brief:'Twenty-nine songs and one legend.',claims:[
+  {text:'Robert Johnson recorded only about twenty-nine songs, in two Texas hotel-room sessions in 1936 and 1937, and died at twenty-seven.',forged:false,reveal:'GENUINE. A catalog you can hear in an afternoon reshaped rock and roll thirty years later, when reissues reached Clapton, Richards, and Dylan.'},
+  {text:'The legend that Johnson sold his soul at a crossroads attached itself to him partly from folklore already circulating about another bluesman, Tommy Johnson.',forged:false,reveal:'GENUINE. The devil story migrated between Johnsons \u2014 folklore is its own kind of forger, and knowing that is half of source criticism.'},
+  {text:'Johnson recorded steadily for two decades, leaving behind several hundred masters now archived in the Library of Congress.',forged:true,reveal:'FORGERY. Twenty-nine songs, two sessions, one brief life. The forger gave him the career his talent deserved; the myth-sized influence came from almost nothing \u2014 which is the actual miracle.'}]},
+ {title:'The First Lady File',brief:'Amateur night, 1934.',claims:[
+  {text:'Ella Fitzgerald won Amateur Night at the Apollo in 1934 at seventeen \u2014 having planned to dance until stage fright pushed her to sing instead.',forged:false,reveal:'GENUINE. The dancers before her were too good; she switched acts on the spot and won the twenty-five dollars. Entire genres turn on such moments.'},
+  {text:'At the first Grammy Awards in 1958, Fitzgerald became the first Black woman to win a Grammy \u2014 taking two.',forged:false,reveal:'GENUINE. Her songbook albums were already redefining how American popular song would be remembered.'},
+  {text:'Fitzgerald was discovered by Duke Ellington, who hired her from the Cotton Club chorus line for his orchestra.',forged:true,reveal:'FORGERY. Drummer Chick Webb hired her for his band after the Apollo win; she led that band herself after his death. The forger reached for the biggest bandleader\u2019s name \u2014 but Webb\u2019s faith is the true story.'}]},
+ {title:'The Cotton Club File',brief:'Harlem\u2019s most famous room, and its door policy.',claims:[
+  {text:'Duke Ellington\u2019s orchestra rose to national fame through live radio broadcasts from Harlem\u2019s Cotton Club in the late 1920s.',forged:false,reveal:'GENUINE. The broadcasts made Ellington a household sound coast to coast \u2014 America\u2019s introduction to its greatest composer.'},
+  {text:'The Cotton Club presented Black performers to an audience from which Black patrons were barred.',forged:false,reveal:'GENUINE. Harlem\u2019s own residents could work the stage but not book a table. The contradiction was the business model.'},
+  {text:'The Cotton Club was Black-owned \u2014 one of Harlem\u2019s proudest business successes of the twenties.',forged:true,reveal:'FORGERY. The club was owned by the gangster Owney Madden, who bought it to sell beer during Prohibition. The forger confused where the genius was with where the money went \u2014 an error worth staying alert to well beyond Harlem.'}]}
+]},
+/* ---------- 9. SOUL & R&B ---------- */
+{key:'soul',color:'var(--good)',name:'The Soul & R&B Files',desc:'The sixties and seventies \u2014 Motown, Stax, and church.',cases:[
+ {title:'The Record File',brief:'Guitars, loans, and one reversed arrow.',claims:[
+  {text:'Sister Rosetta Tharpe was electrifying audiences with distorted electric guitar and gospel fire in the 1940s, influencing the men later called rock\u2019s founders.',forged:false,reveal:'GENUINE. Little Richard, Chuck Berry, and Elvis all drew on her. The Rock & Roll Hall of Fame finally inducted her in 2018, decades late.'},
+  {text:'Berry Gordy founded Motown in Detroit in 1959 with an $800 loan from his family\u2019s savings fund.',forged:false,reveal:'GENUINE. The loan came with interest and a repayment schedule \u2014 the Gordys were serious people \u2014 and it became the most successful Black-owned business of its era.'},
+  {text:'Elvis Presley wrote "Hound Dog" as a gift for blues singer Big Mama Thornton, who recorded it first.',forged:true,reveal:'FORGERY. Thornton did record it first, in 1952 \u2014 but it was written by Leiber and Stoller. Elvis covered it later and outsold her by millions. The forger reversed the arrow of borrowing, which is the usual direction of this particular error.'}]},
+ {title:'The Respect File',brief:'Detroit, 1967.',claims:[
+  {text:'Aretha Franklin\u2019s "Respect" reached number one in 1967 and became an anthem claimed by both the civil rights and women\u2019s movements.',forged:false,reveal:'GENUINE. The spelled-out chorus and "sock it to me" were Aretha\u2019s and her sisters\u2019 additions \u2014 the arrangement is the revolution.'},
+  {text:'In 1987, Franklin became the first woman inducted into the Rock & Roll Hall of Fame.',forged:false,reveal:'GENUINE. First woman in \u2014 in the Hall\u2019s second class, ahead of most of the men who imitated her.'},
+  {text:'Franklin wrote "Respect" herself at her kitchen piano in Detroit.',forged:true,reveal:'FORGERY. Otis Redding wrote and first recorded it in 1965 \u2014 and after hearing her version, joked onstage that the song no longer belonged to him. The forger confused ownership with authorship; Aretha took one and left him the other.'}]},
+ {title:'The Cooke File',brief:'A change, and who owned the change.',claims:[
+  {text:'Sam Cooke founded his own label and publishing company, keeping ownership of his masters \u2014 a business model decades ahead of its time.',forged:false,reveal:'GENUINE. SAR Records made Cooke one of the first Black artists to own his machinery. Every later artist who fought for their masters is quoting him.'},
+  {text:'"A Change Is Gonna Come" was born partly of hearing Bob Dylan\u2019s "Blowin\u2019 in the Wind" \u2014 Cooke was troubled that a white writer had written such a song first \u2014 and of his own arrest after being turned away from a Louisiana motel.',forged:false,reveal:'GENUINE. He found the song almost frightening to perform, as if it had come from somewhere else. It became the movement\u2019s hymn anyway.'},
+  {text:'"A Change Is Gonna Come" topped the pop charts for six weeks in 1963, Cooke\u2019s biggest hit in his lifetime.',forged:true,reveal:'FORGERY. The song was released as a single only after Cooke\u2019s death in December 1964, and charted modestly. Its dominance came from history, not Billboard. The forger paid the song in the wrong currency.'}]},
+ {title:'The Stax File',brief:'East McLemore Avenue, Memphis.',claims:[
+  {text:'Stax Records\u2019 house band, Booker T. & the M.G.\u2019s, was racially integrated \u2014 in Memphis, in the early 1960s.',forged:false,reveal:'GENUINE. Inside the converted movie theater the rules outside did not apply. The sound of Southern soul was made by an integrated rhythm section that could not eat together at half the restaurants nearby.'},
+  {text:'Otis Redding died in a plane crash in December 1967; "(Sittin\u2019 On) The Dock of the Bay," recorded days earlier, became the first posthumous number-one single in American chart history.',forged:false,reveal:'GENUINE. The whistled outro was a placeholder he never returned to replace. Sometimes the sketch is the monument.'},
+  {text:'Stax operated as Motown\u2019s Southern subsidiary, taking direction from Detroit.',forged:true,reveal:'FORGERY. Stax was fiercely independent \u2014 its raw Southern sound was the deliberate opposite of Motown\u2019s polish, and the two were rivals. The forger put America\u2019s two great soul capitals under one roof; the whole point is that there were two.'}]},
+ {title:'The Godfather File',brief:'Boston Garden, April 5, 1968.',claims:[
+  {text:'The night after Dr. King\u2019s assassination, James Brown\u2019s Boston Garden concert was broadcast live on public television \u2014 a decision credited with keeping Boston calm while other cities burned.',forged:false,reveal:'GENUINE. Brown talked restless fans down off the stage himself and told the city to honor King by staying home. One concert did what curfews elsewhere could not.'},
+  {text:'Later that year, Brown released "Say It Loud \u2014 I\u2019m Black and I\u2019m Proud," which became an instant anthem.',forged:false,reveal:'GENUINE. Schoolchildren shouted the response line back at him from the crowd \u2014 a pop single doing the work of a movement slogan.'},
+  {text:'Brown was Motown\u2019s flagship artist through the sixties, its biggest seller after the Supremes.',forged:true,reveal:'FORGERY. Brown recorded for King Records of Cincinnati \u2014 stubbornly independent, feuding with his label, and owning his show outright. The forger filed the least corporate man in music under the most famous corporation.'}]},
+ {title:'The Inner City File',brief:'Motown\u2019s reluctant masterpiece.',claims:[
+  {text:'Berry Gordy initially resisted releasing "What\u2019s Going On," doubting a protest song\u2019s commercial prospects; Marvin Gaye refused to record anything else until it came out.',forged:false,reveal:'GENUINE. The single was released while Gordy was away, sold explosively, and the album followed on Gaye\u2019s terms \u2014 artist over assembly line, for once.'},
+  {text:'The album drew on letters from Gaye\u2019s brother Frankie, then serving in Vietnam.',forged:false,reveal:'GENUINE. The returning veteran\u2019s eyes in "What\u2019s Happening Brother" are Frankie\u2019s. The album is a family document wearing an orchestra.'},
+  {text:'What\u2019s Going On flopped on release and was rediscovered only decades later by critics.',forged:true,reveal:'FORGERY. It was a massive immediate hit \u2014 three top-ten singles \u2014 and changed what Motown allowed its artists to do. The forger loves the neglected-genius plot; this genius was recognized on arrival.'}]},
+ {title:'The Wonder File',brief:'Signed at eleven.',claims:[
+  {text:'Stevie Wonder signed to Motown at age eleven and scored his first number one at thirteen.',forged:false,reveal:'GENUINE. "Fingertips \u2014 Pt. 2," recorded live, hit number one in 1963 \u2014 you can hear a band member shouting for the key as the encore catches everyone off guard.'},
+  {text:'Wonder won the Grammy for Album of the Year three times in the 1970s.',forged:false,reveal:'GENUINE. Innervisions, Fulfillingness\u2019 First Finale, Songs in the Key of Life \u2014 when he skipped a cycle, winner Paul Simon thanked him for not releasing an album that year.'},
+  {text:'Wonder lost his sight in a childhood car accident at age six.',forged:true,reveal:'FORGERY. Wonder has been blind since infancy \u2014 a consequence of premature birth and the oxygen treatment of the era. The forger swapped in a more dramatic cause; the true one is a medical history, not an accident report.'}]},
+ {title:'The Impressions File',brief:'Chicago\u2019s gentle revolutionary.',claims:[
+  {text:'Curtis Mayfield\u2019s songs with the Impressions \u2014 "Keep On Pushing," "People Get Ready" \u2014 were adopted as anthems by the civil rights movement.',forged:false,reveal:'GENUINE. Freedom marchers sang them; King\u2019s circle played them. Mayfield wrote sermons disguised as radio hits.'},
+  {text:'Mayfield founded his own label, Curtom, and owned his publishing \u2014 rare leverage for a Black songwriter of the era.',forged:false,reveal:'GENUINE. Chicago\u2019s soul economy ran substantially through his desk. The gentleness was personal; the business was airtight.'},
+  {text:'Mayfield\u2019s Superfly soundtrack celebrated the drug trade it depicted, drawing condemnation from civil rights groups he never answered.',forged:true,reveal:'FORGERY. The soundtrack is a counter-argument to its own film \u2014 "Freddie\u2019s Dead" and "Pusherman" are warnings, not advertisements, and Mayfield said so plainly. The forger mistook the moralist for the merchandise.'}]},
+ {title:'The Genius File',brief:'Ray Charles and the state of Georgia.',claims:[
+  {text:'Ray Charles\u2019s 1962 album Modern Sounds in Country and Western Music \u2014 a Black R&B star recording country \u2014 topped the charts for weeks.',forged:false,reveal:'GENUINE. He crossed the industry\u2019s most policed border in the other direction, and the audience followed. Genre lines, it turned out, were mostly management.'},
+  {text:'In 1961, Charles refused to perform a segregated show in Augusta, Georgia, forfeiting the booking.',forged:false,reveal:'GENUINE. A promoter sued him for the cancellation \u2014 and lost the larger argument to history.'},
+  {text:'Georgia responded by banning Charles from performing in the state for life \u2014 a ban lifted only when "Georgia On My Mind" became the state song.',forged:true,reveal:'FORGERY. The lifetime ban is legend \u2014 no such official ban existed, though the story is repeated everywhere and was dramatized in film. Georgia did adopt his recording as the state song in 1979, with Charles performing it to the legislature. The reconciliation was real; the banishment was not.'}]},
+ {title:'The Girl Groups File',brief:'Hitsville\u2019s front line.',claims:[
+  {text:'The Supremes scored twelve number-one hits in the 1960s, including five consecutive singles \u2014 chart dominance rivaling the Beatles.',forged:false,reveal:'GENUINE. Three young women from the Brewster projects became, for a stretch, the most reliable hitmakers in America.'},
+  {text:'Martha and the Vandellas\u2019 "Dancing in the Street" took on a second life as an unofficial anthem during the urban uprisings of the late sixties.',forged:false,reveal:'GENUINE. Martha Reeves always insisted it was a party record \u2014 which it was. Songs, once released, are interpreted by history, not by their liner notes.'},
+  {text:'"Dancing in the Street" was written as a riot anthem and banned from major radio stations on release in 1964.',forged:true,reveal:'FORGERY. It was written as a summer dance record and was a smash on release \u2014 the political readings and scattered radio nervousness came years later. The forger moved the controversy to the recording session; it actually lives in the reception.'}]}
+]},
+/* ---------- 10. HIP-HOP ---------- */
+{key:'hiphop',color:'var(--mimeo)',name:'The Hip-Hop Files',desc:'From Sedgwick Avenue to the Source Awards.',cases:[
+ {title:'The Sedgwick File',brief:'A back-to-school party, August 1973.',claims:[
+  {text:'Hip-hop\u2019s origin is conventionally dated to an August 1973 party in the rec room of 1520 Sedgwick Avenue in the Bronx, where DJ Kool Herc extended the drum breaks of funk records.',forged:false,reveal:'GENUINE. His sister Cindy threw the party to raise money for school clothes. Admission: a quarter for the ladies, fifty cents for the fellas. Entire cultures have started for less.'},
+  {text:'Herc\u2019s "merry-go-round" technique \u2014 switching between two copies of the same record to loop the break \u2014 made the breakbeat the foundation of the new music.',forged:false,reveal:'GENUINE. The dancers wanted the drum break; Herc gave them nothing else. The genre is named for what they did during it.'},
+  {text:'Herc also coined the term "hip-hop," trademarking the name by the end of the 1970s.',forged:true,reveal:'FORGERY. The term is usually credited to rhymes by Lovebug Starski and Keith "Cowboy" Wiggins \u2014 and nobody trademarked a culture. The forger consolidated a neighborhood\u2019s invention into one man\u2019s paperwork.'}]},
+ {title:'The Sugar Hill File',brief:'Fifteen minutes that sold a genre.',claims:[
+  {text:'"Rapper\u2019s Delight" (1979) became the first rap single to reach the Billboard Top 40, proving the music could sell beyond the Bronx.',forged:false,reveal:'GENUINE. Radio programmers who swore nobody would sit through a fifteen-minute record were answered with millions of copies.'},
+  {text:'The record was produced by Sylvia Robinson, the singer-turned-executive who co-founded Sugar Hill Records.',forged:false,reveal:'GENUINE. A Black woman executive assembled the group, produced the session, and built the label \u2014 the genre\u2019s first mogul, rarely credited as such.'},
+  {text:'"Rapper\u2019s Delight" was the first rap ever committed to record.',forged:true,reveal:'FORGERY. Recorded rap precedes it \u2014 the Fatback Band\u2019s "King Tim III" beat it to release by months, and party tapes circulated for years before. It was the first hit, not the first record. The forger confused the cash register with the birth certificate.'}]},
+ {title:'The Message File',brief:'1982: the party learns to report.',claims:[
+  {text:'"The Message" (1982), credited to Grandmaster Flash and the Furious Five, turned hip-hop toward social realism \u2014 "it\u2019s like a jungle sometimes" entered the language.',forged:false,reveal:'GENUINE. Before it, rap records were mostly party records. After it, the music had a news desk.'},
+  {text:'The track was built largely by Melle Mel and session writer Duke Bootee \u2014 several group members, skeptical of a downbeat record, barely appear on it.',forged:false,reveal:'GENUINE. The group\u2019s most famous record was its least collective \u2014 and the label put the whole crew\u2019s name on it anyway. Credits are their own genre of forgery.'},
+  {text:'Grandmaster Flash wrote and performed all the vocals on "The Message," his only recording as a rapper.',forged:true,reveal:'FORGERY. Flash \u2014 the DJ \u2014 is scarcely on the record at all; that was the internal dispute. The forger read the label credit as a personnel list, which is exactly what label credits are not.'}]},
+ {title:'The Def Jam File',brief:'Hollis, Queens meets MTV.',claims:[
+  {text:'Run-DMC\u2019s Raising Hell (1986) became the first rap album certified platinum.',forged:false,reveal:'GENUINE. Three men in unlaced Adidas moved rap from singles culture to album culture \u2014 and got a sneaker deal out of it, the genre\u2019s first.'},
+  {text:'Their collaboration with Aerosmith on "Walk This Way" put rap into MTV\u2019s heavy rotation and revived Aerosmith\u2019s stalled career in the bargain.',forged:false,reveal:'GENUINE. The video\u2019s wall being knocked down was not subtle, and did not need to be. Rock radio\u2019s wall went with it.'},
+  {text:'MTV launched in 1981 with rap videos in heavy rotation, giving the genre its first national platform.',forged:true,reveal:'FORGERY. Early MTV was notoriously closed \u2014 to rap and to Black artists generally; even Michael Jackson needed label pressure to break the rotation in 1983. Rap\u2019s MTV arrival was fought for, not founding policy. The forger opened a door years before anyone unlocked it.'}]},
+ {title:'The Golden Age File',brief:'1988\u20131989: louder than a bomb.',claims:[
+  {text:'Public Enemy\u2019s "Fight the Power" was commissioned as the musical centerpiece of Spike Lee\u2019s Do the Right Thing (1989).',forged:false,reveal:'GENUINE. A film and a record produced as one argument \u2014 each made the other bigger.'},
+  {text:'N.W.A\u2019s label received a warning letter from an FBI official over the group\u2019s most notorious track \u2014 which the group treated as a press release.',forged:false,reveal:'GENUINE. The 1989 letter is real and now sits in museum exhibits. Federal disapproval turned out to be excellent marketing.'},
+  {text:'Congress responded by banning the sale of Straight Outta Compton nationwide for two years.',forged:true,reveal:'FORGERY. No such ban existed or could exist \u2014 the First Amendment does not take requests. The era produced warning stickers and hearings, not prohibitions. The forger confused a moral panic with a statute.'}]},
+ {title:'The Queens File',brief:'The women on the mic.',claims:[
+  {text:'MC Lyte\u2019s Lyte as a Rock (1988) is recognized as the first full-length solo album by a female rapper.',forged:false,reveal:'GENUINE. Eighteen years old, Brooklyn steel \u2014 and a lane opened that the industry kept trying to close.'},
+  {text:'Queen Latifah\u2019s "U.N.I.T.Y." won the Grammy for Best Rap Solo Performance \u2014 a record confronting harassment and abuse directly.',forged:false,reveal:'GENUINE. She answered the era\u2019s misogyny on its own airwaves and took the trophy for it.'},
+  {text:'Women did not record hip-hop until the 1990s, when labels first signed female rappers.',forged:true,reveal:'FORGERY. Women were on rap records from the beginning \u2014 Lady B in 1979, Roxanne Shant\u00e9\u2019s battle records in 1984, Salt-N-Pepa\u2019s platinum run in the late eighties. The forger erased a first decade that is inconveniently well documented.'}]},
+ {title:'The Coasts File',brief:'1996\u20131997.',claims:[
+  {text:'Tupac Shakur was fatally shot in Las Vegas in September 1996.',forged:false,reveal:'GENUINE. He was twenty-five, with five number-one-charting albums still ahead of him \u2014 released posthumously, an afterlife nearly as productive as the life.'},
+  {text:'The Notorious B.I.G. was killed in Los Angeles six months later, in March 1997.',forged:false,reveal:'GENUINE. Twenty-four. Life After Death arrived weeks later and topped the charts \u2014 a title no one could hear neutrally.'},
+  {text:'Both murders were solved by the end of the 1990s, with the gunmen convicted and sentenced.',forged:true,reveal:'FORGERY. Both cases sat unsolved for decades \u2014 a charge in the Shakur case came only in 2023, and the Wallace case remains open. The forger closed files that a quarter century of investigation could not.'}]},
+ {title:'The Miseducation File',brief:'Grammy night, 1999.',claims:[
+  {text:'The Miseducation of Lauryn Hill (1998) became the first hip-hop album to win the Grammy for Album of the Year.',forged:false,reveal:'GENUINE. Recorded substantially in Kingston, released to a five-Grammy night \u2014 the ceiling came down all at once.'},
+  {text:'Hill\u2019s five awards that night set a then-record for a woman in a single Grammy ceremony.',forged:false,reveal:'GENUINE. She opened the show reading from the parable of the sower. The industry heard the reading; not all of it listened.'},
+  {text:'Hill was the first woman ever to win Album of the Year.',forged:true,reveal:'FORGERY. Women had won the award for decades \u2014 Carole King, Whitney Houston\u2019s Bodyguard soundtrack among them. Hill\u2019s first was for hip-hop, not for women. The forger grabbed the wrong superlative off the shelf; the right one was historic enough.'}]},
+ {title:'The Stankonia File',brief:'"The South got something to say."',claims:[
+  {text:'Booed at the 1995 Source Awards, Andr\u00e9 3000 answered New York\u2019s skepticism with a declaration \u2014 "the South got something to say" \u2014 now treated as a turning point in hip-hop history.',forged:false,reveal:'GENUINE. Within a decade the genre\u2019s center of gravity had moved below the Mason-Dixon line, exactly as advertised.'},
+  {text:'OutKast\u2019s Speakerboxxx/The Love Below won Album of the Year at the 2004 Grammys \u2014 the second hip-hop album ever to do so.',forged:false,reveal:'GENUINE. A double album split between two artists\u2019 visions took the industry\u2019s top prize \u2014 Atlanta\u2019s coronation in one envelope.'},
+  {text:'Andr\u00e9 3000 and Big Boi met at a Los Angeles talent showcase before relocating to Atlanta to record.',forged:true,reveal:'FORGERY. They met as teenagers at an Atlanta-area high school \u2014 East Point, Georgia, is the whole point of the story. The forger moved the South\u2019s greatest duo to the wrong coast; the boos at the Source Awards were about exactly this geography.'}]},
+ {title:'The Turntable File',brief:'The instruments nobody sold.',claims:[
+  {text:'Grand Wizzard Theodore is credited with discovering scratching as a teenager \u2014 by his own account, while holding a record still as his mother scolded him from the doorway.',forged:false,reveal:'GENUINE \u2014 as the standard account, told by Theodore himself. A technique born of a hand pausing a record became a percussion instrument played worldwide.'},
+  {text:'Grandmaster Flash developed foundational turntable techniques \u2014 the backspin and punch phrasing \u2014 approaching the mixer as an instrument to be engineered.',forged:false,reveal:'GENUINE. Flash studied electronics at vocational school and treated the crossfader like a laboratory. The DJ preceded the rapper; the science preceded them both.'},
+  {text:'Scratching was first developed in Los Angeles club culture and imported to New York by touring DJs.',forged:true,reveal:'FORGERY. The turntable arts are Bronx-born \u2014 bedrooms, rec rooms, and park jams powered from lampposts. The forger reversed the direction of travel; the West Coast built its own styles later, on a Bronx foundation.'}]}
+]},
+/* ---------- 11. MODERN MUSIC ---------- */
+{key:'modern',color:'var(--gold)',name:'The Modern Music Files',desc:'The nineties to the 2010s.',cases:[
+ {title:'The Bodyguard File',brief:'Fourteen weeks at number one.',claims:[
+  {text:'Whitney Houston\u2019s "I Will Always Love You" spent fourteen consecutive weeks at number one \u2014 then a record \u2014 and powered one of the best-selling albums in history.',forged:false,reveal:'GENUINE. The a cappella opening was Kevin Costner\u2019s suggestion; the held note that follows is why the suggestion worked.'},
+  {text:'The song was written and first recorded by Dolly Parton in the early 1970s.',forged:false,reveal:'GENUINE. Parton wrote it as a farewell to her business partner Porter Wagoner \u2014 and has cheerfully noted the royalties ever since. "I\u2019ll always love Whitney," she said, and meant the publishing too.'},
+  {text:'Houston wrote the song for the film, drawing on her own life for the lyric.',forged:true,reveal:'FORGERY. Houston\u2019s authorship was of the performance \u2014 which is why the song now belongs to her in every sense but the copyright. The forger confused the two kinds of ownership again; this cabinet is full of that error.'}]},
+ {title:'The Thriller File',brief:'Motown 25 and the glove.',claims:[
+  {text:'Thriller became the best-selling album of all time \u2014 a record it still holds.',forged:false,reveal:'GENUINE. Its seven top-ten singles rebuilt the music business around the blockbuster album, for better and worse.'},
+  {text:'Michael Jackson debuted the moonwalk during "Billie Jean" on the Motown 25 television special in 1983.',forged:false,reveal:'GENUINE. Forty-seven million people watched a few seconds of backward glide become the most famous dance step of the century.'},
+  {text:'Jackson invented the moonwalk himself, developing it in secret rehearsals for the special.',forged:true,reveal:'FORGERY. The backslide was a street and stage step long before \u2014 Soul Train and club dancers, including Jeffrey Daniel, performed and taught it; Jackson learned, refined, and immortalized it. The forger cut the street out of the story, which is where nearly every step begins.'}]},
+ {title:'The Purple File',brief:'Minneapolis, all instruments.',claims:[
+  {text:'Prince played nearly every instrument on his debut album, recorded when he was nineteen.',forged:false,reveal:'GENUINE. The credits read like a band roster and name one man. The one-person studio album has never been done better.'},
+  {text:'Purple Rain won Prince an Academy Award for its original song score.',forged:false,reveal:'GENUINE. An Oscar, on top of the number-one film, album, and single held simultaneously \u2014 a grand slam nobody has quite repeated.'},
+  {text:'Prince was born Prince Rogers in Atlanta, taking his stage mononym from his birth certificate\u2019s middle name.',forged:true,reveal:'FORGERY \u2014 half of one. Prince Rogers Nelson was indeed his birth name, but he was born and raised in Minneapolis, and the city\u2019s sound bears his fingerprints. The forger got the name right and moved the map; check every element separately.'}]},
+ {title:'The Diamond File',brief:'The nineties in sales figures.',claims:[
+  {text:'TLC\u2019s CrazySexyCool became the first album by a girl group certified diamond \u2014 ten million copies \u2014 in the United States.',forged:false,reveal:'GENUINE. And the group famously declared bankruptcy the following year \u2014 a masterclass in the difference between sales and contracts, taught at their expense.'},
+  {text:'Boyz II Men\u2019s "End of the Road" broke Elvis Presley\u2019s decades-old record for consecutive weeks at number one \u2014 then broke their own record twice more with later singles.',forged:false,reveal:'GENUINE. Four Philadelphia harmonizers spent the early nineties rewriting chart records set before they were born.'},
+  {text:'Boyz II Men recorded for Bad Boy Records, the label\u2019s flagship R&B act.',forged:true,reveal:'FORGERY. They were Motown\u2019s flagship of the era \u2014 the label\u2019s biggest sellers since its Detroit heyday. The forger filed the decade\u2019s smoothest act under its flashiest label.'}]},
+ {title:'The Beyhive File',brief:'Houston to headliner.',claims:[
+  {text:'Beyonc\u00e9 holds the record for the most Grammy Awards won by any artist in history.',forged:false,reveal:'GENUINE. She passed the previous record \u2014 held by a classical conductor \u2014 in 2023, and kept adding to it.'},
+  {text:'Her 2018 Coachella performance made her the first Black woman to headline the festival \u2014 a set built around HBCU marching band culture, later released as the film Homecoming.',forged:false,reveal:'GENUINE. She put a homecoming halftime show on America\u2019s most-watched festival stage \u2014 the HBCU tradition presented as the main event it always was.'},
+  {text:'That Coachella set also made her the first woman of any race to headline the festival.',forged:true,reveal:'FORGERY. Bj\u00f6rk headlined Coachella back in 2007. Beyonc\u00e9\u2019s first was specific \u2014 the first Black woman \u2014 and specificity is the whole discipline here. The forger widened a true first until it broke.'}]},
+ {title:'The Pulitzer File',brief:'Compton, 2018.',claims:[
+  {text:'In 2018, Kendrick Lamar\u2019s DAMN. won the Pulitzer Prize for Music \u2014 the first work outside classical or jazz ever to do so.',forged:false,reveal:'GENUINE. The citation praised its "vernacular authenticity" \u2014 committee language for: the neighborhood was right all along.'},
+  {text:'"Alright," from To Pimp a Butterfly, was taken up as a chant at protest marches across the country.',forged:false,reveal:'GENUINE. A song built on weary hope became the era\u2019s street refrain \u2014 the Impressions\u2019 old job, reassigned.'},
+  {text:'The Pulitzer was awarded for good kid, m.A.A.d city, Lamar\u2019s major-label debut.',forged:true,reveal:'FORGERY. The prize went to DAMN. \u2014 wrong album, five years and two classics apart. The forger\u2019s favorite move in the modern files: right artist, right honor, wrong work. Verify all three.'}]},
+ {title:'The Empire File',brief:'Marcy Projects to the Forbes list.',claims:[
+  {text:'In 2019, Forbes declared Jay-Z hip-hop\u2019s first billionaire.',forged:false,reveal:'GENUINE. The portfolio \u2014 champagne, streaming, art, liquor \u2014 out-earned the catalog, which was the plan he\u2019d been rapping about for twenty years.'},
+  {text:'His debut Reasonable Doubt (1996) was released on Roc-A-Fella Records, a label he co-founded after majors passed on him.',forged:false,reveal:'GENUINE. The rejection became the origin story: no deal offered, so he built the company that would have signed him.'},
+  {text:'Jay-Z founded Def Jam Records in the 1980s before launching his own career on the label.',forged:true,reveal:'FORGERY. Def Jam was founded by Rick Rubin and Russell Simmons in 1984; Jay-Z served as its president two decades later. The forger promoted an employee \u2014 a very senior one \u2014 to founder.'}]},
+ {title:'The Confessions File',brief:'Spring 2004.',claims:[
+  {text:'Usher\u2019s Confessions sold over a million copies in its first week and went on to diamond certification \u2014 the decade\u2019s dominant R&B album.',forged:false,reveal:'GENUINE. For one year, every radio format in America seemed to be an Usher format.'},
+  {text:'The album produced four consecutive number-one singles.',forged:false,reveal:'GENUINE. "Yeah!," "Burn," "Confessions Part II," "My Boo" \u2014 a run the charts had rarely seen from one album.'},
+  {text:'Usher began his career as the youngest member of Boyz II Men before going solo.',forged:true,reveal:'FORGERY. Usher was a solo LaFace Records signing as a teenager \u2014 Atlanta, not Philadelphia; a solo prodigy, not a group alumnus. The forger merged two smooth catalogs into one biography.'}]},
+ {title:'The Supa Dupa File',brief:'Portsmouth, Virginia, in the future tense.',claims:[
+  {text:'In 2019, Missy Elliott became the first female rapper inducted into the Songwriters Hall of Fame.',forged:false,reveal:'GENUINE. The catalog she wrote for others \u2014 Aaliyah, Whitney, half of late-nineties radio \u2014 would justify the honor without a single Missy verse.'},
+  {text:'In 2023, she became the first female hip-hop artist inducted into the Rock & Roll Hall of Fame.',forged:false,reveal:'GENUINE. First woman of the genre through that door too \u2014 a career spent arriving places first, dressed like the future.'},
+  {text:'Elliott directed all of her groundbreaking music videos herself, refusing outside directors.',forged:true,reveal:'FORGERY. The signature visuals were collaborations with directors like Hype Williams and Dave Meyers \u2014 auteurs of the form. Her vision drove them; their cameras built them. The forger erased the collaborators, which is the one thing Missy never did.'}]},
+ {title:'The Streaming File',brief:'The charts learn new math.',claims:[
+  {text:'Lil Nas X\u2019s "Old Town Road" spent nineteen weeks at number one in 2019 \u2014 the longest run in the Hot 100\u2019s history.',forged:false,reveal:'GENUINE. A song bought as a $30 beat online out-charted six decades of the music industry\u2019s best efforts.'},
+  {text:'Drake holds the record for the most charted songs in Hot 100 history.',forged:false,reveal:'GENUINE. Streaming rewrote the charts\u2019 arithmetic, and he read the new math first \u2014 hundreds of entries and counting.'},
+  {text:'Billboard removed "Old Town Road" from the Hot 100 entirely, ruling it ineligible for the main chart.',forged:true,reveal:'FORGERY \u2014 built from a real controversy. Billboard removed the song from the country chart, ruling it insufficiently country; it stayed on the Hot 100 and conquered it. The dispute was about genre gatekeeping \u2014 an old American argument \u2014 not chart eligibility. The forger moved the fence to the wrong field.'}]}
+]}
+];
+
+/* ============ STATE ============ */
+const S={
+  mode:1,seriesIdx:0,cases:[],i:0,
+  wager:20,picked:-1,ruled:false,
+  p:[{score:100,streak:0,best:0,right:0},{score:100,streak:0,best:0,right:0}],
+  turn:0,results:[]
+};
+function cur(){return S.p[S.turn]}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+/* ============ FLOW ============ */
+function chooseMode(m){
+  sfx.click();S.mode=m;
+  document.getElementById('intro').classList.add('hidden');
+  const list=document.getElementById('seriesList');list.innerHTML='';
+  SERIES.forEach((sr,idx)=>{
+    const b=document.createElement('button');
+    b.className='seriesbtn';
+    b.innerHTML='<span class="tab" style="background:'+sr.color+'">'+(idx+1)+'</span><div class="st">'+sr.name+'</div><div class="sd">'+sr.desc+' \u2014 '+sr.cases.length+' case files</div>';
+    b.onclick=()=>pickSeries(idx);
+    list.appendChild(b);
+  });
+  const all=document.createElement('button');
+  all.className='seriesbtn';
+  all.innerHTML='<span class="tab" style="background:var(--ink)">\u2605</span><div class="st">The Full Audit</div><div class="sd">Case files drawn at random from every cabinet.</div>';
+  all.onclick=()=>pickSeries(-1);
+  list.appendChild(all);
+  document.getElementById('seriesPick').classList.remove('hidden');
+}
+function pickSeries(idx){
+  sfx.click();S.seriesIdx=idx;
+  document.getElementById('seriesPick').classList.add('hidden');
+  document.getElementById('countTitle').textContent='How Many Case Files?';
+  document.getElementById('countNote').textContent=idx<0
+    ? 'The Full Audit draws from all '+SERIES.reduce((a,s)=>a+s.cases.length,0)+' case files in the collection.'
+    : 'This cabinet holds '+SERIES[idx].cases.length+' case files. Longer shifts are supplemented at random from the general collection.';
+  document.getElementById('countPick').classList.remove('hidden');
+}
+function chooseCount(n){
+  sfx.click();
+  S.pendingCount=n;
+  document.getElementById('countPick').classList.add('hidden');
+  document.getElementById('clockPick').classList.remove('hidden');
+}
+function chooseClock(secs){
+  sfx.shuffle();
+  S.timerSecs=secs;
+  document.getElementById('clockPick').classList.add('hidden');
+  const n=S.pendingCount;
+  if(S.seriesIdx<0){
+    const pool=SERIES.flatMap(sr=>sr.cases);
+    S.cases=shuffle(pool.slice()).slice(0,n);
+    S.seriesName='The Full Audit';
+  }else{
+    const own=shuffle(SERIES[S.seriesIdx].cases.slice());
+    if(n<=own.length){S.cases=own.slice(0,n)}
+    else{
+      const rest=shuffle(SERIES.filter((s,i)=>i!==S.seriesIdx).flatMap(sr=>sr.cases)).slice(0,n-own.length);
+      S.cases=own.concat(rest);
+    }
+    S.seriesName=SERIES[S.seriesIdx].name;
+  }
+  document.getElementById('scorePanel').classList.remove('hidden');
+  document.getElementById('gamePanel').classList.remove('hidden');
+  if(S.mode===2){
+    document.getElementById('scorebarSolo').classList.add('hidden');
+    document.getElementById('scorebarVs').classList.remove('hidden');
+    showPass();
+  }else{
+    renderCase();
+  }
+}
+function showPass(){
+  document.getElementById('passWho').textContent=S.turn===0?'EXAMINER ONE':'EXAMINER TWO';
+  document.getElementById('passWho').className='who '+(S.turn===0?'p1c':'p2c');
+  document.getElementById('passScreen').classList.remove('hidden');
+}
+function beginTurn(){
+  sfx.click();
+  document.getElementById('passScreen').classList.add('hidden');
+  renderCase();
+}
+
+/* ============ CLOCK ============ */
+let clockId=null,clockLeft=0;
+function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function startClock(){
+  stopClock();
+  if(!S.timerSecs)return;
+  clockLeft=S.timerSecs;
+  const chip=document.getElementById('clockChip'),bar=document.getElementById('clockBar'),fill=document.getElementById('clockFill');
+  chip.classList.remove('hidden','low');bar.classList.remove('hidden');fill.classList.remove('low');
+  chip.textContent=fmt(clockLeft);fill.style.width='100%';
+  clockId=setInterval(()=>{
+    clockLeft--;
+    chip.textContent=fmt(Math.max(0,clockLeft));
+    fill.style.width=(clockLeft/S.timerSecs*100)+'%';
+    if(clockLeft<=10){chip.classList.add('low');fill.classList.add('low')}
+    if(clockLeft<=5&&clockLeft>0)tone(1100,.05,'square',.06);
+    if(clockLeft<=0){stopClock();timeOut()}
+  },1000);
+}
+function stopClock(){if(clockId){clearInterval(clockId);clockId=null}}
+function hideClock(){
+  document.getElementById('clockChip').classList.add('hidden');
+  document.getElementById('clockBar').classList.add('hidden');
+}
+function timeOut(){
+  if(S.ruled)return;
+  S.ruled=true;sfx.bad();
+  const c=S.cases[S.i];
+  order.forEach((ci,slot)=>{
+    const cl=c.claims[ci];
+    const card=document.getElementById('card'+slot);
+    const v=document.getElementById('v'+slot);
+    card.disabled=true;card.classList.add('revealed');
+    if(cl.forged){v.textContent='FORGERY';v.className='verdict forg'}
+    else{v.textContent='GENUINE';v.className='verdict true';card.classList.add('dimmed')}
+  });
+  const P=cur();
+  const delta=Math.floor(S.wager/2);
+  P.score=Math.max(0,P.score-delta);P.streak=0;
+  S.results[S.i]=false;
+  flash('\u2212'+delta+' REPUTATION \u2014 TIME EXPIRED','loss');
+  const st=document.getElementById('stories');st.innerHTML='';
+  const d0=document.createElement('div');
+  d0.className='story forg';
+  d0.innerHTML='<h4>Case Stamped Unresolved</h4>The clock ran out with no ruling on the desk. The forger does not wait, and neither does the Bureau.';
+  st.appendChild(d0);
+  order.forEach(ci=>{
+    const cl=c.claims[ci];
+    const d=document.createElement('div');
+    d.className='story '+(cl.forged?'forg':'true');
+    d.innerHTML='<h4>'+(cl.forged?'The Forgery, Exposed':'The Real Story')+'</h4>'+cl.reveal;
+    st.appendChild(d);
+  });
+  st.classList.remove('hidden');
+  document.getElementById('wagerBox').classList.add('hidden');
+  document.getElementById('nextBtn').classList.remove('hidden');
+  document.getElementById('nextBtn').textContent=S.i+1<S.cases.length?'Next Case File':'Close the Files \u2014 Final Report';
+  hideClock();renderProgress();refresh();
+}
+
+/* ============ RENDER ============ */
+let order=[];
+function renderCase(){
+  const c=S.cases[S.i];
+  S.picked=-1;S.ruled=false;
+  order=shuffle([0,1,2]);
+  document.getElementById('caseHead').textContent=S.seriesName.toUpperCase()+' \u2014 CASE FILE NO. '+String(S.i+1).padStart(3,'0');
+  document.getElementById('caseTitle').textContent=c.title;
+  document.getElementById('caseBrief').textContent=c.brief;
+  const cc='CASE '+(S.i+1)+' OF '+S.cases.length;
+  document.getElementById('caseCount').textContent=cc;
+  document.getElementById('caseCountVs').textContent=cc;
+  const tb=document.getElementById('turnBanner');
+  if(S.mode===2){
+    tb.classList.remove('hidden');
+    tb.textContent=(S.turn===0?'EXAMINER ONE':'EXAMINER TWO')+' HAS THE FILE';
+    tb.className='turnbanner '+(S.turn===0?'p1':'p2');
+    document.getElementById('ps1').classList.toggle('active',S.turn===0);
+    document.getElementById('ps2').classList.toggle('active',S.turn===1);
+  }
+  const box=document.getElementById('cards');box.innerHTML='';
+  order.forEach((ci,slot)=>{
+    const cl=c.claims[ci];
+    const b=document.createElement('button');
+    b.className='doccard';b.id='card'+slot;
+    b.innerHTML='<span class="tab">'+('ABC'[slot])+'</span><span class="clip"></span>'+cl.text+'<span class="verdict" id="v'+slot+'"></span>';
+    b.onclick=()=>pick(slot);
+    box.appendChild(b);
+  });
+  document.getElementById('stories').classList.add('hidden');
+  document.getElementById('stories').innerHTML='';
+  document.getElementById('pointflash').innerHTML='';
+  document.getElementById('nextBtn').classList.add('hidden');
+  document.getElementById('wagerBox').classList.remove('hidden');
+  document.getElementById('ruleBtn').disabled=true;
+  document.getElementById('ruleBtn').textContent='Select the Forgery Above';
+  renderProgress();refresh();
+  sfx.shuffle();
+  window.scrollTo({top:0,behavior:'smooth'});
+  startClock();
+}
+function renderProgress(){
+  const p=document.getElementById('progress');p.innerHTML='';
+  for(let k=0;k<S.cases.length;k++){
+    const d=document.createElement('div');
+    d.className='pip'+(k<S.i?(' done '+(S.results[k]?'right':'wrong')):k===S.i?' now':'');
+    p.appendChild(d);
+  }
+}
+function pick(slot){
+  if(S.ruled)return;
+  sfx.click();S.picked=slot;
+  for(let k=0;k<3;k++)document.getElementById('card'+k).classList.toggle('picked',k===slot);
+  document.getElementById('ruleBtn').disabled=false;
+  document.getElementById('ruleBtn').textContent='Rule Document '+('ABC'[slot])+' a Forgery';
+}
+function setWager(w){
+  if(S.ruled)return;
+  sfx.click();S.wager=w;
+  [10,20,30].forEach(x=>document.getElementById('w'+x).classList.toggle('on',x===w));
+}
+function refresh(){
+  document.getElementById('score').textContent=S.p[0].score;
+  document.getElementById('score1').textContent=S.p[0].score;
+  document.getElementById('score2').textContent=S.p[1].score;
+  const st=cur().streak;
+  document.getElementById('streakNote').textContent=(S.mode===1&&st>=2)?('\u2605 '+st+' IN A ROW \u2014 BONUS +'+(st*2)+' \u2605'):'';
+}
+
+/* ============ RULING ============ */
+function rule(){
+  if(S.picked<0||S.ruled)return;
+  S.ruled=true;stopClock();hideClock();sfx.slam();
+  const c=S.cases[S.i];
+  const pickedClaim=c.claims[order[S.picked]];
+  const correct=pickedClaim.forged;
+  order.forEach((ci,slot)=>{
+    const cl=c.claims[ci];
+    const card=document.getElementById('card'+slot);
+    const v=document.getElementById('v'+slot);
+    card.disabled=true;card.classList.add('revealed');
+    if(cl.forged){v.textContent='FORGERY';v.className='verdict forg'}
+    else{v.textContent='GENUINE';v.className='verdict true';card.classList.add('dimmed')}
+  });
+  const P=cur();
+  let delta;
+  if(correct){
+    delta=S.wager+(P.streak>=2?P.streak*2:0);
+    P.score+=delta;P.streak++;P.right++;
+    sfx.good();flash('+'+delta+' REPUTATION','gain');
+  }else{
+    delta=Math.floor(S.wager/2);
+    P.score=Math.max(0,P.score-delta);P.streak=0;
+    sfx.bad();flash('\u2212'+delta+' REPUTATION','loss');
+  }
+  P.best=Math.max(P.best,P.streak);
+  S.results[S.i]=correct;
+  const st=document.getElementById('stories');st.innerHTML='';
+  order.forEach(ci=>{
+    const cl=c.claims[ci];
+    const d=document.createElement('div');
+    d.className='story '+(cl.forged?'forg':'true');
+    d.innerHTML='<h4>'+(cl.forged?'The Forgery, Exposed':'The Real Story')+'</h4>'+cl.reveal;
+    st.appendChild(d);
+  });
+  st.classList.remove('hidden');
+  document.getElementById('wagerBox').classList.add('hidden');
+  document.getElementById('nextBtn').classList.remove('hidden');
+  document.getElementById('nextBtn').textContent=S.i+1<S.cases.length?'Next Case File':'Close the Files \u2014 Final Report';
+  renderProgress();refresh();
+}
+function flash(txt,cls){
+  document.getElementById('pointflash').innerHTML='<div class="pointflash '+cls+'">'+txt+'</div>';
+}
+function nextCase(){
+  sfx.click();
+  S.i++;
+  if(S.i>=S.cases.length){endGame();return}
+  if(S.mode===2){S.turn=1-S.turn;showPass()}
+  else renderCase();
+}
+
+/* ============ END ============ */
+function rankSolo(r,total){
+  const pct=r/total;
+  if(pct>=1)return'MASTER ARCHIVIST \u2014 NOT ONE FORGERY ESCAPED YOU';
+  if(pct>=.8)return'SENIOR EXAMINER \u2014 THE FORGER FEARS YOUR DESK';
+  if(pct>=.6)return'DOCUMENT EXAMINER \u2014 A TRAINED AND WARY EYE';
+  if(pct>=.4)return'APPRENTICE CLERK \u2014 THE HALF-TRUTHS FOUND THEIR MARK';
+  return'NEW HIRE \u2014 THE FORGER SENDS HIS COMPLIMENTS';
+}
+function endGame(){
+  const fs=document.getElementById('finalStats');
+  if(S.mode===1){
+    const P=S.p[0];
+    document.getElementById('rankBox').textContent=rankSolo(P.right,S.cases.length);
+    fs.innerHTML='<div class="row"><span>Forgeries correctly identified</span><span>'+P.right+' of '+S.cases.length+'</span></div>'
+      +'<div class="row"><span>Final reputation</span><span>'+P.score+'</span></div>'
+      +'<div class="row"><span>Best streak</span><span>'+P.best+'</span></div>';
+  }else{
+    const a=S.p[0],b=S.p[1];
+    const winner=a.score===b.score?null:(a.score>b.score?0:1);
+    document.getElementById('endTitle').textContent=winner===null?'A Dead Heat':'The Files Are Closed';
+    document.getElementById('rankBox').innerHTML=winner===null
+      ?'BOTH EXAMINERS KEEP THEIR DESKS \u2014 REMATCH REQUIRED'
+      :'<span class="'+(winner===0?'p1c':'p2c')+'">EXAMINER '+(winner===0?'ONE':'TWO')+'</span> TAKES THE DESK BY THE WINDOW';
+    fs.innerHTML='<div class="row"><span class="p1c">Examiner One \u2014 reputation</span><span>'+a.score+' ('+a.right+' forgeries caught)</span></div>'
+      +'<div class="row"><span class="p2c">Examiner Two \u2014 reputation</span><span>'+b.score+' ('+b.right+' forgeries caught)</span></div>';
+  }
+  document.getElementById('endOverlay').classList.remove('hidden');
+}
+</script>
+</body>
+</html>

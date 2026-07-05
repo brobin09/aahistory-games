@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIT DOWN — A Durham Campaign, 1960</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,400;1,600&family=Special+Elite&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EFE6D0; --paper-2:#E4D8BC; --news:#F4EEDC;
+  --ink:#221E19; --mimeo:#6E4E9E; --red:#A8342A;
+  --tan:#C9B891; --good:#3E6B3A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper-2);
+  background-image:radial-gradient(ellipse at 30% 10%, rgba(255,255,255,.35), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(34,30,25,.015) 3px 4px);
+  color:var(--ink); font-family:'Libre Franklin',sans-serif;
+  font-size:16px; line-height:1.5; min-height:100vh;
+}
+.wrap{max-width:920px;margin:0 auto;padding:16px 14px 60px}
+
+/* ---------- masthead ---------- */
+header{text-align:center;border-bottom:4px double var(--ink);padding:16px 8px 12px;margin-bottom:14px;position:relative}
+.eyebrow{font-family:'Special Elite',monospace;font-size:.76rem;letter-spacing:.14em;color:var(--mimeo);text-transform:uppercase}
+h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2.4rem,9vw,4.4rem);letter-spacing:.04em;line-height:.95;text-transform:uppercase}
+h1 .sign{display:inline-block;background:var(--ink);color:var(--paper);padding:.04em .18em;transform:rotate(-1.2deg)}
+.subhead{font-family:'Special Elite',monospace;font-size:.84rem;margin-top:8px}
+#muteBtn{position:absolute;right:0;top:0;background:none;border:2px solid var(--ink);font-family:'Special Elite',monospace;font-size:.7rem;padding:4px 8px;cursor:pointer;background:var(--paper)}
+
+/* ---------- panels ---------- */
+.panel{background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 rgba(34,30,25,.25);padding:16px;margin-bottom:16px;position:relative}
+.panel h2{font-family:'Oswald',sans-serif;font-weight:500;text-transform:uppercase;letter-spacing:.08em;font-size:1.02rem;border-bottom:1px solid var(--ink);padding-bottom:6px;margin-bottom:12px}
+.stamp{float:right;font-family:'Special Elite',monospace;font-size:.68rem;color:var(--red);border:2px solid var(--red);padding:2px 7px;transform:rotate(3deg);letter-spacing:.1em;opacity:.85}
+
+/* ---------- tug of war ---------- */
+.tugwrap{margin-bottom:14px}
+.tuglabels{display:flex;justify-content:space-between;font-family:'Oswald',sans-serif;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.tug{position:relative;height:34px;border:2px solid var(--ink);background:var(--news);overflow:hidden}
+.tug .side{position:absolute;top:0;bottom:0;transition:width .8s cubic-bezier(.34,1.2,.5,1)}
+.tug .move{left:0;background:repeating-linear-gradient(45deg,var(--red) 0 10px,#933026 10px 20px)}
+.tug .merch{right:0;background:repeating-linear-gradient(-45deg,#4d453a 0 10px,#3c362d 10px 20px)}
+.tug .mark{position:absolute;top:0;bottom:0;width:3px;background:var(--ink);left:50%}
+.tugcap{display:flex;justify-content:space-between;font-family:'Special Elite',monospace;font-size:.74rem;margin-top:4px;color:#4d453a}
+.streak{font-family:'Oswald',sans-serif;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;text-align:center;margin-top:8px;color:var(--red)}
+
+/* ---------- small meters ---------- */
+.minirow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.mini{text-align:center}
+.mini .label{font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;margin-bottom:4px}
+.minibar{height:12px;border:2px solid var(--ink);background:var(--news);position:relative;overflow:hidden}
+.minibar .fill{position:absolute;left:0;top:0;bottom:0;transition:width .7s ease}
+.mini .value{font-family:'Special Elite',monospace;font-size:.86rem;margin-top:3px}
+
+/* ---------- roster ---------- */
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.chip{border:2px solid var(--ink);background:var(--news);padding:7px 5px 6px;text-align:center;position:relative;transition:transform .15s}
+.chip .face{width:40px;height:40px;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-weight:700;font-size:.95rem;color:var(--paper);background:var(--ink);border:2px solid var(--ink)}
+.chip.trained .face{background:var(--mimeo)}
+.chip .nm{font-weight:800;font-size:.7rem;line-height:1.15}
+.chip .yr{font-family:'Special Elite',monospace;font-size:.6rem;color:#6b6152}
+.chip.jailed{opacity:.55}
+.chip.jailed::after{content:'JAILED';position:absolute;top:26%;left:-6%;right:-6%;text-align:center;font-family:'Special Elite',monospace;font-size:.62rem;color:var(--red);border-top:2px solid var(--red);border-bottom:2px solid var(--red);transform:rotate(-12deg);background:rgba(244,238,220,.85);letter-spacing:.12em}
+.chip.shaken::after{content:'SHAKEN';position:absolute;top:26%;left:-6%;right:-6%;text-align:center;font-family:'Special Elite',monospace;font-size:.62rem;color:#8a6d1f;border-top:2px solid #8a6d1f;border-bottom:2px solid #8a6d1f;transform:rotate(-12deg);background:rgba(244,238,220,.85);letter-spacing:.12em}
+.chip.pop{animation:pop .45s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.14) rotate(-2deg)}100%{transform:scale(1)}}
+.rosterkey{font-family:'Special Elite',monospace;font-size:.68rem;color:#6b6152;margin-top:8px}
+.rosterkey b{color:var(--mimeo)}
+
+/* ---------- action sheet ---------- */
+.week-line{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;font-family:'Special Elite',monospace;font-size:.84rem;margin-bottom:10px}
+.pool{font-weight:800;font-family:'Libre Franklin',sans-serif}
+.action{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px dashed rgba(34,30,25,.5);padding:9px 12px;margin-bottom:8px;background:rgba(255,255,255,.35)}
+.action.locked{opacity:.45}
+.action .name{font-weight:800;font-size:.92rem;text-transform:uppercase;letter-spacing:.03em}
+.action .desc{font-size:.78rem;color:#4d453a;margin-top:2px}
+.spin{display:flex;align-items:center;border:2px solid var(--ink);background:var(--paper)}
+.spin button{width:36px;height:36px;border:none;background:var(--ink);color:var(--paper);font-family:'Oswald',sans-serif;font-size:1.15rem;cursor:pointer;line-height:1}
+.spin button:active{background:var(--mimeo)}
+.spin .num{width:42px;text-align:center;font-family:'Special Elite',monospace;font-size:1.05rem}
+.bigbtn{display:block;width:100%;margin-top:12px;padding:14px;background:var(--red);color:var(--paper);border:2px solid var(--ink);font-family:'Oswald',sans-serif;font-weight:700;font-size:1.15rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.bigbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.bigbtn:disabled{background:#8a8172;cursor:not-allowed}
+.bigbtn.alt{background:var(--ink)}
+.gambit{margin-top:10px;border:3px double var(--red);padding:12px;background:rgba(168,52,42,.06)}
+.gambit .gname{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--red)}
+.gambit p{font-size:.8rem;color:#4d453a;margin:4px 0 8px}
+.gambit button{background:var(--paper);border:2px solid var(--red);color:var(--red);font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;cursor:pointer}
+.gambit button.armed{background:var(--red);color:var(--paper)}
+
+/* ---------- bulletin ---------- */
+.bulletin{font-family:'Special Elite',monospace;font-size:.85rem;line-height:1.6;max-height:340px;overflow-y:auto}
+.bulletin .entry{margin-bottom:11px;padding-left:12px;border-left:3px solid var(--tan)}
+.bulletin .entry.event{border-left-color:var(--mimeo);color:#463366}
+.bulletin .entry.bad{border-left-color:var(--red);color:#6e211a}
+.bulletin .entry.good{border-left-color:var(--good);color:#2c4c29}
+.bulletin .headline{text-transform:uppercase;letter-spacing:.06em}
+
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;background:rgba(34,30,25,.82);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
+.overlay .card{max-width:600px;width:100%;max-height:90vh;overflow-y:auto}
+.hidden{display:none !important}
+
+/* ---------- newspaper ---------- */
+.newspaper{background:var(--news);border:2px solid var(--ink);padding:22px 24px 18px;font-family:'Playfair Display',serif;color:var(--ink);box-shadow:0 12px 40px rgba(0,0,0,.5);transform-origin:center;animation:pressrun .7s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pressrun{0%{transform:scale(.2) rotate(-14deg);opacity:0}70%{transform:scale(1.04) rotate(1deg)}100%{transform:scale(1) rotate(0)}}
+.np-mast{text-align:center;border-bottom:3px double var(--ink);padding-bottom:8px;margin-bottom:10px}
+.np-mast .np-name{font-weight:900;font-size:clamp(1.6rem,6vw,2.4rem);letter-spacing:.02em}
+.np-mast .np-date{font-family:'Libre Franklin',sans-serif;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;display:flex;justify-content:space-between;margin-top:5px}
+.np-head{font-weight:900;font-size:clamp(1.5rem,5.6vw,2.3rem);line-height:1.05;text-align:center;margin:8px 0 6px;text-transform:uppercase}
+.np-deck{font-family:'Libre Franklin',sans-serif;font-style:italic;text-align:center;font-size:.92rem;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:6px 0;margin-bottom:12px}
+.np-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;font-family:'Libre Franklin',sans-serif;font-size:.8rem;line-height:1.55}
+@media(max-width:520px){.np-cols{grid-template-columns:1fr}}
+.np-cols h4{font-family:'Playfair Display',serif;font-size:.95rem;margin-bottom:3px;text-transform:uppercase}
+.np-foot{margin-top:14px}
+
+/* ---------- crisis ---------- */
+.crisis{background:var(--ink);color:var(--paper);border:2px solid var(--paper);padding:22px;position:relative;overflow:hidden}
+.crisis::before{content:'';position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;animation:flash .8s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+.crisis .ctag{font-family:'Special Elite',monospace;font-size:.72rem;letter-spacing:.2em;color:var(--red);text-transform:uppercase;margin-bottom:8px}
+.crisis h3{font-family:'Playfair Display',serif;font-size:1.35rem;line-height:1.25;margin-bottom:10px}
+.crisis p{font-size:.92rem;color:#d8cfb8;margin-bottom:14px}
+.crisis .choices{display:grid;gap:8px}
+.crisis .choices button{text-align:left;padding:11px 13px;background:transparent;border:2px solid var(--paper);color:var(--paper);font-family:'Libre Franklin',sans-serif;font-size:.88rem;cursor:pointer}
+.crisis .choices button:hover{background:var(--red);border-color:var(--red)}
+.crisis .choices small{display:block;font-family:'Special Elite',monospace;font-size:.68rem;color:#b7ac91;margin-top:2px}
+
+/* ---------- docs & endings ---------- */
+.docsheet{background:#F6F0DF;border:1px solid var(--ink);padding:20px 22px;font-family:'Special Elite',monospace;font-size:.86rem;line-height:1.7;color:#3a2f55;box-shadow:inset 0 0 40px rgba(110,78,158,.06)}
+.docsheet h3{font-size:.98rem;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:10px;color:var(--mimeo)}
+.docsheet .meta{font-size:.7rem;text-align:center;margin-bottom:12px;color:#6b6152}
+.dchoices{margin-top:14px;display:grid;gap:8px}
+.dchoices button{text-align:left;padding:10px 12px;background:var(--paper);border:2px solid var(--ink);font-family:'Libre Franklin',sans-serif;font-size:.86rem;cursor:pointer}
+.dchoices button:hover{background:var(--tan)}
+.endtitle{font-family:'Oswald',sans-serif;font-weight:700;font-size:2rem;text-transform:uppercase;letter-spacing:.06em;text-align:center;margin-bottom:10px}
+.endtitle.win{color:var(--good)} .endtitle.lose{color:var(--red)}
+.lesson{font-family:'Special Elite',monospace;font-size:.84rem;border-top:1px dashed var(--ink);margin-top:14px;padding-top:12px;color:#4d453a}
+.introcopy p{margin-bottom:12px;font-size:.93rem}
+.introcopy .flag{font-family:'Special Elite',monospace;font-size:.78rem;color:var(--mimeo);border:1px dashed var(--mimeo);padding:8px 10px;margin-bottom:12px}
+
+/* ---------- report card ---------- */
+.report{border:2px solid var(--ink);background:var(--news);padding:16px;margin-top:14px;font-family:'Special Elite',monospace}
+.report h3{text-align:center;font-size:.9rem;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.report .row{display:flex;justify-content:space-between;border-bottom:1px dotted #8a8172;padding:5px 0;font-size:.84rem}
+.report .grade{font-family:'Playfair Display',serif;font-weight:900;font-size:1.05rem}
+.report .final{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:2px solid var(--ink)}
+.report .final .grade{font-size:2.2rem;color:var(--red)}
+@media (prefers-reduced-motion: reduce){.newspaper,.chip.pop,.crisis::before{animation:none}.tug .side,.minibar .fill{transition:none}}
+button:focus-visible{outline:3px solid var(--mimeo);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <button id="muteBtn" onclick="toggleSound()">SOUND: ON</button>
+  <div class="eyebrow">Student Movement Coordinating Committee &mdash; Durham, North Carolina</div>
+  <h1><span class="sign">SIT&nbsp;DOWN</span></h1>
+  <div class="subhead">A campaign of nonviolent direct action &bull; Spring Semester, 1960</div>
+</header>
+
+<!-- INTRO -->
+<div class="overlay" id="intro">
+  <div class="panel card introcopy">
+    <span class="stamp">CONFIDENTIAL</span>
+    <h2>Orientation Briefing</h2>
+    <div class="flag">MIMEOGRAPHED &mdash; DO NOT POST ON CAMPUS BULLETIN BOARDS</div>
+    <p>It is February 1960. Three years ago, seven young people sat down at the Royal Ice Cream parlor and were arrested for it. Last week, Greensboro students sat down at a lunch counter and would not leave. The moment has arrived in Durham.</p>
+    <p>You chair the coordinating committee. You have <strong>fourteen weeks</strong> before the semester ends. Break the merchants' resolve before the calendar breaks your campaign.</p>
+    <p>Discipline is not a slogan. It is the strategy. Train your people. Mind the bail fund. Keep Hayti behind you. And know your volunteers by name — you will be spending their courage.</p>
+    <button class="bigbtn" onclick="startGame()">Call the First Meeting</button>
+  </div>
+</div>
+
+<!-- CAMPAIGN BOARD -->
+<section class="panel">
+  <h2>Campaign Board <span style="float:right;font-family:'Special Elite',monospace;font-size:.8rem" id="weekTag">Week 1 of 14</span></h2>
+  <div class="tugwrap">
+    <div class="tuglabels"><span style="color:var(--red)">Movement Pressure</span><span>Merchants' Resolve</span></div>
+    <div class="tug">
+      <div class="side move" id="tugMove"></div>
+      <div class="side merch" id="tugMerch"></div>
+      <div class="mark"></div>
+    </div>
+    <div class="tugcap"><span id="capMove">0</span><span id="capNote">Push the line past the merchants' resolve.</span><span id="capMerch">100</span></div>
+    <div class="streak" id="streakNote"></div>
+  </div>
+  <div class="minirow">
+    <div class="mini"><div class="label">Bail Fund</div><div class="minibar"><div class="fill" id="mBail" style="background:var(--good)"></div></div><div class="value" id="vBail">$300</div></div>
+    <div class="mini"><div class="label">Community</div><div class="minibar"><div class="fill" id="mComm" style="background:var(--mimeo)"></div></div><div class="value" id="vComm">50</div></div>
+    <div class="mini"><div class="label">On the Line</div><div class="minibar"><div class="fill" id="mVol" style="background:var(--ink)"></div></div><div class="value" id="vVol">18 ready</div></div>
+  </div>
+</section>
+
+<!-- ROSTER -->
+<section class="panel">
+  <span class="stamp" style="color:var(--mimeo);border-color:var(--mimeo)">KEEP CURRENT</span>
+  <h2>The Roster</h2>
+  <div class="roster" id="roster"></div>
+  <div class="rosterkey">Violet portrait = <b>trained in nonviolence</b>. Jailed volunteers are off the line until bonded out. Shaken volunteers rest one week.</div>
+</section>
+
+<!-- ACTION SHEET -->
+<section class="panel" id="planPanel">
+  <span class="stamp">WEEKLY ACTION PLAN</span>
+  <h2>Assignments</h2>
+  <div class="week-line">
+    <span>Fill in assignments and carry the sheet to Friday mass meeting.</span>
+    <span>UNASSIGNED: <span class="pool" id="poolLeft">18</span></span>
+  </div>
+  <div id="actions"></div>
+  <div class="gambit" id="gambitBox">
+    <div class="gname">&#9733; Jail, No Bail &#9733;</div>
+    <p>Once this semester, your sit-in volunteers may refuse bond and fill the county jail. If discipline holds, the story goes national and the fund is spared. If it breaks, you hand the merchants their headline. Available from week 5.</p>
+    <button id="gambitBtn" onclick="toggleGambit()" disabled>ARM THE GAMBIT</button>
+  </div>
+  <button class="bigbtn" id="goBtn" onclick="runWeek()">Carry Out the Plan</button>
+</section>
+
+<!-- BULLETIN -->
+<section class="panel">
+  <span class="stamp" style="color:var(--mimeo);border-color:var(--mimeo)">2ND COPY</span>
+  <h2>Committee Bulletin</h2>
+  <div class="bulletin" id="log">
+    <div class="entry">The committee convenes in a church basement off Fayetteville Street. Folding chairs. A borrowed mimeograph machine. Eighteen students and a semester in front of you.</div>
+  </div>
+</section>
+
+<!-- NEWSPAPER OVERLAY -->
+<div class="overlay hidden" id="npOverlay">
+  <div class="card">
+    <div class="newspaper" id="npSheet">
+      <div class="np-mast">
+        <div class="np-name">The Carolina Clarion</div>
+        <div class="np-date"><span>DURHAM, N.C.</span><span id="npDate">FEBRUARY 1960</span><span>PRICE 5&cent;</span></div>
+      </div>
+      <div class="np-head" id="npHead"></div>
+      <div class="np-deck" id="npDeck"></div>
+      <div class="np-cols" id="npCols"></div>
+      <button class="bigbtn np-foot" onclick="closePaper()">Fold the Paper &mdash; Next Week</button>
+    </div>
+  </div>
+</div>
+
+<!-- CRISIS OVERLAY -->
+<div class="overlay hidden" id="crisisOverlay">
+  <div class="card"><div class="crisis" id="crisisBox"></div></div>
+</div>
+
+<!-- DOCUMENT OVERLAY -->
+<div class="overlay hidden" id="docOverlay">
+  <div class="panel card">
+    <h2>From the File Cabinet</h2>
+    <div class="docsheet" id="docBody"></div>
+    <div class="dchoices" id="docChoices"></div>
+  </div>
+</div>
+
+<!-- END OVERLAY -->
+<div class="overlay hidden" id="endOverlay">
+  <div class="panel card">
+    <div class="endtitle" id="endTitle"></div>
+    <div id="endBody" style="font-size:.94rem"></div>
+    <div id="reportCard"></div>
+    <div class="lesson" id="endLesson"></div>
+    <button class="bigbtn alt" onclick="location.reload()" style="margin-top:16px">Start a New Campaign</button>
+  </div>
+</div>
+
+<script>
+/* =============== SOUND (WebAudio, no assets) =============== */
+let AC=null, soundOn=true;
+function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC}
+function tone(freq,dur,type,vol,when=0){
+  if(!soundOn)return;
+  try{
+    const a=ac(),o=a.createOscillator(),g=a.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,a.currentTime+when);
+    g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+when+dur);
+    o.connect(g);g.connect(a.destination);
+    o.start(a.currentTime+when);o.stop(a.currentTime+when+dur+.05);
+  }catch(e){}
+}
+const sfx={
+  click:()=>tone(1400,.03,'square',.05),
+  type:()=>{for(let i=0;i<6;i++)tone(900+Math.random()*500,.02,'square',.04,i*.07)},
+  good:()=>{tone(523,.12,'triangle',.09);tone(784,.18,'triangle',.09,.1)},
+  bad:()=>{tone(160,.25,'sawtooth',.1);tone(110,.3,'sawtooth',.08,.12)},
+  flash:()=>tone(2200,.08,'square',.07),
+  press:()=>{for(let i=0;i<4;i++)tone(220+i*40,.06,'square',.06,i*.08)}
+};
+function toggleSound(){soundOn=!soundOn;document.getElementById('muteBtn').textContent='SOUND: '+(soundOn?'ON':'OFF')}
+document.addEventListener('click',()=>{if(soundOn)ac()},{once:true});
+
+/* =============== STATE =============== */
+const S={
+  week:1,maxWeek:14,
+  bail:300,comm:50,press:0,resolve:100,
+  streak:0,breaks:0,arrestsTotal:0,peakPress:0,
+  negotiateUnlocked:false,gambitArmed:false,gambitUsed:false,
+  over:false,docIndex:0,heat:0
+};
+const NAMES=[
+ ['Ernestine G.','JR','Sociology'],['Booker T. W.','SO','History'],['Callie M.','SR','Education'],
+ ['James Earl P.','FR','Biology'],['Vivian D.','JR','English'],['Nathaniel B.','SO','Commerce'],
+ ['Doretha S.','SR','Music'],['Lonnie R.','FR','Mathematics'],['Pauline C.','JR','Nursing'],
+ ['Theodore J.','SO','Religion'],['Mamie L.','SR','Home Econ.'],['Wendell F.','JR','Physics'],
+ ['Gwendolyn H.','FR','Art'],['Percy A.','SO','History'],['Rosetta K.','JR','Education'],
+ ['Clarence O.','SR','Law (pre)'],['Bernice T.','SO','English'],['Otis M.','FR','Agriculture']
+];
+const ROSTER=NAMES.map((n,i)=>({id:i,name:n[0],yr:n[1],major:n[2],trained:false,status:'ready',restWeeks:0}));
+ROSTER[0].trained=ROSTER[2].trained=true; // two veterans of '57
+
+const ACTIONS=[
+ {id:'sitin',name:'Sit-Ins Downtown',desc:'Take the counter seats. Biggest push on the merchants. Arrest risk; untrained volunteers may break discipline.'},
+ {id:'picket',name:'Picket Lines',desc:'March outside the stores. Steady pressure, low risk, keeps the story alive.'},
+ {id:'train',name:'Nonviolence Workshop',desc:'Role-play the abuse before it comes. Converts volunteers to trained.'},
+ {id:'fund',name:'Church Collections',desc:'Sunday appeals. Raises bail money; stronger when community support is high.'},
+ {id:'canvass',name:'Canvass Hayti',desc:'Door to door among families and business owners. Builds community support.'},
+ {id:'negotiate',name:'Negotiating Delegation',desc:'Meet the merchants. Unlocks when their resolve falls below 40.',locked:true}
+];
+const assign={sitin:0,picket:0,train:0,fund:0,canvass:0,negotiate:0};
+
+/* =============== EVENTS =============== */
+const EVENTS=[
+ {t:'good',h:'SIT-INS SPREAD TO A DOZEN CITIES',b:'Reporters start asking about Durham. Resolve -5.',f:s=>{s.resolve-=5}},
+ {t:'good',h:'THREE PULPITS ENDORSE THE CAMPAIGN',b:'Community +8, Bail Fund +$40.',f:s=>{s.comm+=8;s.bail+=40}},
+ {t:'good',h:'FIELD ORGANIZER PASSES THROUGH',b:'An evening workshop leaves two more volunteers trained.',f:s=>{trainSome(2)}},
+ {t:'good',h:'ENVELOPE FROM A FAYETTEVILLE ST. DRUGGIST',b:'Bail Fund +$60. No note. None needed.',f:s=>{s.bail+=60}},
+ {t:'good',h:'WIRE PHOTO RUNS UP NORTH',b:'Your orderly picket line, above the fold. Resolve -7.',f:s=>{s.resolve-=7}},
+ {t:'bad',h:'MORNING PAPER BLAMES OUTSIDE AGITATORS',b:'Community -6.',f:s=>{s.comm-=6}},
+ {t:'bad',h:'POLICE CHIEF PROMISES STRICT ENFORCEMENT',b:'Arrest risk rises this week and next.',f:s=>{s.heat=2}},
+ {t:'bad',h:'MIDTERM EXAMINATIONS',b:'Three volunteers must rest for the week.',f:s=>{restSome(3)}},
+ {t:'bad',h:'HECKLERS GATHER DOWNTOWN',b:'Lit cigarettes and worse intentions. Discipline will be tested.',f:s=>{s.provoke=true}},
+ {t:'good',h:'DIVINITY STUDENTS CROSS TOWN TO JOIN',b:'Shaken volunteers take heart and return early.',f:s=>{healAll()}},
+ {t:'bad',h:'MERCHANTS ANNOUNCE A STUDY COMMITTEE',b:'Nothing moves. Their resolve hardens +6.',f:s=>{s.resolve+=6}},
+ {t:'good',h:'EASTER TRADE APPROACHES',b:'Empty counters sting worse. Downtown actions count extra this week.',f:s=>{s.season=true}}
+];
+
+/* =============== CRISES (each fires once, on sit-in weeks) =============== */
+const CRISES=[
+ {id:'sugar',
+  tag:'FLASHBULB — DOWNTOWN COUNTER, 12:40 P.M.',
+  h:'A heckler upends the sugar jar over Ernestine\u2019s head. A wire-service photographer raises his camera.',
+  p:'She has not moved. The counter has gone silent except for the man laughing. Your floor captain looks to you from the door.',
+  ch:[
+   {t:'Hold the line. Nobody moves, nobody answers.',s:'Trained volunteers make this look easy. Untrained ones may not.',
+    f:(s,ts)=>{if(Math.random()<.25+ts*.65){s.resolve-=10;s.comm+=6;sfx.good();return{good:true,msg:'The photograph runs everywhere — a young woman, sugar in her hair, eyes forward, unmoved. The country sees exactly who is civilized here. Resolve -10, Community +6.'}}else{s.press-=5;s.comm-=6;s.breaks++;shakeOne();sfx.bad();return{good:false,msg:'A freshman two seats down comes off his stool shouting. That is the photograph instead. Community -6, and he is shaken for a week.'}}}},
+   {t:'Withdraw the team quietly. Live to sit another day.',s:'Safe. Costs momentum.',
+    f:s=>{s.streak=0;s.resolve+=3;return{good:false,msg:'The team files out in silence. Nothing lost but the day — and the merchants notice the empty seats. Resolve +3.'}}},
+   {t:'Start the singing.',s:'Neither retreat nor confrontation.',
+    f:s=>{if(Math.random()<.6){s.comm+=8;s.resolve-=5;sfx.good();return{good:true,msg:'\u201cWe Shall Not Be Moved,\u201d low at first, then filling the store. Two clerks stop working to listen. Community +8, Resolve -5.'}}else{s.comm+=3;return{good:true,msg:'The song steadies everyone, though the moment passes without a headline. Community +3.'}}}}
+  ]},
+ {id:'mother',
+  tag:'PERSONAL — FRIDAY MASS MEETING',
+  h:'Lonnie\u2019s mother has taken the bus from Rocky Mount. She stands at the back of the church, hat in her hands.',
+  p:'She has heard about the arrests. He is her only son and the first in the family to reach college. She asks to speak to whoever is in charge. That is you.',
+  ch:[
+   {t:'Meet her yourself. Answer every question honestly.',s:'Costs an evening. Might cost a volunteer.',
+    f:s=>{if(Math.random()<.7){s.comm+=7;sfx.good();return{good:true,msg:'You talk past midnight — about the training, the bail fund, why her son will not be alone. Sunday she puts five dollars in the movement collection at her home church. Community +7, Bail +$5.',x:()=>{S.bail+=5}}}else{loseOne('Lonnie R.');return{good:false,msg:'She listens, thanks you, and takes Lonnie home for the semester. You do not blame her. Neither does he.'}}}},
+   {t:'Have Lonnie decide for himself, in front of her.',s:'His choice to make.',
+    f:s=>{s.comm+=4;trainByName('Lonnie R.');return{good:true,msg:'\u201cMama, I have to.\u201d She stays for the whole meeting. Lonnie asks to lead the next workshop — he is now trained. Community +4.'}}},
+   {t:'Send your most respected minister ally to speak with her.',s:'Delegation has its uses.',
+    f:s=>{s.comm+=2;return{good:true,msg:'Reverend counsel eases her fears somewhat. Lonnie stays, quieter than before. Community +2.'}}}
+  ]},
+ {id:'backdoor',
+  tag:'OFFER — MANAGER\u2019S OFFICE',
+  h:'A store manager makes an offer: he will serve your people at a stand-up counter in the rear, starting Monday.',
+  p:'\u201cIt is more than anyone else in this town is offering,\u201d he says. He is not wrong. He is also not offering what you asked.',
+  ch:[
+   {t:'Refuse. The demand is service with dignity, not service in the back.',s:'The whole point.',
+    f:s=>{s.resolve-=8;s.comm+=5;sfx.good();return{good:true,msg:'Word of the refusal travels. Nobody marched for a back counter. The merchants learn you cannot be bought cheap. Resolve -8, Community +5.'}}},
+   {t:'Accept it as a first step.',s:'Something for the tired volunteers.',
+    f:s=>{s.press-=8;s.comm-=8;s.streak=0;sfx.bad();return{good:false,msg:'The campaign fractures over it. Half the roster calls it surrender. The papers call it settled. Pressure -8, Community -8.'}}},
+   {t:'Counter: full service, one store, and you will call off the pickets there.',s:'Split the association.',
+    f:s=>{if(Math.random()<.5){s.resolve-=12;sfx.good();return{good:true,msg:'He takes the deal. One integrated counter downtown — and the association\u2019s common front cracks in public. Resolve -12.'}}else{s.resolve+=2;return{good:false,msg:'He cannot risk his neighbors\u2019 anger and withdraws the offer entirely. Resolve +2.'}}}}
+  ]},
+ {id:'cigarette',
+  tag:'FLASHPOINT — WOOLWORTH COUNTER',
+  h:'A man is walking the line of seated volunteers, lit cigarette held an inch from Booker\u2019s neck.',
+  p:'The police officer by the door is studying the ceiling. Booker\u2019s hands are flat on the counter. You are close enough to intervene.',
+  ch:[
+   {t:'Signal Booker: hold. The officer must be made to choose.',s:'Highest risk, highest reward.',
+    f:(s,ts)=>{if(Math.random()<.3+ts*.6){s.resolve-=11;s.comm+=5;sfx.good();return{good:true,msg:'Booker does not flinch. A white customer, disgusted, demands the officer act — and the moment turns. Resolve -11, Community +5.'}}else{s.arrestsTotal++;shakeByName('Booker T. W.');s.comm+=2;return{good:false,msg:'The burn catches his collar. Booker stands — slowly, hands raised — and is arrested for disturbing the peace. He is shaken but unbowed. Community +2 in sympathy.',x:()=>{payBail(1)}}}}},
+   {t:'Step between them yourself.',s:'The chair takes the risk.',
+    f:s=>{s.comm+=4;s.arrestsTotal++;return{good:true,msg:'You take the seat beside Booker and the cigarette\u2019s attention with it. The officer finally moves — on you. The committee bonds you out by supper. Community +4.',x:()=>{payBail(1)}}}},
+   {t:'Pull the team. This crowd wants blood.',s:'Discretion.',
+    f:s=>{s.streak=0;return{good:false,msg:'You will not spend volunteers on a mob\u2019s terms. The team withdraws. The streak is broken, but everyone sleeps in their own bed.'}}}
+  ]},
+ {id:'ally',
+  tag:'VISITOR — CHURCH BASEMENT',
+  h:'Two white students from across town ask to join the sit-ins.',
+  p:'\u201cWe can take seats they cannot refuse to serve,\u201d one says, \u201cand give our seats to your people when the manager comes.\u201d The committee is divided.',
+  ch:[
+   {t:'Welcome them, after full training.',s:'The movement\u2019s door is open.',
+    f:s=>{s.resolve-=6;s.comm+=3;sfx.good();return{good:true,msg:'The sight of an integrated row at the counter unhinges the hecklers and moves the wire editors. Resolve -6, Community +3.'}}},
+   {t:'Decline. This campaign\u2019s leadership and its risks stay with the students of this college.',s:'A defensible principle.',
+    f:s=>{s.comm+=2;return{good:true,msg:'The decision is respected on campus, and the campaign\u2019s discipline stays entirely in hands you have trained. Community +2.'}}},
+   {t:'Accept them for pickets only.',s:'Half measures.',
+    f:s=>{s.press+=3;return{good:true,msg:'They carry signs and take their share of spit. Pressure +3.'}}}
+  ]},
+ {id:'informant',
+  tag:'WARNING — PASSED IN A HYMNAL',
+  h:'A note in Sunday\u2019s hymnal: the police know Tuesday\u2019s target and will be waiting with a paddy wagon and a magistrate on call.',
+  p:'Someone downtown is friendly. Or someone is baiting you. Tuesday\u2019s team is your largest yet.',
+  ch:[
+   {t:'Change the target. Hit the store across the street instead.',s:'Trust the note.',
+    f:s=>{if(Math.random()<.7){s.resolve-=9;sfx.good();return{good:true,msg:'The paddy wagon idles outside an empty counter while your team fills the seats next door. The papers enjoy the police department\u2019s embarrassment. Resolve -9.'}}else{s.heat=2;return{good:false,msg:'The note was bait. Officers are waiting at the second store too, and now they know someone is leaking. Heat rises.'}}}},
+   {t:'Proceed as planned — and alert the newspapers first.',s:'If they want a show of force, give it an audience.',
+    f:s=>{s.arrestsTotal+=3;s.resolve-=6;s.comm+=4;return{good:true,msg:'Three arrests under the eye of two photographers and a Northern columnist. Expensive, and worth every dollar. Resolve -6, Community +4.',x:()=>{payBail(3)}}}},
+   {t:'Cancel Tuesday entirely.',s:'No risk, no reward.',
+    f:s=>{s.streak=0;s.resolve+=3;return{good:false,msg:'A quiet Tuesday. The merchants breathe easier. Resolve +3.'}}}
+  ]}
+];
+let crisisDeck=[...CRISES];
+
+/* =============== DOCUMENTS =============== */
+const DOCS=[
+ {week:3,title:'WORKSHOP HANDOUT NO. 2',meta:'Mimeograph copy — nonviolence training series',
+  body:'Rules for those who take a seat: Sit straight and face forward. Do not speak to hecklers. Do not strike back or curse back if abused. Walk with dignity if arrested. Remember that the man pouring coffee on your coat is not the enemy. The system that put him there is.',
+  q:'According to the handout, why must a volunteer not strike back?',
+  a:['Because retaliation gives the press and police the story they want, and the target is the system, not the individual','Because volunteers were not physically capable of defending themselves','Because the merchants requested peaceful behavior'],
+  correct:0,bonus:'Every volunteer reads the handout aloud at mass meeting. +3 trained.',bf:s=>{trainSome(3)}},
+ {week:6,title:'TREASURER\u2019S NOTE TO THE COMMITTEE',meta:'Handwritten, filed with weekly minutes',
+  body:'Bail stood at $25 per person this week and the magistrate hints it may rise. Every arrest we cannot bond out is a mother\u2019s telephone call I must answer. The Sunday collections carry us, but the churches carry the collections. Do not spend goodwill faster than we bank it.',
+  q:'What is the treasurer\u2019s warning?',
+  a:['The campaign should stop accepting church donations','Arrests cost money and goodwill, and both are drawn from the same community that sustains the movement','The magistrate is secretly sympathetic'],
+  correct:1,bonus:'The committee tightens its books. Bail Fund +$50.',bf:s=>{s.bail+=50}},
+ {week:9,title:'LETTER FROM A DOWNTOWN MERCHANT',meta:'Unsigned, delivered by a third party',
+  body:'My registers are down by a third and my lunch counter loses money every hour it sits roped off. I hold no brief for your methods. But I am a businessman before I am anything else, and there are others who feel as I do. If your people stay orderly, you will find the association less united than its statements suggest.',
+  q:'What does the letter reveal?',
+  a:['The merchants are united and will never negotiate','The merchants object to segregation on moral grounds','Economic losses are splitting the merchants, and continued discipline may break their common front'],
+  correct:2,bonus:'Word of the letter is leaked carefully. Resolve -6.',bf:s=>{s.resolve-=6}}
+];
+
+/* =============== ROSTER HELPERS =============== */
+const ready=()=>ROSTER.filter(v=>v.status==='ready');
+function trainSome(n){const u=ready().filter(v=>!v.trained);for(let i=0;i<Math.min(n,u.length);i++)u[i].trained=true}
+function trainByName(nm){const v=ROSTER.find(v=>v.name===nm);if(v)v.trained=true}
+function restSome(n){const r=ready();for(let i=0;i<Math.min(n,r.length);i++){r[i].status='shaken';r[i].restWeeks=1}}
+function shakeOne(){const u=ready().filter(v=>!v.trained);const v=u[0]||ready()[0];if(v){v.status='shaken';v.restWeeks=1;popChip(v.id)}}
+function shakeByName(nm){const v=ROSTER.find(v=>v.name===nm);if(v&&v.status==='ready'){v.status='shaken';v.restWeeks=1;popChip(v.id)}}
+function healAll(){ROSTER.forEach(v=>{if(v.status==='shaken'){v.status='ready';v.restWeeks=0}})}
+function loseOne(nm){const v=ROSTER.find(v=>v.name===nm);if(v)v.status='gone'}
+function jailSome(n){const r=ready();const picked=[];for(let i=0;i<Math.min(n,r.length);i++){const v=r[Math.floor(Math.random()*r.length)];if(v.status==='ready'){v.status='jailed';picked.push(v);popChip(v.id)}else i--}return picked}
+function bondOut(list){list.forEach(v=>{if(v.status==='jailed'){v.status='ready';popChip(v.id)}})}
+function popChip(id){const el=document.getElementById('chip_'+id);if(el){el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}}
+
+/* =============== UI =============== */
+function buildRoster(){
+  const box=document.getElementById('roster');box.innerHTML='';
+  ROSTER.forEach(v=>{
+    if(v.status==='gone')return;
+    const d=document.createElement('div');
+    d.className='chip'+(v.trained?' trained':'')+(v.status==='jailed'?' jailed':'')+(v.status==='shaken'?' shaken':'');
+    d.id='chip_'+v.id;
+    const init=v.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    d.innerHTML=`<div class="face">${init}</div><div class="nm">${v.name}</div><div class="yr">${v.yr} &bull; ${v.major}</div>`;
+    box.appendChild(d);
+  });
+}
+function buildActions(){
+  const box=document.getElementById('actions');box.innerHTML='';
+  ACTIONS.forEach(a=>{
+    const locked=a.id==='negotiate'&&!S.negotiateUnlocked;
+    const row=document.createElement('div');
+    row.className='action'+(locked?' locked':'');
+    row.innerHTML=`<div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>
+      <div class="spin">
+        <button aria-label="fewer" ${locked?'disabled':''} onclick="bump('${a.id}',-1)">&minus;</button>
+        <div class="num" id="n_${a.id}">0</div>
+        <button aria-label="more" ${locked?'disabled':''} onclick="bump('${a.id}',1)">+</button>
+      </div>`;
+    box.appendChild(row);
+  });
+}
+function bump(id,d){
+  sfx.click();
+  const pool=ready().length-totalAssigned();
+  if(d>0&&pool<=0)return;
+  assign[id]=Math.max(0,assign[id]+d);
+  refresh();
+}
+function totalAssigned(){return Object.values(assign).reduce((a,b)=>a+b,0)}
+function toggleGambit(){
+  if(S.gambitUsed)return;
+  S.gambitArmed=!S.gambitArmed;sfx.click();
+  const b=document.getElementById('gambitBtn');
+  b.classList.toggle('armed',S.gambitArmed);
+  b.textContent=S.gambitArmed?'GAMBIT ARMED — SIT-IN TEAM WILL REFUSE BAIL':'ARM THE GAMBIT';
+}
+function refresh(){
+  clamp();
+  S.peakPress=Math.max(S.peakPress,S.press);
+  document.getElementById('weekTag').textContent=`Week ${S.week} of ${S.maxWeek}`;
+  const total=S.press+S.resolve;
+  document.getElementById('tugMove').style.width=(S.press/total*100)+'%';
+  document.getElementById('tugMerch').style.width=(S.resolve/total*100)+'%';
+  document.getElementById('capMove').textContent=S.press;
+  document.getElementById('capMerch').textContent=S.resolve;
+  document.getElementById('capNote').textContent=
+    S.resolve<=15?'The association is meeting behind closed doors.':
+    S.resolve<=40?'Registers are down. Their statements grow shorter.':
+    S.resolve<=70?'Downtown has noticed. The books are being watched.':
+    'The merchants believe they can wait you out.';
+  document.getElementById('streakNote').textContent=S.streak>=2?`\u2605 DISCIPLINE STREAK: ${S.streak} WEEKS — PRESS COVERAGE MULTIPLIER \u00d7${(1+Math.min(S.streak,5)*.1).toFixed(1)} \u2605`:'';
+  document.getElementById('vBail').textContent='$'+S.bail;
+  document.getElementById('vComm').textContent=S.comm;
+  const r=ready().length,j=ROSTER.filter(v=>v.status==='jailed').length;
+  document.getElementById('vVol').textContent=`${r} ready${j?' \u2022 '+j+' jailed':''}`;
+  document.getElementById('mBail').style.width=Math.min(100,S.bail/6)+'%';
+  document.getElementById('mComm').style.width=S.comm+'%';
+  document.getElementById('mVol').style.width=(r/18*100)+'%';
+  ACTIONS.forEach(a=>{const n=document.getElementById('n_'+a.id);if(n)n.textContent=assign[a.id]});
+  document.getElementById('poolLeft').textContent=r-totalAssigned();
+  const gb=document.getElementById('gambitBtn');
+  gb.disabled=S.gambitUsed||S.week<5;
+  if(S.gambitUsed){gb.textContent='GAMBIT SPENT';gb.classList.remove('armed')}
+  buildRoster();
+}
+function clamp(){
+  S.comm=Math.max(0,Math.min(100,S.comm));
+  S.press=Math.max(0,Math.min(110,S.press));
+  S.resolve=Math.max(0,Math.min(110,S.resolve));
+  S.bail=Math.max(0,S.bail);
+  let over=totalAssigned()-ready().length;
+  const keys=Object.keys(assign);
+  while(over>0){for(const k of keys){if(assign[k]>0&&over>0){assign[k]--;over--}}}
+}
+function log(msg,cls){
+  const d=document.createElement('div');
+  d.className='entry'+(cls?' '+cls:'');d.innerHTML=msg;
+  const box=document.getElementById('log');box.insertBefore(d,box.firstChild);
+}
+
+/* =============== BAIL =============== */
+function payBail(n){
+  S.arrestsTotal+=0; // counted by callers
+  const cost=n*25;
+  if(S.bail>=cost){S.bail-=cost;return{held:0,paid:cost}}
+  const bonded=Math.floor(S.bail/25);S.bail-=bonded*25;
+  return{held:n-bonded,paid:bonded*25};
+}
+
+/* =============== WEEK RESOLUTION =============== */
+let weekNews=null;
+function runWeek(){
+  if(S.over)return;
+  sfx.click();
+  weekNews={head:null,deck:'',stories:[],weight:0};
+  const wk=S.week;
+  log(`<span class="headline">— Week ${wk} —</span>`);
+
+  S.season=false;S.provoke=false;
+  const ev=EVENTS[Math.floor(Math.random()*EVENTS.length)];
+  ev.f(S);
+  log(`<span class="headline">${ev.h}.</span> ${ev.b}`,'event');
+  addStory(ev.h,ev.b,ev.t==='bad'?2:3);
+
+  const seasonMult=S.season?1.5:1;
+  const streakMult=1+Math.min(S.streak,5)*.1;
+  const commMult=.5+S.comm/100;
+  let brokeDiscipline=false;
+
+  /* training */
+  if(assign.train>0){
+    const gained=Math.min(Math.ceil(assign.train*.7),ready().filter(v=>!v.trained).length);
+    trainSome(gained);
+    if(gained>0)log(`Workshop in the basement — insults endured in practice so they can be endured in earnest. ${gained} volunteer${gained===1?'':'s'} now trained.`,'good');
+  }
+  /* fundraising */
+  if(assign.fund>0){
+    const dollars=Math.round(assign.fund*(8+S.comm*.2));
+    S.bail+=dollars;
+    log(`Sunday appeals raise $${dollars}.`,'good');
+    addStory('COLLECTION PLATES ANSWER THE CALL',`Congregations across Hayti raise $${dollars} for the student defense fund.`,2);
+  }
+  /* canvass */
+  if(assign.canvass>0){
+    const g=Math.round(assign.canvass*1.1);S.comm+=g;
+    log(`Canvassers work the blocks of Hayti. Community +${g}.`,'good');
+  }
+  /* pickets */
+  if(assign.picket>0){
+    const g=Math.round(assign.picket*.6*seasonMult*commMult*streakMult);
+    S.press+=g;S.resolve-=Math.ceil(g*.6);
+    log(`Picket signs circle the block in good order. Pressure +${g}.`);
+    addStory('PICKETS HOLD THE SIDEWALK',`${assign.picket} students walk the line downtown in silence and good order.`,2);
+  }
+  /* sit-ins */
+  let sitTeam=[];
+  if(assign.sitin>0){
+    const pool=ready();
+    sitTeam=pool.slice().sort((a,b)=>(b.trained?1:0)-(a.trained?1:0)).slice(0,assign.sitin);
+    const n=sitTeam.length;
+    const trainedShare=sitTeam.filter(v=>v.trained).length/Math.max(1,n);
+    const g=Math.round(n*1.8*seasonMult*commMult*streakMult);
+    S.press+=g;S.resolve-=g;
+    log(`${n} take the counter seats and hold them: ${sitTeam.slice(0,4).map(v=>v.name).join(', ')}${n>4?' and others':''}. Pressure +${g}.`);
+    addStory('STUDENTS FILL THE COUNTERS AGAIN',`Seats occupied from opening to close. Store owners decline comment; their registers do not.`,4+g/3);
+
+    /* arrests */
+    const aRate=.22+(S.heat?.12:0);
+    const nArr=Math.min(n,Math.round(n*aRate*(0.6+Math.random()*0.8)));
+    if(nArr>0){
+      S.arrestsTotal+=nArr;
+      const victims=sitTeam.slice(0,nArr);
+      victims.forEach(v=>{v.status='jailed';popChip(v.id)});
+      if(S.gambitArmed&&!S.gambitUsed){
+        S.gambitUsed=true;S.gambitArmed=false;
+        if(trainedShare>=.5){
+          S.press+=18;S.resolve-=14;S.comm+=8;sfx.press();
+          log(`<span class="headline">JAIL, NO BAIL.</span> ${nArr} volunteer${nArr===1?'':'s'} refuse bond — ${victims.map(v=>v.name).join(', ')} — and the county jail begins to fill with students singing. The story goes out on the wires by morning. Pressure +18, Resolve -14, Community +8, and not a dollar spent.`,'good');
+          addStory('STUDENTS CHOOSE JAIL OVER BAIL',`Arrested demonstrators refuse bond in a coordinated act, filling county cells and drawing national correspondents to Durham.`,10);
+          victims.forEach(v=>v.restWeeks=2);
+        }else{
+          S.comm-=8;S.press-=6;S.breaks++;sfx.bad();
+          log(`<span class="headline">THE GAMBIT MISFIRES.</span> Too few trained hands in the cells. Shouting matches with jailers, a scuffle in booking — the merchants get their headline. Community -8, Pressure -6.`,'bad');
+          addStory('DISORDER IN COUNTY JAIL',`Arrested demonstrators clash with jailers; movement leaders decline comment.`,8);
+          victims.forEach(v=>v.restWeeks=2);
+        }
+      } else {
+        const res=payBail(nArr);
+        log(`${nArr} arrested at the counters: ${victims.map(v=>v.name).join(', ')}.`,'bad');
+        if(res.held===0){
+          bondOut(victims);
+          log(`The treasurer posts $${res.paid}. All are back on the line by evening.`);
+        }else{
+          const freed=victims.slice(0,nArr-res.held);
+          bondOut(freed);
+          const held=victims.slice(nArr-res.held);
+          held.forEach(v=>v.restWeeks=99);
+          S.comm-=3;sfx.bad();
+          log(`The fund runs dry at $${res.paid}. ${held.map(v=>v.name).join(', ')} remain${held.length===1?'s':''} in the county jail. The committee feels it.`,'bad');
+          addStory('DEFENSE FUND EXHAUSTED',`Student demonstrators remain in county custody as movement coffers empty.`,6);
+        }
+      }
+    }
+    /* discipline */
+    const provokeChance=(S.provoke?.5:.18)*(1-trainedShare*.85);
+    if(Math.random()<provokeChance){
+      brokeDiscipline=true;S.breaks++;
+      S.press=Math.max(0,S.press-8);S.comm-=7;S.resolve+=5;shakeOne();sfx.bad();
+      log(`Under a rain of abuse an untrained volunteer shoves back. The photograph runs everywhere. Pressure -8, Community -7, Resolve +5. Discipline is the strategy.`,'bad');
+      addStory('SCUFFLE MARS DEMONSTRATION',`A shoving incident at the counters gives merchants and morning editors their talking point for the week.`,9);
+    }else if(S.provoke){
+      S.press+=5;S.resolve-=4;sfx.good();
+      log(`Hecklers do their worst and the line does not move, does not answer. The contrast tells. Pressure +5, Resolve -4.`,'good');
+      addStory('JEERS MET WITH SILENCE',`Onlookers described a wall of composure at the counters as hecklers spent themselves against it.`,7);
+    }
+  }
+  /* streak */
+  if(assign.sitin>0&&!brokeDiscipline){S.streak++}else if(assign.sitin>0){S.streak=0}
+  /* negotiation */
+  if(assign.negotiate>0&&S.negotiateUnlocked){
+    if(S.resolve<=15||(S.resolve<=30&&Math.random()<.5)){win();return}
+    const g=4+assign.negotiate;S.resolve-=g;
+    log(`The delegation is received coolly, but received. Terms floated and refused. Resolve -${g}. They are counting their receipts.`,'event');
+    addStory('TALKS HELD, NOTHING SIGNED',`A student delegation met merchant representatives for two hours. Both sides described the meeting as frank.`,5);
+  }
+  if(S.heat)S.heat--;
+  /* jailed/shaken recovery */
+  ROSTER.forEach(v=>{
+    if(v.restWeeks>0&&v.restWeeks<99){v.restWeeks--;if(v.restWeeks===0&&v.status!=='gone'){v.status='ready'}}
+  });
+  /* merchants push back on quiet weeks */
+  if(assign.sitin===0&&assign.picket===0){
+    S.resolve+=4;
+    log(`A quiet week downtown. The merchants' resolve hardens. Resolve +4.`);
+  }
+  /* unlock negotiation */
+  if(!S.negotiateUnlocked&&S.resolve<=40){
+    S.negotiateUnlocked=true;
+    log(`<span class="headline">WORD THROUGH A THIRD PARTY:</span> the merchants will receive a delegation.`,'event');
+    buildActions();
+  }
+  /* end checks */
+  if(S.resolve<=0||S.press>=100){win();return}
+  if(ready().length+ROSTER.filter(v=>v.status==='shaken').length<5){lose('The committee cannot fill five seats. With volunteers jailed, exhausted, or gone home, the campaign winds down. Movements ran on people, and people ran out.');return}
+  if(S.comm<=0){lose('The churches go quiet. The collections stop. Without the community behind it, the movement cannot bond out its people or fill its lines. Campaigns that lost their base lost everything.');return}
+  if(S.week>=S.maxWeek){lose('Final examinations arrive and the volunteers scatter for the summer. The counters remain segregated — for now. In many cities the first campaign fell short and the second one, wiser, did not.');return}
+
+  showPaper(wk);
+}
+function addStory(h,b,weight){
+  weekNews.stories.push({h,b});
+  if(weight>weekNews.weight){weekNews.weight=weight;weekNews.head=h;weekNews.deck=b}
+}
+
+/* =============== NEWSPAPER =============== */
+const MONTHS=['FEBRUARY','FEBRUARY','FEBRUARY','MARCH','MARCH','MARCH','MARCH','APRIL','APRIL','APRIL','APRIL','MAY','MAY','MAY'];
+function showPaper(wk){
+  sfx.press();sfx.type();
+  document.getElementById('npDate').textContent=`${MONTHS[wk-1]||'MAY'} 1960 \u2022 WEEK ${wk}`;
+  document.getElementById('npHead').textContent=weekNews.head||'DURHAM WAITS AND WATCHES';
+  document.getElementById('npDeck').textContent=weekNews.deck||'A week of meetings and preparations behind church doors.';
+  const cols=document.getElementById('npCols');cols.innerHTML='';
+  weekNews.stories.filter(s=>s.h!==weekNews.head).slice(0,4).forEach(s=>{
+    const d=document.createElement('div');
+    d.innerHTML=`<h4>${s.h}</h4><p>${s.b}</p>`;cols.appendChild(d);
+  });
+  if(!cols.children.length){
+    cols.innerHTML='<div><h4>WEATHER</h4><p>Fair and mild. A good day, some say, to sit down.</p></div>';
+  }
+  const sheet=document.getElementById('npSheet');
+  sheet.style.animation='none';void sheet.offsetWidth;sheet.style.animation='';
+  document.getElementById('npOverlay').classList.remove('hidden');
+}
+function closePaper(){
+  sfx.click();
+  document.getElementById('npOverlay').classList.add('hidden');
+  S.week++;
+  Object.keys(assign).forEach(k=>assign[k]=0);
+  refresh();
+  maybeCrisisQueue();
+  maybeDoc();
+}
+
+/* =============== CRISIS FLOW (fires at start of a week if last week had sit-ins) =============== */
+let hadSitins=false;
+function maybeCrisisQueue(){
+  if(crisisDeck.length===0)return;
+  if(S.week>=3&&Math.random()<.55){
+    const i=Math.floor(Math.random()*crisisDeck.length);
+    const c=crisisDeck.splice(i,1)[0];
+    showCrisis(c);
+  }
+}
+function showCrisis(c){
+  sfx.flash();
+  const ts=(()=>{const r=ready();return r.filter(v=>v.trained).length/Math.max(1,r.length)})();
+  const box=document.getElementById('crisisBox');
+  box.innerHTML=`<div class="ctag">${c.tag}</div><h3>${c.h}</h3><p>${c.p}</p><div class="choices" id="cCh"></div>`;
+  const ch=document.getElementById('cCh');
+  c.ch.forEach(opt=>{
+    const b=document.createElement('button');
+    b.innerHTML=`${opt.t}<small>${opt.s}</small>`;
+    b.onclick=()=>{
+      document.getElementById('crisisOverlay').classList.add('hidden');
+      const r=opt.f(S,ts);
+      if(r.x)r.x();
+      log(`<span class="headline">CRISIS:</span> ${r.msg}`,r.good?'good':'bad');
+      refresh();
+    };
+    ch.appendChild(b);
+  });
+  box.style.animation='none';void box.offsetWidth;box.style.animation='';
+  document.getElementById('crisisOverlay').classList.remove('hidden');
+}
+
+/* =============== DOCUMENTS =============== */
+function maybeDoc(){
+  const d=DOCS[S.docIndex];
+  if(d&&S.week===d.week){
+    S.docIndex++;
+    document.getElementById('docBody').innerHTML=
+      `<h3>${d.title}</h3><div class="meta">${d.meta}</div><p>${d.body}</p><p style="margin-top:12px;color:var(--ink)"><strong>${d.q}</strong></p>`;
+    const ch=document.getElementById('docChoices');ch.innerHTML='';
+    d.a.forEach((opt,i)=>{
+      const b=document.createElement('button');b.textContent=opt;
+      b.onclick=()=>{
+        document.getElementById('docOverlay').classList.add('hidden');
+        if(i===d.correct){d.bf(S);sfx.good();log(`<span class="headline">FROM THE FILE CABINET:</span> ${d.bonus}`,'good')}
+        else{log(`The committee debates the document late into the evening and moves on, a little wiser and a little tired.`)}
+        refresh();
+      };
+      ch.appendChild(b);
+    });
+    document.getElementById('docOverlay').classList.remove('hidden');
+  }
+}
+
+/* =============== ENDINGS + REPORT CARD =============== */
+function gradeOf(v){return v>=90?'A':v>=80?'A\u2212':v>=70?'B+':v>=55?'B':v>=40?'C':v>=25?'D':'F'}
+function reportCard(won){
+  const disc=Math.max(0,100-S.breaks*30);
+  const fin=Math.min(100,Math.round(S.bail/4+ (S.arrestsTotal? Math.max(0,60-(S.arrestsTotal*3)):70)));
+  const com=S.comm;
+  const mom=won?100:Math.round(S.peakPress);
+  const overall=Math.round(disc*.3+fin*.2+com*.25+mom*.25);
+  return `<div class="report">
+    <h3>Campaign Report Card &mdash; Spring 1960</h3>
+    <div class="row"><span>Nonviolent Discipline (${S.breaks} break${S.breaks===1?'':'s'})</span><span class="grade">${gradeOf(disc)}</span></div>
+    <div class="row"><span>Financial Stewardship (${S.arrestsTotal} arrests, $${S.bail} remaining)</span><span class="grade">${gradeOf(fin)}</span></div>
+    <div class="row"><span>Community Base (support at ${S.comm})</span><span class="grade">${gradeOf(com)}</span></div>
+    <div class="row"><span>Momentum (peak pressure ${S.peakPress})</span><span class="grade">${gradeOf(mom)}</span></div>
+    <div class="final"><span>CHAIR\u2019S OVERALL MARK</span><span class="grade">${gradeOf(overall)}</span></div>
+  </div>`;
+}
+function win(){
+  S.over=true;refresh();sfx.good();
+  document.getElementById('endTitle').textContent='The Counters Open';
+  document.getElementById('endTitle').className='endtitle win';
+  const t=ROSTER.filter(v=>v.trained).length;
+  document.getElementById('endBody').innerHTML=
+    `<p>In week ${S.week}, the merchants agree. No proclamation, no ceremony — a quiet understanding, service for all customers, effective Monday. Ernestine orders coffee and drinks it slowly.</p>
+     <p style="margin-top:10px">${ready().length} volunteers held to the end, ${t} of them trained, with $${S.bail} still in the fund.</p>`;
+  document.getElementById('reportCard').innerHTML=reportCard(true);
+  document.getElementById('endLesson').textContent='In the real Durham, students from North Carolina College led sit-ins beginning in February 1960, building on the Royal Ice Cream protest of 1957. Desegregation came not in one dramatic moment but through months of disciplined pressure, negotiation, and economic arithmetic. The movement was planned — workshops, phone trees, treasurers, and all.';
+  document.getElementById('endOverlay').classList.remove('hidden');
+}
+function lose(msg){
+  S.over=true;refresh();sfx.bad();
+  document.getElementById('endTitle').textContent='The Semester Ends';
+  document.getElementById('endTitle').className='endtitle lose';
+  document.getElementById('endBody').innerHTML=`<p>${msg}</p>`;
+  document.getElementById('reportCard').innerHTML=reportCard(false);
+  document.getElementById('endLesson').textContent='Real campaigns failed for exactly these reasons — empty bail funds, exhausted volunteers, communities stretched too thin. What the movement learned from failed campaigns shaped the ones that succeeded. Study the report card and try again.';
+  document.getElementById('endOverlay').classList.remove('hidden');
+}
+
+/* =============== START =============== */
+function startGame(){
+  sfx.click();
+  document.getElementById('intro').classList.add('hidden');
+  refresh();
+}
+buildActions();buildRoster();refresh();
+</script>
+</body>
+</html>

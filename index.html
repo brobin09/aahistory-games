@@ -2,242 +2,318 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The Card Catalog · Historical Games</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History Games — Brian A. Robinson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,400&family=Special+Elite&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
-/* ════════════════════════════════════════════════════════════
-   THE CARD CATALOG — a reception desk for a suite of history games
-   Identity distinct from every game: oak drawers, index cards,
-   typewriter labels, the rubber date-stamp. Not any one game's
-   world — the room where all of them are checked out.
-   ════════════════════════════════════════════════════════════ */
 :root{
-  --oak:#5A3E24; --oak-dk:#3E2A18; --oak-lt:#6E4E2E;
-  --brass:#B8912E; --brass-lt:#D4AF37;
-  --card:#F4EDDD; --card-edge:#E0D5BC; --card-line:#B9C4C9;
-  --card-red:#B23A32;
-  --type:#2B2016; --type-soft:#5C4C38; --type-faint:#8B7A61;
-  --stamp:#3A6A6E;
+  --paper:#EFE6D0; --paper-2:#E0D4B6; --news:#F4EEDC;
+  --ink:#221E19; --mimeo:#6E4E9E; --red:#A8342A;
+  --tan:#C9B891; --good:#3E6B3A; --gold:#8a6d1f; --p2:#1F4E63;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html{scroll-behavior:smooth;}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}*{animation:none!important;transition:none!important;}}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
 body{
-  font-family:'Courier New',Courier,monospace;color:var(--type);min-height:100dvh;
-  background:
-    repeating-linear-gradient(90deg,rgba(0,0,0,0.04) 0 2px,transparent 2px 5px),
-    linear-gradient(180deg,var(--oak-lt),var(--oak) 40%,var(--oak-dk));
-  background-attachment:fixed;
+  background:var(--paper-2);
+  background-image:radial-gradient(ellipse at 30% 8%, rgba(255,255,255,.4), transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(34,30,25,.015) 3px 4px);
+  color:var(--ink);
+  font-family:'Libre Franklin',sans-serif;
+  font-size:16px;line-height:1.55;min-height:100vh;
 }
-a{color:inherit;text-decoration:none;}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px 70px}
 
-.wrap{max-width:940px;margin:0 auto;padding:clamp(20px,5vw,44px) 16px 60px;}
-
-/* ── the drawer header plate ── */
-.plate{
-  background:linear-gradient(180deg,var(--oak-lt),var(--oak-dk));
-  border:1px solid #2a1c10;border-radius:5px;
-  box-shadow:0 2px 0 #7a5a38 inset,0 12px 30px rgba(0,0,0,.45);
-  padding:clamp(20px,5vw,34px) clamp(18px,5vw,40px);
-  position:relative;margin-bottom:34px;
+header{text-align:center;border-bottom:4px double var(--ink);padding:18px 8px 16px;margin-bottom:22px}
+.eyebrow{font-family:'Special Elite',monospace;font-size:.78rem;letter-spacing:.14em;color:var(--mimeo);text-transform:uppercase}
+h1{
+  font-family:'Oswald',sans-serif;font-weight:700;
+  font-size:clamp(2.4rem,8vw,4.2rem);letter-spacing:.05em;line-height:.95;text-transform:uppercase;
+  margin-top:4px;
 }
-.plate::after{ /* brass pull ring */
-  content:'';position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);
-  width:54px;height:26px;border:3px solid var(--brass);border-top:none;
-  border-radius:0 0 30px 30px;box-shadow:0 3px 8px rgba(0,0,0,.4);
+h1 .sign{display:inline-block;background:var(--ink);color:var(--paper);padding:.04em .22em;transform:rotate(-1deg)}
+.subhead{
+  font-family:'Special Elite',monospace;font-size:.9rem;margin-top:10px;
+  max-width:640px;margin-left:auto;margin-right:auto;color:#3a3229;
 }
-.eyebrow{
-  color:var(--brass-lt);letter-spacing:.42em;font-size:clamp(9.5px,2.6vw,12px);
-  text-align:center;margin-bottom:14px;
-}
-.plate h1{
-  font-family:Georgia,serif;color:var(--card);font-weight:400;text-align:center;
-  font-size:clamp(30px,8vw,58px);line-height:1.0;letter-spacing:.02em;
-  text-shadow:0 2px 0 #2a1c10,0 6px 20px rgba(0,0,0,.5);
-}
-.plate .sub{
-  color:#D8C8A8;text-align:center;font-size:clamp(11.5px,3vw,14px);line-height:1.7;
-  max-width:560px;margin:16px auto 0;font-family:Georgia,serif;font-style:italic;
-}
-.plate .curator{
-  text-align:center;color:var(--brass-lt);font-size:clamp(9.5px,2.5vw,11px);
-  letter-spacing:.2em;margin-top:16px;
+.byline{
+  font-family:'Playfair Display',serif;font-weight:700;font-style:italic;
+  font-size:1rem;margin-top:8px;color:#4d453a;
 }
 
-/* ── section divider ── */
-.railLabel{
-  display:flex;align-items:center;gap:12px;color:var(--card);
-  letter-spacing:.3em;font-size:clamp(10px,2.7vw,12px);margin:0 4px 16px;
+/* section titles */
+.sectionhead{
+  display:flex;align-items:baseline;gap:14px;margin:26px 0 14px;
 }
-.railLabel::before,.railLabel::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.25);}
+.sectionhead h2{
+  font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;font-size:1.1rem;white-space:nowrap;
+}
+.sectionhead .rule{flex:1;height:0;border-top:2px solid var(--ink)}
+.sectionhead .stamp{
+  font-family:'Special Elite',monospace;font-size:.7rem;color:var(--mimeo);
+  border:2px solid var(--mimeo);padding:2px 8px;letter-spacing:.12em;transform:rotate(-2deg);
+}
 
-/* ── the cards ── */
-.cards{display:flex;flex-direction:column;gap:20px;}
+/* card grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+
 .card{
-  display:block;position:relative;background:var(--card);
-  border:1px solid var(--card-edge);border-radius:2px;
-  box-shadow:0 1px 0 #fff8 inset,0 10px 24px rgba(0,0,0,.4);
-  padding:0;overflow:hidden;transition:transform .16s ease,box-shadow .16s ease;
-  /* ruled index-card lines */
-  background-image:
-    linear-gradient(var(--card),var(--card)),
-    repeating-linear-gradient(180deg,transparent 0 33px,var(--card-line) 33px 34px);
+  position:relative;background:var(--paper);border:2px solid var(--ink);
+  box-shadow:4px 4px 0 rgba(34,30,25,.25);padding:0;
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .15s, box-shadow .15s;
+  text-decoration:none;color:var(--ink);
 }
-.card:hover{transform:translateY(-3px) rotate(-.25deg);box-shadow:0 16px 34px rgba(0,0,0,.5);}
-.card:focus-visible{outline:3px solid var(--brass-lt);outline-offset:3px;}
-.card .redline{position:absolute;top:0;bottom:0;left:52px;width:1px;background:var(--card-red);opacity:.5;}
-.card .inner{padding:20px 22px 22px 66px;position:relative;}
-.callno{
-  position:absolute;top:16px;left:0;width:52px;text-align:center;
-  color:var(--card-red);font-size:11px;letter-spacing:.05em;line-height:1.4;
-}
-.card h2{
-  font-family:Georgia,serif;font-weight:400;font-size:clamp(19px,5vw,27px);
-  line-height:1.12;letter-spacing:.01em;margin-bottom:3px;
-}
-.card .era{color:var(--stamp);font-size:clamp(10px,2.7vw,12px);letter-spacing:.14em;margin-bottom:12px;}
-.card .desc{
-  font-family:Georgia,serif;font-size:clamp(13px,3.4vw,15px);line-height:1.62;
-  color:var(--type-soft);max-width:60ch;
-}
-.card .meta{
-  display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:14px;
-}
-.tag{
-  border:1px solid var(--card-edge);background:#fff6;border-radius:2px;
-  padding:4px 9px;font-size:clamp(9px,2.4vw,10.5px);letter-spacing:.08em;color:var(--type-faint);
-}
-.card .pull{
-  display:inline-flex;align-items:center;gap:8px;margin-top:16px;
-  color:var(--type);font-size:clamp(11px,3vw,13px);letter-spacing:.14em;font-weight:700;
-}
-.card .pull .arrow{transition:transform .16s ease;}
-.card:hover .pull .arrow{transform:translateX(5px);}
+.card:hover{transform:translate(-3px,-3px);box-shadow:7px 7px 0 rgba(34,30,25,.3)}
+.card.featured{grid-column:span 2}
+@media (max-width:640px){.card.featured{grid-column:span 1}}
 
-/* rubber date-stamp on each card */
-.stamp{
-  position:absolute;bottom:16px;right:18px;transform:rotate(-7deg);
-  color:var(--stamp);border:2px solid var(--stamp);border-radius:3px;
-  padding:3px 9px;font-size:clamp(9px,2.3vw,10.5px);letter-spacing:.12em;opacity:.62;
-  text-align:center;line-height:1.3;pointer-events:none;
+.card .banner{
+  padding:14px 16px 12px;
+  color:var(--paper);position:relative;
+  border-bottom:2px solid var(--ink);
 }
-@media(max-width:520px){.stamp{position:static;display:inline-block;transform:rotate(-2deg);margin-top:14px;}}
+.card .banner .kicker{
+  font-family:'Special Elite',monospace;font-size:.7rem;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.85;
+}
+.card .banner .title{
+  font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;font-size:1.35rem;line-height:1.05;margin-top:4px;
+}
+.card .banner .era{
+  font-family:'Playfair Display',serif;font-style:italic;font-weight:700;
+  font-size:.9rem;margin-top:4px;opacity:.95;
+}
+.card .newtag{
+  position:absolute;top:8px;right:8px;
+  font-family:'Special Elite',monospace;font-size:.66rem;letter-spacing:.14em;
+  background:var(--paper);color:var(--red);border:2px solid var(--red);
+  padding:2px 8px;transform:rotate(6deg);
+}
 
-/* ── footer / colophon ── */
-.colophon{
-  margin-top:38px;padding:18px 20px;border:1px dashed rgba(255,255,255,.3);border-radius:3px;
-  color:#E4D6BB;font-size:clamp(10.5px,2.8vw,12.5px);line-height:1.8;text-align:center;
+.card .body{padding:14px 16px 12px;flex:1;display:flex;flex-direction:column}
+.card .desc{font-size:.9rem;color:#3a3229;flex:1}
+.card .tags{
+  margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;
 }
-.colophon b{color:var(--brass-lt);letter-spacing:.1em;}
-.colophon a{text-decoration:underline;text-underline-offset:2px;}
+.card .tag{
+  font-family:'Special Elite',monospace;font-size:.66rem;letter-spacing:.08em;
+  text-transform:uppercase;padding:2px 8px;border:1px solid var(--ink);
+  background:var(--news);color:#3a3229;
+}
+.card .cta{
+  margin:10px 16px 14px;padding:10px;text-align:center;
+  background:var(--ink);color:var(--paper);
+  font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;font-size:.85rem;
+  border:2px solid var(--ink);
+}
+.card:hover .cta{background:var(--red);border-color:var(--red)}
+
+/* banner color themes */
+.banner.red{background:var(--red)}
+.banner.mimeo{background:var(--mimeo)}
+.banner.good{background:var(--good)}
+.banner.gold{background:var(--gold)}
+.banner.p2{background:var(--p2)}
+.banner.ink{background:var(--ink)}
+
+/* about panel */
+.about{
+  background:var(--paper);border:2px solid var(--ink);
+  box-shadow:4px 4px 0 rgba(34,30,25,.25);
+  padding:18px 20px;margin-top:26px;position:relative;
+}
+.about .stamp{
+  position:absolute;top:14px;right:14px;
+  font-family:'Special Elite',monospace;font-size:.7rem;color:var(--red);
+  border:2px solid var(--red);padding:3px 10px;transform:rotate(3deg);letter-spacing:.12em;
+}
+.about h3{
+  font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;font-size:1rem;border-bottom:1px solid var(--ink);
+  padding-bottom:6px;margin-bottom:10px;
+}
+.about p{font-size:.9rem;margin-bottom:8px;color:#3a3229}
+.about .contact{
+  font-family:'Special Elite',monospace;font-size:.82rem;margin-top:12px;color:#4d453a;
+}
+.about a{color:var(--mimeo);text-decoration:none;border-bottom:1px dotted var(--mimeo)}
+.about a:hover{color:var(--red);border-bottom-color:var(--red)}
+
+/* footer */
+footer{
+  text-align:center;font-family:'Special Elite',monospace;font-size:.75rem;
+  color:#6b6152;margin-top:34px;padding-top:18px;border-top:1px dashed #8a8172;
+}
+
+@media (prefers-reduced-motion: reduce){.card,.card:hover{transition:none;transform:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <header class="plate">
-    <div class="eyebrow">DEPARTMENT OF HISTORY · GAMES COLLECTION</div>
-    <h1>The Card Catalog</h1>
-    <p class="sub">A working collection of playable history — each title puts the mechanics in service of the past, so that understanding comes from doing rather than being told. Pull a card to begin.</p>
-    <div class="curator">CURATED BY BRIAN A. ROBINSON</div>
-  </header>
+<header>
+  <div class="eyebrow">Public History Lab &mdash; Interactive Projects</div>
+  <h1><span class="sign">HISTORY&nbsp;GAMES</span></h1>
+  <div class="byline">by Brian A. Robinson</div>
+  <div class="subhead">Playable histories of the African American experience &mdash; primary-source detective work, campaign strategy, community building, and archival authentication, in the browser.</div>
+</header>
 
-  <div class="railLabel">TITLES IN CIRCULATION</div>
+<!-- STRATEGY & CAMPAIGN GAMES -->
+<div class="sectionhead">
+  <h2>Strategy &amp; Campaign</h2>
+  <div class="rule"></div>
+  <div class="stamp">CASE FILE A</div>
+</div>
 
-  <nav class="cards">
+<div class="grid">
 
-    <a class="card" href="grain.html">
-      <span class="redline"></span>
-      <div class="inner">
-        <div class="callno">D 973<br>.G7</div>
-        <h2>Against the Grain</h2>
-        <div class="era">THE HISTORIAN'S CRAFT · 1849–1994</div>
-        <p class="desc">Four archive boxes, twelve documents, and a method: source the record, corroborate the claim, read the hostile document against its own purpose, and publish only what the evidence can carry. A puzzle game about how history is actually made.</p>
-        <div class="meta">
-          <span class="tag">SOURCE ANALYSIS</span>
-          <span class="tag">4 CASES</span>
-          <span class="tag">METHODS COURSE</span>
-        </div>
-        <div class="pull">OPEN THE BOX <span class="arrow">→</span></div>
-        <div class="stamp">SOURCE<br>CORROBORATE<br>PUBLISH</div>
+  <a class="card featured" href="sit_down.html">
+    <div class="banner red">
+      <span class="newtag">NEW</span>
+      <div class="kicker">Coordinating Committee &mdash; Durham</div>
+      <div class="title">Sit Down</div>
+      <div class="era">Spring Semester, 1960</div>
+    </div>
+    <div class="body">
+      <div class="desc">You chair a student sit-in coordinating committee with fourteen weeks to break the merchants' resolve. Assign named volunteers, train them in nonviolent discipline, mind the bail fund, weather crisis moments at the counters, and read your weekly progress in a mimeographed newspaper front page. Built on the Royal Ice Cream and Greensboro traditions.</div>
+      <div class="tags">
+        <span class="tag">Campaign strategy</span>
+        <span class="tag">Named roster</span>
+        <span class="tag">Crisis decisions</span>
+        <span class="tag">Newspaper reveals</span>
       </div>
-    </a>
+    </div>
+    <div class="cta">Take the Chair &rarr;</div>
+  </a>
 
-    <a class="card" href="parrish.html">
-      <span class="redline"></span>
-      <div class="inner">
-        <div class="callno">F 264<br>.D9</div>
-        <h2>Parrish Street</h2>
-        <div class="era">BUILDING BLACK WALL STREET · 1898–1970</div>
-        <p class="desc">A ledger-book simulation of Durham's Hayti district. Charter the insurance company, capitalize the bank, extend the credit no white lender would — and hold it all together against a system built to stop you. Every decision is written into the ledger, and history's own record waits at the end.</p>
-        <div class="meta">
-          <span class="tag">SIMULATION</span>
-          <span class="tag">23 TURNS</span>
-          <span class="tag">DURHAM HISTORY</span>
-        </div>
-        <div class="pull">OPEN THE LEDGER <span class="arrow">→</span></div>
-        <div class="stamp">1898<br>——<br>1970</div>
+  <a class="card" href="parrish_street.html">
+    <div class="banner good">
+      <div class="kicker">Black Wall Street</div>
+      <div class="title">Parrish Street</div>
+      <div class="era">Durham, 1898&ndash;1929</div>
+    </div>
+    <div class="body">
+      <div class="desc">Build a Black business district from the founding of the Mutual through the boom years. Balance insurance, banking, real estate, and community trust in a decade-by-decade economic simulation.</div>
+      <div class="tags">
+        <span class="tag">Economic strategy</span>
+        <span class="tag">Community building</span>
       </div>
-    </a>
+    </div>
+    <div class="cta">Open the Ledger &rarr;</div>
+  </a>
 
-    <a class="card" href="freedom-quest.html">
-      <span class="redline"></span>
-      <div class="inner">
-        <div class="callno">E 450<br>.F8</div>
-        <h2>Freedom Quest</h2>
-        <div class="era">A JOURNEY THROUGH BLACK HISTORY · ACTION-RPG</div>
-        <p class="desc">Move through six eras from the plantation to a liberation nexus, meeting the ancestors, answering the knowledge quizzes that open each portal, and facing what stands in the way of freedom. Includes the Hall of Ancestors — an encyclopedia of seventy-seven figures, from Phillis Wheatley to the present.</p>
-        <div class="meta">
-          <span class="tag">ACTION-RPG</span>
-          <span class="tag">6 ZONES</span>
-          <span class="tag">77 IN THE HALL</span>
-          <span class="tag">3 DIFFICULTIES</span>
-        </div>
-        <div class="pull">BEGIN THE JOURNEY <span class="arrow">→</span></div>
-        <div class="stamp">HALL OF<br>ANCESTORS</div>
+  <a class="card" href="freedom_quest.html">
+    <div class="banner mimeo">
+      <div class="kicker">Escape RPG</div>
+      <div class="title">Freedom Quest</div>
+      <div class="era">Antebellum South</div>
+    </div>
+    <div class="body">
+      <div class="desc">A role-playing journey along Underground Railroad routes. Choose paths, gather help from conductors and safe houses, and weigh the risks that every fugitive weighed in real time.</div>
+      <div class="tags">
+        <span class="tag">RPG</span>
+        <span class="tag">Choice-driven</span>
       </div>
-    </a>
+    </div>
+    <div class="cta">Begin the Journey &rarr;</div>
+  </a>
 
-    <a class="card" href="charles-ball.html">
-      <span class="redline"></span>
-      <div class="inner">
-        <div class="callno">E 444<br>.B18</div>
-        <h2>Charles Ball · North by the Stars</h2>
-        <div class="era">A TRUE ESCAPE · NIGHT STEALTH · c. 1809–1810</div>
-        <p class="desc">Move by night, hide by day. Slip the lantern cones, break your scent in the water, and follow the one fixed star — through five nights of Charles Ball's real walk home from Georgia to Maryland, helped at every turn by the enslaved, the free, and a rare open door. From the narrative he published in 1836, later retitled <em>Fifty Years in Chains</em>.</p>
-        <div class="meta">
-          <span class="tag">STEALTH</span>
-          <span class="tag">5 NIGHTS</span>
-          <span class="tag">TRUE STORY</span>
-          <span class="tag">NOBODY ESCAPED ALONE</span>
-        </div>
-        <div class="pull">STEP INTO THE DARK <span class="arrow">→</span></div>
-        <div class="stamp">FOLLOW<br>THE STAR</div>
+  <a class="card" href="charles_ball.html">
+    <div class="banner ink">
+      <div class="kicker">Stealth</div>
+      <div class="title">Charles Ball</div>
+      <div class="era">The Domestic Slave Trade</div>
+    </div>
+    <div class="body">
+      <div class="desc">Based on the 1836 narrative. Move by night, avoid patrols, and navigate a landscape mapped for capture. The tension is second-to-second and the stakes are historical.</div>
+      <div class="tags">
+        <span class="tag">Stealth</span>
+        <span class="tag">Narrative-driven</span>
       </div>
-    </a>
+    </div>
+    <div class="cta">Move at Nightfall &rarr;</div>
+  </a>
 
-    <a class="card" href="miles-to-go.html">
-      <span class="redline"></span>
-      <div class="inner">
-        <div class="callno">E 185<br>.M64</div>
-        <h2>Miles to Go</h2>
-        <div class="era">A GREEN BOOK JOURNEY · DRIVING GAME · 1954</div>
-        <p class="desc">Drive your family from Chicago to New Orleans with the Green Book on the seat beside you. Plan fuel around the listings, hold your speed through hostile counties, and be somewhere safe when the sun goes down. The navigation is the history.</p>
-        <div class="meta">
-          <span class="tag">DRIVING</span>
-          <span class="tag">5 LEGS</span>
-          <span class="tag">GREEN BOOK · 1936–1966</span>
-        </div>
-        <div class="pull">START THE ENGINE <span class="arrow">→</span></div>
-        <div class="stamp">BE SAFE<br>BY DARK</div>
+  <a class="card" href="miles_to_go.html">
+    <div class="banner gold">
+      <div class="kicker">Navigation under constraint</div>
+      <div class="title">Miles to Go</div>
+      <div class="era">Jim Crow Highways</div>
+    </div>
+    <div class="body">
+      <div class="desc">Cross a segregated country by car with the Green Book on the passenger seat. Every stop for gas, food, and rest is a calculation. Reach your destination without becoming a statistic.</div>
+      <div class="tags">
+        <span class="tag">Navigation</span>
+        <span class="tag">Resource management</span>
       </div>
-    </a>
+    </div>
+    <div class="cta">Start the Engine &rarr;</div>
+  </a>
 
-  </nav>
+</div>
 
-  <div class="colophon">
-    <b>ON THE SOURCES —</b> These games teach with historical materials. Where documents are invented to model archival patterns, they are labeled as composites within the game; where they reproduce the historical record, that too is noted. Built to be played in classrooms and beyond.
-  </div>
+<!-- SOURCE & ARCHIVE GAMES -->
+<div class="sectionhead">
+  <h2>Source &amp; Archive</h2>
+  <div class="rule"></div>
+  <div class="stamp" style="color:var(--red);border-color:var(--red)">CASE FILE B</div>
+</div>
+
+<div class="grid">
+
+  <a class="card featured" href="forgery_file.html">
+    <div class="banner p2">
+      <span class="newtag">NEW</span>
+      <div class="kicker">Bureau of Historical Records</div>
+      <div class="title">The Forgery File</div>
+      <div class="era">An Archival Trivia Game</div>
+    </div>
+    <div class="body">
+      <div class="desc">Two documents are genuine. One is planted. Find the forgery. Eleven themed cabinets and 110 case files spanning Carolina, Freedom, Migration, Movement, Politics, Sports, Pioneers, and four decades of Black music. Wager your reputation, race the clock, and play solo or head-to-head in versus mode.</div>
+      <div class="tags">
+        <span class="tag">Trivia</span>
+        <span class="tag">Source criticism</span>
+        <span class="tag">Solo &amp; versus</span>
+        <span class="tag">11 cabinets &bull; 110 cases</span>
+      </div>
+    </div>
+    <div class="cta">Report to the Bureau &rarr;</div>
+  </a>
+
+  <a class="card" href="against_the_grain.html">
+    <div class="banner mimeo">
+      <div class="kicker">Primary-source detective work</div>
+      <div class="title">Against the Grain</div>
+      <div class="era">Reading Historical Documents</div>
+    </div>
+    <div class="body">
+      <div class="desc">Interrogate slaveholder ledgers, court records, and runaway advertisements the way historians do &mdash; reading against the grain to recover the lives the documents tried to obscure.</div>
+      <div class="tags">
+        <span class="tag">Document analysis</span>
+        <span class="tag">Historical method</span>
+      </div>
+    </div>
+    <div class="cta">Open the Archive &rarr;</div>
+  </a>
+
+</div>
+
+<!-- ABOUT -->
+<div class="about">
+  <span class="stamp">ABOUT THE PROJECT</span>
+  <h3>About These Games</h3>
+  <p>These games are built to make African American history playable, discussable, and hard to forget. Each one is designed to teach a specific historical skill or truth &mdash; source criticism, campaign logistics, the economics of Black enterprise, the calculus of escape and mobility &mdash; through mechanics rather than memorization.</p>
+  <p>All games run in the browser on any device. Nothing to install. Classroom use is warmly encouraged, and each game is designed to open a discussion, not close one.</p>
+  <p class="contact"><strong>Brian A. Robinson</strong> &bull; Assistant Professor of History, North Carolina Central University &bull; Feedback and classroom queries welcome.</p>
+</div>
+
+<footer>
+  &copy; Brian A. Robinson &bull; History Games &bull; North Carolina Central University
+</footer>
 
 </div>
 </body>
