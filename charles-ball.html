@@ -75,14 +75,6 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
 .dlgWho{color:var(--gold);font-family:'Courier New',monospace;letter-spacing:.18em;font-size:clamp(10px,2.7vw,11px);margin-bottom:5px;}
 .dlgTxt{color:#E4E9F5;font-size:clamp(12.5px,3.4vw,14.5px);line-height:1.7;font-style:italic;}
 .dlgHint{color:#7f8db5;font-family:'Courier New',monospace;font-size:10px;letter-spacing:.1em;margin-top:7px;text-align:right;}
-#dlgOpts{display:none;flex-direction:column;gap:7px;margin-top:10px;}
-#dlgOpts.on{display:flex;}
-.dlgOpt{background:transparent;color:#EBDFC0;border:1px solid rgba(232,197,90,.5);border-radius:4px;
-  padding:9px 12px;text-align:left;font-family:Georgia,serif;font-style:italic;
-  font-size:clamp(12px,3.2vw,14px);line-height:1.5;min-height:42px;transition:background .12s,border-color .12s;}
-.dlgOpt:active,.dlgOpt:hover{background:rgba(232,197,90,.14);border-color:rgba(232,197,90,.85);}
-.dlgOpt .onum{color:var(--gold);font-family:'Courier New',monospace;font-style:normal;font-size:11px;margin-right:8px;letter-spacing:.05em;}
-.dlgOpt.quizWrong{border-color:rgba(217,92,74,.6);}
 
 /* HUD */
 #hud{position:fixed;top:0;left:0;right:0;z-index:10;display:none;pointer-events:none;
@@ -135,7 +127,6 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
   <span class="hb">🌽 <span id="corn">0</span> &nbsp;🍠 <span id="yam">0</span></span>
   <span class="hb" id="marks"></span>
   <span class="hb" id="alertHb">⚠ SEEN</span>
-  <span class="hb" id="wxHb" title="weather">☾</span>
   <span class="hb"><span id="phaseLbl">NIGHT</span> <span id="nightNo">I</span><span class="bar" id="dawnBar"><i style="width:100%"></i></span></span>
 </div></div>
 
@@ -146,10 +137,9 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
   <div class="tb" id="bAct">ACT</div>
 </div>
 
-<div id="dlg"><div class="dlgBox" onclick="dlgBoxClick(event)">
+<div id="dlg" onclick="act()"><div class="dlgBox">
   <div class="dlgWho" id="dlgWho"></div>
   <div class="dlgTxt" id="dlgTxt"></div>
-  <div id="dlgOpts"></div>
   <div class="dlgHint" id="dlgHint">ACT / E — continue</div>
 </div></div>
 
@@ -170,7 +160,6 @@ canvas{display:block;max-width:100vw;max-height:100dvh;}
   <div class="chapCard">
     <div class="ch" id="chNo"></div>
     <h2 id="chTitle"></h2>
-    <div id="chVig" style="text-align:center;margin:2px 0 10px;line-height:0"></div>
     <div id="chText"></div>
   </div>
   <button class="obtn" onclick="beginStage()">SET OUT →</button>
@@ -308,37 +297,10 @@ const STAGES=[
 '##############################################',
 ]),
  npcs:{1:{who:'AUNT PHILLIS — of the quarters',kind:'enslaved',
-   tree:{start:'p1',nodes:{
-     p1:{say:`“Hush now. I heard you was gone — whole quarters heard, and won’t none of us seen nothing, you understand?”`,
-       opts:[
-         {t:'“I understand. No one saw me. No one knows.”',next:'p2',fx:{trust:+1}},
-         {t:'“Say nothing — you only watch the dark, and wait for her.”',next:'p2',fx:{trust:+1}},
-         {t:'“I’ll fight any man that lays a hand on me.”',next:'p_rash',fx:{trust:-1}},
-       ]},
-     p_rash:{say:`“Fight? Child, a dead man walks nowhere, and a loud one walks to the whipping post. Keep that fire — but keep it HID. This road is won with feet and with quiet, not with fists.”`,
-       next:'p2'},
-     p2:{say:`“Now. The drinking gourd hangs in the north sky — but a body has to READ it. Which stars in it point you true?”`,quiz:true,
-       opts:[
-         {t:'“The two on the front of the cup — I run their line up to the star that never moves.”',next:'p_right',fx:{trust:+1}},
-         {t:'“The bright star out on the end of the handle.”',next:'p_wrong'},
-         {t:'“The biggest, brightest star in the whole sky.”',next:'p_wrong'},
-       ]},
-     p_right:{say:`“That’s it. That’s exactly it. The two on the cup’s lip, straight up to the fixed star — that’s north, every clear night of your life. You won’t lose your way while you can see the sky.”`,
-       give:{corn:1},next:'p_hist'},
-     p_wrong:{say:`“No — listen, for it’s your life. The gourd is a dipper. The two stars on the FRONT of the cup, you draw a line up through them and it strikes the one star that don’t ever move. Not the brightest — the STILL one. Say it back every night till it’s in your bones.”`,
-       next:'p_hist'},
-     p_hist:{say:`“You want to know how the whole quarters knew before your foot ever left the row?”`,
-       opts:[
-         {t:'“How does word run that fast — no letters, no horse?”',next:'p_hist2',give:{note:'grapevine'}},
-         {t:'“Better I don’t know. What I can’t tell, they can’t whip out of me.”',next:'p_send',fx:{trust:+1}},
-       ]},
-     p_hist2:{say:`“Mouth to mouth, cabin to cabin — house folk, wagon men, the ones hired out. We pass a thing quiet and it crosses a county ’fore the mail. No paddyroller ever found that wire. It carried YOU tonight.”`,
-       next:'p_send'},
-     p_send:{say:n=>getTrust(n)>=1
-         ? `“Take this corn — roast it cold, in a dug hole, like your daddy showed you. Corn is legs, boy. And the old cabin behind me: the door’s off the latch. If the sky grays before you’re clear, get INSIDE something. Now go. We never woke.”`
-         : `“Take the corn and go — quick as you’ll burn a body up, you’ll need it. But I’ll not tell a man who talks of fighting where my unlatched doors are; that knowing gets folks killed. Keep low. Keep quiet. GO.”`,
-       give:{corn:2,food:30,note:'quarters'},end:true},
-   }}}},
+   lines:[`“Hush now. I heard you was gone — whole quarters heard, and won\u2019t none of us seen nothing, you understand?”`,
+     `“Take this corn. Roast it cold-fire, in a hole, like your daddy showed you. Corn is legs, boy — an empty belly walks like an old man. And the drinking gourd: two stars on the cup\u2019s edge point to the bright one that don\u2019t move. Keep it before your face.”`,
+     `“The old cabin behind me — the door\u2019s off the latch. If the sky grays before you\u2019re clear, get INSIDE something. If they ask us tomorrow, we never woke. Go on now. Go.”`],
+   give:{corn:3,food:30,note:'quarters'}}},
  card:['NIGHT I · GEORGIA','The Cotton Lands',
  `<p>Four years sold south, and Charles Ball has studied every fence line and patrol road between the quarters and the county line. Tonight he uses them. The plantation sleeps — but the patrollers do not, and the moon is higher than he\u2019d like.</p><p><b>Creep through the cane. Stay out of the lantern light. Someone at the quarters is waiting up for you — the first of many hands on this road. Gather corn; hunger will slow your legs to a shuffle. The ✦ star marks north. And watch the night bar — the clock will not wait for you at the county line.</b></p>`]},
 
@@ -381,45 +343,14 @@ const STAGES=[
 '##############################################',
 ]),
  npcs:{2:{who:'OLD SANDER — fisherman of the river',kind:'enslaved',
-   tree:{start:'s1',nodes:{
-     s1:{say:`“Boy, you stand out like a lantern. Get LOW. You runnin’?”`,
-       opts:[
-         {t:'“Running north — and I mean to get there.”',next:'s2',fx:{trust:+1}},
-         {t:'“Just passing. I’ll trouble no soul on this water.”',next:'s2',fx:{trust:+1}},
-       ]},
-     s2:{say:`“Then hear me — dogs is out past the oxbow, two packs, Tillman’s money bought ’em. A hound don’t follow your eyes, he follows what your feet leave on the ground. So how do you throw him off it?”`,quiz:true,
-       opts:[
-         {t:'“Walk the water — I leave nothing for his nose to find.”',next:'s_right'},
-         {t:'“Run faster than the pack can follow.”',next:'s_wrong'},
-         {t:'“Double back and hide in the cane.”',next:'s_wrong'},
-       ]},
-     s_right:{say:`“THAT’S it. Wade the sloughs, cross and cross again — cold feet, cold trail, and the pack circling nothing. Here, smoked fish. Eat it slow; it’s got to last.”`,
-       give:{stam:30,food:45,scent:true,note:'scent'},next:'s_hist'},
-     s_wrong:{say:`“No, boy — you can’t outrun a nose, and you can’t hide from one, for it finds where you BEEN, not where you are. Only the water beats it: wade, and you leave nothing. Cold, yes. Caught is colder. Take the fish, and remember it.”`,
-       give:{stam:20,food:38,note:'scent'},next:'s_hist'},
-     s_hist:{say:`“There’s a deep cane island up the water. You want to know who’s in it?”`,
-       opts:[
-         {t:'“Who could live in a swamp like that?”',next:'s_hist2',give:{note:'maroons'}},
-         {t:'“Best I don’t ask. I’ll pass it quiet.”',next:'s_send',fx:{trust:+1}},
-       ]},
-     s_hist2:{say:`“Folks who took their freedom and KEPT it — years in that cane, working hid ground no overseer’s boot has crossed. When you pass, whistle soft, twice. They’ll know a friend from a spy.”`,
-       next:'s_send'},
-     s_send:{say:`“Go on now. Keep the water at your feet and the star at your face. Cold don’t kill a moving man — stopping does.”`,end:true},
-   }},
+   lines:[`“Boy, you stand out like a lantern. Get low.”`,
+     `“Dogs is out past the oxbow — Tillman\u2019s money bought two packs. Hear me: a dog follows what your feet leave behind. Walk the water and you leave nothing. Cold, yes. Caught is colder.”`,
+     `“Smoked fish, take it — eat it slow, it has to last. And when you pass the deep cane island, whistle soft twice. Folks live free in there. They\u2019ll know you\u2019re a friend passing, not a spy.”`],
    give:{stam:30,food:45,note:'scent'}},
   9:{who:'THE MAROONS — of the cane island',kind:'maroon',
-   tree:{start:'m1',nodes:{
-     m1:{say:`(Two soft whistles answered. Shapes rise from the cane — men and women, armed, unafraid. They have lived free in this swamp for years.) “Sander sent word ahead of you. You’re among friends here. What is it you need, walker?”`,
-       opts:[
-         {t:'“Rest — and to know how you live free out here.”',next:'m_hist',give:{note:'maroons'}},
-         {t:'“Only rest, and then the road north.”',next:'m2',fx:{trust:+1}},
-       ]},
-     m_hist:{say:`“We farm ground the swamp keeps hid — corn, hogs, fields no paddyroller has ever found. Some of us was born in this cane and never wore a chain. We defend it, and their books never write us down. The swamp holds our story instead.”`,
-       next:'m2'},
-     m2:{say:`“There’s hominy on the fire. Rest till the moon drops — no patrol ever came into this cane and walked out proud.”`,
-       give:{camp:true,stam:100,food:60,note:'maroons'},next:'m3'},
-     m3:{say:`“Now you go on to Maryland. Some of us mean to die free in this swamp and call that a life well lived. Ain’t but one river between your road and ours.”`,end:true},
-   }},
+   lines:[`(Two soft whistles answered. Shapes rise from the cane — men and women, armed, unafraid. They have lived free in this swamp for years.)`,
+     `“Sander sent word. Rest here till the moon drops — no patrol has ever come into this cane and come out proud. There\u2019s hominy on the fire. Eat.”`,
+     `“You go on to Maryland. Some of us was born in this swamp and will die free in it. Ain\u2019t but one river between your way and ours.”`],
    give:{camp:true,stam:100,food:60,note:'maroons'}}},
  card:['NIGHT? · SOUTH CAROLINA','The Congaree',
  `<p>Between the fugitive and the road north lies the black water. The dogs came out today — Ball heard them from his hiding hole, and dogs change everything: they do not need to see you.</p><p><b>You leave a scent trail behind you now. Dogs will find it and follow it to your feet. Wading water breaks the trail — use the sloughs. A fisherman works the near bank, and deeper in, the cane island holds people who have made the swamp their freedom. Hollow trees stand in the fog — remember where. A swamp day is long when you\u2019re hungry.</b></p>`]},
@@ -463,51 +394,14 @@ const STAGES=[
 '##############################################',
 ]),
  npcs:{4:{who:'ELIAS FREEMAN — tinker, free man of color',kind:'free',
-   tree:{start:'e1',nodes:{
-     e1:{say:`“Easy — easy. I’m free-born, and I mend pots for half this county, which means I hear the other half talking. You’re the walker.”`,
-       opts:[
-         {t:'“Do they know I’m here?”',next:'e_news'},
-         {t:'“How does a free man cross both worlds and not get taken himself?”',next:'e_hist',give:{note:'freeblack'}},
-       ]},
-     e_news:{say:`“Your notice is in the Gazette — fifty dollars, your height, your trade, your letters. Patrols doubled, riding in PAIRS past the meeting house now. Which means you don’t take roads.”`,
-       next:'e_prac'},
-     e_hist:{say:`(He taps his coat.) “Free papers. I carry mine folded soft as scripture, and I’ve copied a blank one more than once for a man who had none. A slip of paper’s the only wall between me and a coffle — kidnappers sell free folk south and no court lifts a hand. My freedom’s a rumor I keep proving.”`,
-       next:'e_prac'},
-     e_prac:{say:`“Now — how do you mean to get north of here?”`,quiz:true,
-       opts:[
-         {t:'“Keep to the pines, off every road.”',next:'e_good',fx:{trust:+1}},
-         {t:'“Take the main road while it’s dark and I’m fast.”',next:'e_warn'},
-       ]},
-     e_good:{say:`“Good man. The Quaker farm north — his barn’s unlatched, and a lantern set in the window means the yard is clear. Free paper or none, he asks nothing. Go before the moon clears that pine.”`,
-       give:{corn:2,food:25,note:'freeblack'},end:true},
-     e_warn:{say:`“The road is exactly where the fifty dollars waits, in pairs, on horseback. The pines are slower — and the pines are LIFE. Off the road. There’s a Quaker farm north, lantern in the window when the yard’s clear, barn unlatched. Go that way, and go careful.”`,
-       give:{corn:1,food:25,note:'freeblack'},end:true},
-   }},
+   lines:[`“Easy — easy. I\u2019m free-born, and I mend pots for half this county, which means I hear the other half talking.”`,
+     `“Your notice is in the Gazette. Fifty dollars. Patrols doubled on every road, riding in pairs past the meeting house. So you don\u2019t take roads.”`,
+     `“The Quaker farm north of here — the man leaves his barn unlatched, and his lantern in the window means the yard is clear. Free paper or no paper, he asks nothing. Go before the moon clears that pine.”`],
    give:{corn:2,food:25,note:'freeblack'}},
   3:{who:'FRIEND HOLLOWAY — a Quaker farmer',kind:'white',
-   tree:{start:'h1',nodes:{
-     h1:{say:`(A white man stands in the barn doorway, lantern down-shaded. He does not ask thy name.) “Thee is welcome to the loft, friend, and to what’s in the pail. I hold that no man was made property — and my house acts on it, quietly.”`,
-       opts:[
-         {t:'“Why would a white man risk all this?”',next:'h_hist',give:{note:'quaker'}},
-         {t:'“How do I know which strange door is safe, and which will sell me?”',next:'h_quiz'},
-       ]},
-     h_hist:{say:`“Because a faith that costs nothing is no faith. There are fewer of us than the stories pretend, and the law falls hard — fine, prison, ruin. But some doors open. Thy own account, when thee writes it, must tell the cruelty AND the few kindnesses, both true.”`,
-       next:'h_quiz'},
-     h_quiz:{say:`“Now heed me, for it may save thy life. At a strange house in the dark — what tells thee a friend lives within?”`,quiz:true,
-       opts:[
-         {t:'“A lamp set in the window, and a knock they answer in kind.”',next:'h_right'},
-         {t:'“A quilt hung on the line in the right pattern.”',next:'h_quilt'},
-         {t:'“Any house with its light still burning.”',next:'h_wrong'},
-       ]},
-     h_quilt:{say:`“Thee has heard the quilt tales. I’ll speak plain, friend: I know of no quilt that ever signaled a road, and I’d not stake thy neck on a story. What we truly used was plainer — a lamp set in a window on purpose, a knock given and answered just so, a name passed by folk who’d proved themselves. Trust the signal a living person gives thee, not a pattern on a line.”`,
-       next:'h_send'},
-     h_wrong:{say:`“No — a burning light is only a wakeful house, and a wakeful house may hold thy captor. Look for the SET signal: a lamp placed in the window with intent, a knock answered in kind. And above all, the word of living folk who’ve proved themselves.”`,
-       next:'h_send'},
-     h_right:{say:`“Just so. The set lamp, the answered knock, and above all the word of people who have proved themselves. Agreed-upon signals — not stories.”`,
-       give:{corn:1},next:'h_send'},
-     h_send:{say:`“The patrol supped at my table an hour past and rode east — I am ashamed they trust me. Rest. The barn will hide thee through any daylight. Then keep the star on thy right shoulder to the creek, and cross at the stones.”`,
-       give:{camp:true,stam:100,corn:1,food:50,note:'quaker'},end:true},
-   }},
+   lines:[`(A white man stands in the barn doorway, lantern down-shaded. He does not ask your name.)`,
+     `“Thee is welcome to the loft, friend, and to what\u2019s in the pail. I hold that no man was made property, and my house acts on it — quietly.”`,
+     `“The patrol supped at my table an hour ago and rode east. I am ashamed to say they trust me. Rest. The barn will hide thee through any daylight. Then keep the star on thy right shoulder till the creek, and cross at the stones.”`],
    give:{camp:true,stam:100,corn:2,food:50,note:'quaker'}}},
  card:['NIGHT? · THE CAROLINAS','The Pine Barrens',
  `<p>The newspaper notice is out — fifty dollars, his height, his trade, his letters. Every road now has riders on it, and every stranger is fifty dollars on foot. Ball keeps to the pines and learns which houses to trust from the people who know: the free Black families who move through both worlds, and the rare white door that opens.</p><p><b>Patrols ride in pairs tonight. A free tinker on the south track knows their schedule — find him first. And there is a barn, north inside a fence, with a lantern in the window. A barn will hold you through a whole day, if you can reach it.</b></p>`]},
@@ -551,31 +445,16 @@ const STAGES=[
 '##############################################',
 ]),
  npcs:{8:{who:'JUBA — turpentine hand, hired out',kind:'enslaved',
-   tree:{start:'j1',nodes:{
-     j1:{say:`(He steps from behind a boxed pine, tar to the elbows, and looks you over exactly once.) “You the walker. Word runs down the tar camps faster than any horse.”`,
-       opts:[
-         {t:'“How does a hired-out man come to know three counties’ roads?”',next:'j_hist',give:{note:'turpentine'}},
-         {t:'“Where do the patrols give out?”',next:'j_prac'},
-       ]},
-     j_hist:{say:`“They hire us out county to county — turpentine, tar, gum, wherever the pine bleeds. The owners wanted hands. What they made was men who know every road, every patrol, every safe door between here and the next kiln, and pass it camp to camp. They built the map. We learned to read it.”`,
-       next:'j_prac'},
-     j_prac:{say:`“Patrols quit at the county line north of the kilns; the next county’s riders don’t start till the wagon road. There’s a gap. But mind the pines — how do you cross a stand of boxed pine, along the rows or across them?”`,quiz:true,
-       opts:[
-         {t:'“Across the rows — never down a row a rider can see the length of.”',next:'j_good',fx:{trust:+1}},
-         {t:'“Straight down a row, quick and quiet.”',next:'j_warn'},
-       ]},
-     j_good:{say:`“Smart. A row is a gun-sight for a man on a horse. Take this — pone and a fist of parched corn. A man that don’t eat don’t walk. My daddy said that. He walked too.”`,
-       give:{corn:3,food:40,note:'turpentine'},end:true},
-     j_warn:{say:`“No — a row runs straight as a rifle-barrel, and a rider at the far end sees you the whole length of it. CROSS the rows, always. Here — pone and parched corn. Eat, or your legs quit before the county line does.”`,
-       give:{corn:2,food:38,note:'turpentine'},end:true},
-   }},
+   lines:[`(He steps from behind a boxed pine, tar to the elbows, and looks you over exactly once.)`,
+     `“You the walker. Word runs down the tar camps faster than any horse — we get hired out county to county, and we carry more than buckets, you follow me?”`,
+     `“Patrols quit at the county line north of the kilns; the next county\u2019s riders don\u2019t start till the wagon road. There\u2019s a gap. And take this — pone and a fist of parched corn. A man that don\u2019t eat don\u2019t walk. My daddy said that. He walked too.”`],
    give:{corn:3,food:40,note:'turpentine'}}},
  card:['NIGHT? · NORTH CAROLINA','The Turpentine Pines',
  `<p>The longleaf country: mile on mile of boxed pines bleeding gum into clay cups, tar kilns smoking in the clearings, and camps of enslaved men hired out far from their home plantations. The camps are a road of their own — news, names, and warnings travel down them faster than the mail.</p><p><b>The pines run in rows here and the sightlines are long — a rider can see far down an alley of trees. Cross the rows, not along them. A tar hand near the kilns knows where the patrols give out. Hollow trees mark the old burns.</b></p>`]},
 
 /* ── STAGE 5 · THE TOBACCO ROADS ── */
 {name:'STAGE V · THE TOBACCO ROADS',
- pal:{gnd:'#161B12',gnd2:'#0E120B',water:'#16303C',grass:'#2C3A1E',tree:'#0B100A',tree2:'#182611',canopy:'#14220F',fog:0.07,moonX:0.5,moonR:11,moonP:0.2,flies:0},
+ pal:{gnd:'#161B12',gnd2:'#0E120B',water:'#16303C',grass:'#2C3A1E',tree:'#0B100A',tree2:'#182611',canopy:'#14220F',fog:0.07,rain:true,moonX:0.5,moonR:11,moonP:0.2,flies:0},
  rows:M([
 '#############..X.X...#########################',
 '#.............................................#',
@@ -613,26 +492,9 @@ const STAGES=[
 '##############################################',
 ]),
  npcs:{1:{who:'SISTER RHODY — of the hush harbor',kind:'enslaved',
-   tree:{start:'r1',nodes:{
-     r1:{say:`(Under the brush arbor, a low voice is lining out a hymn with no tune a patrol could hear. It stops. She was expecting you.) “We been praying you up this road three nights now — word came by the grapevine before your feet did. Sit, child.”`,
-       opts:[
-         {t:'“Why do you sing so low — near under your breath?”',next:'r_quiz'},
-         {t:'“Why risk worship the law forbids at all?”',next:'r_hist',give:{note:'hushharbor'}},
-       ]},
-     r_hist:{say:`“Because a people must have one place the law can’t reach — to pray, to mourn, to plan a thing like your walk. Out here in the brush we’re free an hour. Many an escape was prayed over before it was ever walked. Yours among them.”`,
-       next:'r_quiz'},
-     r_quiz:{say:`“Now — why do you think we pitch the singing so low it hardly leaves this arbor?”`,quiz:true,
-       opts:[
-         {t:'“So the sound won’t carry on the wind to the patrol roads.”',next:'r_right'},
-         {t:'“Because loud singing would be a sin.”',next:'r_wrong'},
-         {t:'“To keep from waking the little ones.”',next:'r_wrong'},
-       ]},
-     r_right:{say:`“That’s it, child. Low enough the wind won’t carry it to a white man’s ear. A sanctuary’s no sanctuary if it can be heard. Here — strength for your legs, and ash cake for the road.”`,
-       give:{camp:true,stam:80,food:55,corn:1,note:'hushharbor'},next:'r_send'},
-     r_wrong:{say:`“No — we sing low so no sound ever reaches the patrol road. A hush harbor lives only as long as it stays HUSH; loud faith out here gets folks whipped. Mind it. Now take strength, and ash cake.”`,
-       give:{camp:true,stam:60,food:50,note:'hushharbor'},next:'r_send'},
-     r_send:{say:`“The rain’s a mercy tonight — it drowns your smell and their lanterns both. But it eats a body’s strength. When the sky grays, don’t you DARE it. This hollow hides. The Lord made the dark first, child. Use it.”`,end:true},
-   }},
+   lines:[`(Under the brush arbor, a low voice is lining out a hymn with no tune a patrol could hear. It stops. She was expecting you.)`,
+     `“We been praying you up this road three nights now — word came by the grapevine before your feet did. Sit. There\u2019s ash cake and there\u2019s quiet, and both are yours.”`,
+     `“The rain is a mercy tonight — it drowns your smell and their lanterns both. But it eats a body\u2019s strength. When the sky grays, don\u2019t you dare it. This hollow hides. The Lord made the dark first, child. Use it.”`],
    give:{camp:true,stam:80,food:55,corn:1,note:'hushharbor'}}},
  card:['NIGHT? · VIRGINIA','The Tobacco Roads',
  `<p>Rain over the tobacco country — long fenced fields, curing barns, and roads with riders on them even in weather. But rain is a friend to a walking man: it kills his scent, shortens every lantern, and keeps honest men indoors. Somewhere off the road, under a brush arbor, people are worshiping where the law can\u2019t hear them — and they know he is coming.</p><p><b>The rain hides you but wears you down — strength drains faster tonight. Find the hush harbor by the great canopy. Dogs are nearly blind of nose in this weather; riders see half as far. It is the best walking of the whole road, if your legs hold.</b></p>`]},
@@ -648,22 +510,22 @@ const STAGES=[
 '#.....##......................P..##...........#',
 '#..............................................#',
 '#........~~~~~................................#',
-'#.......~~~~~~~...............................#',
+'#.......~~~~~~~......5........................#',
 '#........~~~~~.................,,,............#',
 '#..............................,,,.....C......#',
 '#...C..........................,,,............#',
 '#.....................####....................#',
 '#....P.................##.....................#',
 '#...........O..................................#',
-'#......P.......................R..............#',
-'#======~~~~======================G===========#',
+'#..............................R..............#',
+'#......,,,....................................#',
 '#......,,,.........~~~~~~.....................#',
 '#......,,,........~~~~~~~~....................#',
 '#...................~~~~......................#',
 '#..........K..................####............#',
 '#...............................##......P.....#',
 '#..............................................#',
-'#..C...5...........D..........................#',
+'#..C...............D..........................#',
 '#..............................,,,,...........#',
 '#........####..................,,,,.....C.....#',
 '#.........##...................,,,,...........#',
@@ -677,26 +539,9 @@ const STAGES=[
 '##############################################',
 ]),
  npcs:{5:{who:'LITTLE ISAIAH — a herd boy',kind:'enslaved',
-   tree:{start:'i1',nodes:{
-     i1:{say:`(A boy no older than twelve sits a rail fence in the dark like he owns the county — and maybe at this hour he does.) “You Charles? See — the grapevine had you a day out. It’ll have you in Maryland ’fore YOU’RE in Maryland.” (He grins, then doesn’t.)`,
-       opts:[
-         {t:'“How’s a boy come to know all that?”',next:'i_hist',give:{note:'grapevine'}},
-         {t:'“Tell me about the crossing.”',next:'i_quiz'},
-       ]},
-     i_hist:{say:`“I mind cows, so I mind the roads. Herd boys hear everything — nobody hushes ’fore a child. I pass it on up the line. The grapevine don’t need letters. Just a boy on a fence with good ears.”`,
-       next:'i_quiz'},
-     i_quiz:{say:`“They watching the lower ford — man drowned there in irons last spring, and they figure walkers come anyway. So you got to read the river your own self. Where does a river run shallow enough to wade?”`,quiz:true,
-       opts:[
-         {t:'“Where it runs wide and loud over the stones.”',next:'i_right'},
-         {t:'“Where it’s narrow and smooth and quiet.”',next:'i_wrong'},
-         {t:'“Wherever it takes a bend.”',next:'i_wrong'},
-       ]},
-     i_right:{say:`“That’s IT! Wide and loud and shallow — the still narrow water runs deep, that’s the drowning kind. Cross where the cows cross, past the willows. I’ll mark it for you — look for the sign right at the water.”`,
-       give:{corn:2,food:45,markFord:true,note:'grapevine'},next:'i_send'},
-     i_wrong:{say:`“Naw — the smooth quiet water is the DEEP water; that’s what took the man in irons. Wide and LOUD and shallow, over the stones, is where a body wades. Cross where the cows do, past the willows. Read it careful — I can’t mark a thing you don’t yet know.”`,
-       give:{corn:2,food:45,note:'grapevine'},next:'i_send'},
-     i_send:{say:`“Here — Mama sends biscuits when the vine says somebody’s walking. She says don’t none of it come back but the word you made it.”`,end:true},
-   }},
+   lines:[`(A boy no older than twelve sits a rail fence in the dark like he owns the county, and maybe at this hour he does.)`,
+     `“You Charles? See — the grapevine had you a day out. It\u2019ll have you in Maryland \u2019fore YOU\u2019re in Maryland.” (He grins, then doesn\u2019t.) “They watching the lower ford. Man drowned there in irons last spring; they figure walkers know it and come anyway.”`,
+     `“Cross at the rocks past the willows — cows do it, so can you. Here. Mama sends biscuits when the vine says somebody\u2019s walking. She says don\u2019t none of it come back but the word you made it.”`],
    give:{corn:2,food:45,note:'grapevine'}}},
  card:['NIGHT? · THE VIRGINIA HILLS','The Blue Run Hills',
  `<p>The land begins to rise and fold — stone outcrops, cold fast creeks, upland pastures. Ball is close enough now that the news of him travels ahead of him: the grapevine telegraph, mouth to mouth, quarters to quarters, faster than any rider and invisible to every one of them.</p><p><b>The fords are watched. A herd boy on the rails knows which crossing the cattle use. The hills hide you but tire you; there\u2019s a cabin on the south slope and a hollow oak by the high pasture — mark them before you commit to the open ground.</b></p>`]},
@@ -740,18 +585,10 @@ const STAGES=[
 '##############################################',
 ]),
  npcs:{5:{who:'MOSES TASKER — free waterman',kind:'free',
-   tree:{start:'t1',nodes:{
-     t1:{say:`“You the one walking? Word came up the river ahead of you — good word, from good people.”`,
-       opts:[
-         {t:'“You’d row a stranger across, and risk all that?”',next:'t_hist',give:{note:'waterman'}},
-         {t:'“What is it you need of me?”',next:'t_task'},
-       ]},
-     t_hist:{say:`“I ferry oysters by day and freedom by night, and I row for my own reasons — my wife’s people are still down where you come from. A waterman knows every landing, current, and patrol on this river. Some of us spend that knowing on more than wages.”`,
-       next:'t_task'},
-     t_task:{say:`“My net’s fouled on a snag downstream — the lantern floats right on the spot. Free it and bring it back, so my morning looks honest, and I’ll have you on Maryland mud before the sky grays.”`,
-       give:{note:'waterman'},end:true},
-   }},needs:'net',
-   give:{note:'waterman'}},
+   lines:[`“You the one walking? Word came up the river ahead of you — good word, from good people.”`,
+     `“I ferry oysters by day and freedom by night, and I row for my own reasons: my wife\u2019s people are still down where you come from.”`,
+     `“My net\u2019s fouled on a snag downstream — lantern floats on the spot. Free it and bring it, so my morning looks honest, and I\u2019ll have you on Maryland mud before the sky grays.”`],
+   give:{note:'waterman'},needs:'net'},
   6:{who:'THE SNAGGED NET',kind:'obj',
    lines:[`(You work the net free of the drowned limb, quiet as you can, the river pulling at your arms.)`],
    give:{item:'net'}}},
@@ -797,24 +634,9 @@ const STAGES=[
 '##############################################',
 ]),
  npcs:{7:{who:'CATO — of the home quarters',kind:'enslaved',
-   tree:{start:'c1',nodes:{
-     c1:{say:`(He knows you before you speak. His hands stop shaking around the third breath.) “We buried your mother two winters past. She said you’d walk it. She SAID it.”`,
-       opts:[
-         {t:'“I’m home now. Surely here I can breathe easy.”',next:'c_quiz'},
-         {t:'“Tell me what I don’t yet understand about this place.”',next:'c_quiz'},
-       ]},
-     c_quiz:{say:`“Hear me, for the danger’s changed its shape. You’re fifty dollars here same as Georgia — but why is coming HOME the most dangerous ground of the whole road?”`,quiz:true,
-       opts:[
-         {t:'“Because here my own face has a name — folks know me on sight.”',next:'c_right'},
-         {t:'“Because the patrols ride thicker in Maryland.”',next:'c_wrong'},
-         {t:'“There’s no danger left — I’m among my own now.”',next:'c_wrong'},
-       ]},
-     c_right:{say:`“That’s the bitter truth of it. In Georgia you were a stranger. Here, every soul who’d know your face at forty yards is the danger — and half of them would sell you back by morning. You’ll have to live quiet in the very county you were born in. That is the cost of home.”`,
-       give:{corn:2,stam:60,food:50,note:'home'},next:'c_send'},
-     c_wrong:{say:`“No — the danger ain’t the patrols alone. It’s that HERE your face has a name. The people who’d know you on sight are the peril now, and freedom in your home county means living quiet, hid in plain sight. Learn that before you knock on any door.”`,
-       give:{corn:2,stam:50,food:50,note:'home'},next:'c_send'},
-     c_send:{say:`“Stay off the shore road — old man Hance rides it at moonset. The cabin past the tobacco barn: that door’s been unlatched a year, on faith. Go home, Charles.”`,end:true},
-   }},
+   lines:[`(He knows you before you speak. His hands stop shaking around the third breath.)`,
+     `“We buried your mother two winters past. She said you\u2019d walk it. She SAID it.”`,
+     `“Listen — you\u2019re fifty dollars here same as Georgia, and the ones who\u2019d know your face are the danger now. Stay off the shore road; old man Hance rides it at moonset. The cabin past the tobacco barn — the door\u2019s unlatched, been unlatched a year. Go home, Charles.”`],
    give:{corn:2,stam:60,food:50,note:'home'}}},
  card:['NIGHT? · MARYLAND','Calvert County — Home',
  `<p>Maryland mud on his feet at last — and the most dangerous night of all, because here his face has a name. The county he was born in is full of people who would know him at forty yards, and half of them would sell him back by morning. One night more. The people at the old quarters have kept a door unlatched for a year, on faith.</p><p><b>The patrols here ride for a man they can name, and they ride thick. If the night is old, the unlatched cabin will hold you through a last long day. Reach the tree line north — home is past it.</b></p>`]},
@@ -838,9 +660,6 @@ const FIELDNOTES={
  caught:{h:'THE PRICE OF CAPTURE',t:`Capture meant the whip, the iron, sale further south — and the narrative is unsparing about all three. Ball himself was seized more than once in his life and escaped more than once. In this game capture costs you ground, food, and one of three marks; in life it cost immeasurably more. The marks are a mercy the road never gave.`},
  crossing:{h:'THE COUNTY LINE',t:`A line on a map moved no clock. Crossing into new ground at the wrong hour — moon high, night old, belly empty — was how walkers were taken; the craft was to arrive at a line with darkness to spare, or to hole up and spend a day rather than gamble a dawn. Ball's year of nights was a year precisely because he refused the gambles. Patience was the whole trick.`},
  home:{h:'WHAT HOME COST',t:`Ball reached Maryland after roughly a year of nights — and had to live the rest of his freedom in secret, in the county where he was most known. Years later he was seized and sold south again, and escaped again, by ship. His freedom was never once given. It was taken, kept, retaken — and finally written down where no patrol could reach it.`},
- weather:{h:'THE WEATHER AS ALLY',t:`Rain was the freedom-seeker's friend and enemy at once. It drowned the scent a hound lived by and shrank every lantern to a stub — the honest men stayed indoors and the dogs went nose-blind. But it also robbed the body of heat and strength faster than dry cold, and a storm's lightning could strip the dark from a whole field in an instant. Ball weighed the sky as carefully as the road: a wet night bought cover at the price of the strength to use it.`},
- parley:{h:'STOPPED ON THE ROAD',t:`A Black traveler at night without a pass was, by law, anyone's to seize. Ball's narrative recounts more than one night when he talked his way past white men — claiming an errand for a named planter, or bowing low and slow to buy a moment. It worked when the stranger didn't know the county's people; it failed, hard, when he did. Free papers were forged and shared; a good lie needed real names, which is why the help of local people was worth more than any weapon. Mounted patrols running dogs did not stop to talk — and that mercilessness is its own lesson in what the road demanded.`},
- fords:{h:'READING THE WATER',t:`A river was crossed where it ran wide, shallow, and loud over stones — the still, narrow, silent places ran deep and killed. Cattle knew the fords and so did the patrols, who watched them because walkers had to use them. Ball's craft was to read moving water in the dark: the loud shallows to cross, the smooth deeps to shun, and the hard arithmetic that many captures happened at exactly these unavoidable crossings.`},
 };
 
 const EPILOGUE=`<p>Charles Ball reached Calvert County after nearly a year of nights — and lived his freedom quietly, married again, farmed, and fought: in 1814 he served with Barney's flotilla at the Battle of Bladensburg, standing to the guns for a country that did not count him a citizen.</p>
@@ -864,11 +683,9 @@ function fit(){
   VH=470;                                 /* vertical field of view stays constant */
   VW=Math.round(VH*(W/H));
   VW=Math.max(220,Math.min(1400,VW));     /* clamp extreme aspect ratios */
+  cv.width=VW;cv.height=VH;                /* backing store */
   const s=Math.min(W/VW,H/VH);            /* scale to fill (aspect already matches) */
-  const dpr=Math.min(window.devicePixelRatio||1,3);
-  cv.width=Math.round(VW*s*dpr);cv.height=Math.round(VH*s*dpr); /* backing store at native res */
   cv.style.width=(VW*s)+'px';cv.style.height=(VH*s)+'px';
-  c.setTransform(s*dpr,0,0,s*dpr,0,0);    /* draw code stays in world coords (VW×VH) */
 }
 addEventListener('resize',fit);
 addEventListener('orientationchange',()=>setTimeout(fit,80));
@@ -885,20 +702,7 @@ let foes=[],npcs=[],items=[],scent=[],pfx=[],smoke=[],flies=[],rain=[],clouds=[]
 let ckx=0,cky=0,tick=0,state='title',anim=0;
 let seen=false,haveNet=false,wasWater=false,hunt=1;
 let noteSeen={},dlgIdx=0,dlgNPC=null,toasts=[];
-/* ── branching dialogue + session state ── */
-let dlgNode=null,dlgTree=null,dlgChoice=false;
-const FLAGS={};                       /* session flags set by dialogue choices */
-const TRUST={};                       /* per-NPC trust, keyed by stage:id */
-let parleyUsed=false,parleyCool=0,runBoost=0;    /* one parley per stage; runBoost = post-parley sprint */
-/* ── dynamic weather ── */
-let wx='clear',wxFog=0,wxLantern=1,wxNose=1,wxStamina=1;
-let lightning=0,lightWarn=0,lightForks=[];
-const WXGLYPH={clear:'☾',overcast:'☁',rain:'🌧',storm:'⛈'};
-let deer=[],embers=[],skyBirds=[],splashes=[];
 const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
-const trustKey=n=>stage+':'+(n&&n.id!=null?n.id:'?');
-function getTrust(n){const k=trustKey(n);return TRUST[k]||0;}
-function addTrust(n,d){const k=trustKey(n);TRUST[k]=(TRUST[k]||0)+d;}
 
 /* ══════════ SOUND — night ambience, heartbeat, the hunt ══════════ */
 let AC=null,sMaster=null,threat=0,hbNext=0,cricketG=null,rainG=null;
@@ -955,17 +759,14 @@ function soundTick(){
   if(threat>0.12){
     if(tick>=hbNext){sfx.heart();hbNext=tick+Math.max(22,70-threat*52);}
   }
-  if(tick%600===0&&Math.random()<0.4&&threat<0.2&&!wxWet)sfx.owl();
-  if(cricketG)cricketG.gain.value=(wxWet?0.015:0.05)*(1-threat*0.8);
-  if(rainG)rainG.gain.value=(wxWet&&state==='play')?(wx==='storm'?0.075:0.055):0;
+  if(tick%600===0&&Math.random()<0.4&&threat<0.2&&!(pal&&pal.rain))sfx.owl();
+  if(cricketG)cricketG.gain.value=(pal&&pal.rain?0.015:0.05)*(1-threat*0.8);
+  if(rainG)rainG.gain.value=(pal&&pal.rain&&state==='play')?0.055:0;
 }
 const keys={};
 addEventListener('keydown',e=>{
   initAudio();
   keys[e.code]=true;
-  // number keys pick a dialogue choice
-  if(state==='dlg'&&dlgChoice&&(e.code==='Digit1'||e.code==='Digit2'||e.code==='Digit3')){
-    chooseDlgOpt(+e.code.slice(5)-1);e.preventDefault();return;}
   if(e.code==='KeyE'||e.code==='Space'){act();e.preventDefault();}
   if(e.code==='KeyF'){eat();e.preventDefault();}
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();});
@@ -1006,83 +807,13 @@ const solidAt=(x,y)=>SOLID(tile(Math.floor(x/TS),Math.floor(y/TS)));
 const tileAtPx=(x,y)=>tile(Math.floor(x/TS),Math.floor(y/TS));
 function toast(txt){toasts.push({txt,t:130});}
 
-/* ════════════ DYNAMIC WEATHER ════════════
-   Rolled fresh at each night's start. Stages lean wet or dry via WETBIAS. */
-const WETBIAS=[0,0.24,-0.24,-0.20,0.55,0,-0.05,0.05];
-let wxWet=false;
-function rollWeather(atLoad){
-  const bias=WETBIAS[stage]||0;
-  const r=Math.random();
-  const clearT=Math.max(0.15,0.55-bias*0.9);
-  const overT=clearT+0.20;
-  const rainT=overT+0.18+Math.max(0,bias)*0.10;
-  if(r<clearT)wx='clear';
-  else if(r<overT)wx='overcast';
-  else if(r<rainT)wx='rain';
-  else wx='storm';
-  applyWeather();
-}
-function applyWeather(){
-  if(wx==='clear'){wxFog=0;wxLantern=1;wxNose=1;wxStamina=1;}
-  else if(wx==='overcast'){wxFog=0.06;wxLantern=0.85;wxNose=1;wxStamina=1;}
-  else if(wx==='rain'){wxFog=0.04;wxLantern=0.6;wxNose=0.4;wxStamina=1.5;}
-  else{wxFog=0.05;wxLantern=0.6;wxNose=0.4;wxStamina=1.5;}  /* storm = rain + lightning */
-  wxWet=(wx==='rain'||wx==='storm');
-  const glyph=document.getElementById('wxHb');
-  if(glyph){glyph.textContent=WXGLYPH[wx];glyph.style.color=wx==='storm'?'#8FB4FF':(wxWet?'#7FA8D8':'#E8C55A');}
-  const wantN=wxWet?70:0;
-  if(rain.length<wantN){for(let k=rain.length;k<wantN;k++)rain.push({x:Math.random()*VW,y:Math.random()*VH,l:8+Math.random()*8,s:5+Math.random()*3});}
-  else if(rain.length>wantN)rain.length=wantN;
-  lightning=0;lightWarn=0;lightForks=[];
-}
-/* effective fog = palette fog + weather fog */
-function effFog(){return (pal?(pal.fog||0):0)+wxFog;}
-let fordSafe=false,fordTiles=[],ropeTile=null;   /* Stage VI river crossing */
-function markFordSafe(){fordSafe=true;toast('you know the safe crossing now — look for the ✦ at the ford');}
-/* the rope crossing sweeps a weak swimmer downstream to the south bank — no mark */
-function sweptDownstream(){
-  const ry=ropeTile?ropeTile.y:Math.floor(py/TS);
-  let landed=false;
-  for(let dy=2;dy<=6&&!landed;dy++)for(let tries=0;tries<20&&!landed;tries++){
-    const x=3+((Math.random()*(Wd-6))|0),y=ry+dy;
-    if(grid[y]&&grid[y][x]==='.'){px=x*TS+8;py=y*TS+4;landed=true;}
-  }
-  if(!landed){px=ckx;py=cky;}
-  food=Math.max(8,food-8);stam=Math.max(30,stam);scent=[];
-  burst(px+8,py+8,'#5FB3C0');sfx.splash();
-  toast('the current takes you — swept back to the south bank');
-  updHUD();
-}
-/* storm lightning: telegraphed flicker (1s) → 0.4s illuminating flash + thunder */
-function makeFork(){
-  const x=40+Math.random()*(VW-80);let y=0,cx=x;const pts=[{x:cx,y:0}];
-  while(y<VH*0.72){y+=18+Math.random()*30;cx+=(Math.random()-0.5)*44;pts.push({x:cx,y});}
-  return pts;
-}
-function stepWeather(){
-  if(wx!=='storm'){lightning=Math.max(0,lightning-0.05);lightWarn=0;return;}
-  if(lightning>0)lightning=Math.max(0,lightning-0.045);   /* ~0.4s decay */
-  if(lightWarn>0){
-    lightWarn--;
-    if(lightWarn===0){                                    /* the strike */
-      lightning=1;lightForks=makeFork();
-      const delay=180+((Math.random()*420)|0);            /* thunder trails the flash */
-      setTimeout(()=>{sNoise(0.5,0.22,-260);sTone(48,0.7,'sine',0.12,32);},delay);
-    }
-  }else if(lightning<=0&&phase==='night'&&Math.random()<0.006){
-    lightWarn=60;                                         /* ~1s telegraph */
-  }
-}
 function loadStage(i,fullReset){
   hunt=1+i*0.015;
   const S=STAGES[i];pal=S.pal;
   if(!S.grown)S.grown=growStage(S.rows,i);
   grid=S.grown.map(r=>r.split(''));Ht=grid.length;
   foes=[];npcs=[];items=[];scent=[];pfx=[];smoke=[];flies=[];rain=[];
-  deer=[];embers=[];skyBirds=[];splashes=[];
   seen=false;haveNet=false;sheltered=false;shelter=null;exitCool=0;
-  parleyUsed=false;parleyCool=0;runBoost=0;lightning=0;lightWarn=0;lightForks=[];fordSafe=false;
-  rollWeather(true);
   if(fullReset){phase='night';phaseT=NIGHT_MIN+((Math.random()*NIGHT_SPAN)|0);expose=0;marks=0;}
   const flySpots=[];
   for(let y=0;y<Ht;y++)for(let x=0;x<Wd;x++){
@@ -1098,7 +829,7 @@ function loadStage(i,fullReset){
     else if(t==='D'){foes.push(mkDog(x,y));grid[y][x]='.';}
     else if(t==='R'){foes.push(mkRider(x,y));grid[y][x]='.';}
     else if(t>='1'&&t<='9'){const def=S.npcs[t];
-      if(def)npcs.push({id:t,x:x*TS,y:y*TS,who:def.who,kind:def.kind,lines:def.lines,tree:def.tree,give:def.give,needs:def.needs,done:false});
+      if(def)npcs.push({id:t,x:x*TS,y:y*TS,who:def.who,kind:def.kind,lines:def.lines,give:def.give,needs:def.needs,done:false});
       grid[y][x]='.';}
     if((t===','||t==='~')&&Math.random()<0.05)flySpots.push([x,y]);
   }
@@ -1106,33 +837,12 @@ function loadStage(i,fullReset){
   const nf=Math.min(pal.flies||0,flySpots.length);
   for(let k=0;k<nf;k++){const s=flySpots[(Math.random()*flySpots.length)|0];
     flies.push({x:s[0]*TS+Math.random()*TS,y:s[1]*TS+Math.random()*TS,ph:Math.random()*7,vx:0,vy:0});}
+  // rain
+  if(pal.rain)for(let k=0;k<70;k++)rain.push({x:Math.random()*VW,y:Math.random()*VH,l:8+Math.random()*8,s:5+Math.random()*3});
   // clouds
   clouds=[];for(let k=0;k<3;k++)clouds.push({x:Math.random()*VW,y:20+Math.random()*90,w:170+Math.random()*140,s:0.06+Math.random()*0.08});
-  // Stage VI river: record the ford (~) and rope (G) tiles in the deep-water row
-  fordTiles=[];ropeTile=null;
-  for(let y=0;y<Ht;y++){if(grid[y].indexOf('=')>=0){
-    for(let x=0;x<Wd;x++){if(grid[y][x]==='~')fordTiles.push({x,y});else if(grid[y][x]==='G')ropeTile={x,y};}
-  }}
-  // handler pair — a leashed dog and its man, from Stage IV on
-  if(i>=3){const sp=randOpenTile(6);if(sp)foes.push(mkPair(sp[0],sp[1]));}
-  // skittish deer — ambient life that betrays a running man
-  const dn=1+((Math.random()<0.6)?1:0);
-  for(let k=0;k<dn;k++){const sp=randOpenTile(5);
-    if(sp)deer.push({x:sp[0]*TS,y:sp[1]*TS,dir:Math.random()*Math.PI*2,flee:0,bob:Math.random()*7,gait:0});}
   updHUD();
   updPhaseBar();
-}
-/* find an open ground tile away from the player's start and the exit rows */
-function randOpenTile(minTilesFromPlayer){
-  const pcx=px/TS,pcy=py/TS;
-  for(let tries=0;tries<160;tries++){
-    const x=2+((Math.random()*(Wd-4))|0),y=3+((Math.random()*(Ht-6))|0);
-    const t=grid[y]&&grid[y][x];
-    if(t!=='.')continue;
-    if(Math.hypot(x-pcx,y-pcy)<minTilesFromPlayer)continue;
-    return [x,y];
-  }
-  return null;
 }
 function updPhaseBar(){
   const bar=document.querySelector('#dawnBar i');if(!bar)return;
@@ -1151,11 +861,6 @@ function mkRider(x,y){
 function mkDog(x,y){
   return{k:'dog',x:x*TS,y:y*TS,hx:x*TS,hy:y*TS,dir:0,spd:1.5,
     det:0,mode:'idle',trail:-1,barkT:0};}
-/* a handler pair — patroller + leashed dog, moving as one slow unit.
-   The dog's nose feeds the patroller's alarm; only water or shelter shakes them. */
-function mkPair(x,y){
-  return{k:'pair',x:x*TS,y:y*TS,dir:Math.random()*Math.PI*2,spd:0.5,
-    det:0,mode:'patrol',pause:0,alertT:0,bob:Math.random()*7,barkT:0,dogSide:1};}
 
 /* ── line of sight ── */
 function los(x0,y0,x1,y1){
@@ -1184,104 +889,18 @@ function updHUD(){
   document.getElementById('marks').textContent='⛓'.repeat(marks)+'·'.repeat(Math.max(0,3-marks));
 }
 
-/* ── dialogue system — linear lines[] OR branching tree{} ── */
-let dlgPendingNotes=[],dlgGranted=null;
+/* ── dialogue system ── */
 function openDlg(npc){
-  dlgNPC=npc;dlgIdx=0;state='dlg';dlgPendingNotes=[];
+  dlgNPC=npc;dlgIdx=0;state='dlg';
   document.getElementById('dlg').classList.add('on');
-  if(npc.tree){
-    dlgTree=npc.tree;dlgGranted=npc._granted||(npc._granted={});
-    showDlgNode(npc.tree.start);
-  }else{
-    dlgTree=null;dlgNode=null;
-    showDlgLine();
-  }
-}
-/* apply a gift/effect payload (corn/food/stam/camp/item/note), floored & clamped */
-function applyGive(g){
-  if(!g)return;
-  if(g.corn)corn+=g.corn;
-  if(g.yam)yam+=g.yam;
-  if(g.stam)stam=Math.min(100,Math.max(0,stam+g.stam));
-  if(g.food)food=Math.min(100,Math.max(0,food+g.food));
-  if(g.camp&&dlgNPC){ckx=dlgNPC.x||px;cky=(dlgNPC.y||py)+TS;burst(px+8,py+8,'#FFAA5A');}
-  if(g.scent)scent=[];                 /* a taught trick wipes your trail */
-  if(g.markFord)markFordSafe();        /* Isaiah's crossing lore lights the ford */
-  if(g.item==='net')haveNet=true;
-  if(g.hunt)hunt=Math.max(1,Math.min(1.3,hunt+g.hunt));
-  if(g.note&&!noteSeen[g.note]&&dlgPendingNotes.indexOf(g.note)<0)dlgPendingNotes.push(g.note);
-  sfx.aid();updHUD();
-}
-function applyFx(fx){
-  if(!fx)return;
-  if(fx.trust)addTrust(dlgNPC,fx.trust);
-  if(fx.flag)FLAGS[fx.flag]=true;
-  if(fx.hunt)hunt=Math.max(1,Math.min(1.3,hunt+fx.hunt));
-  if(fx.give)applyGive(fx.give);
-  if(fx.toast)toast(fx.toast);
-}
-/* ── branching tree traversal ── */
-function showDlgNode(id){
-  const node=dlgTree.nodes[id];
-  if(!node){closeDlg();return;}
-  dlgNode=id;
-  document.getElementById('dlgWho').textContent=dlgNPC.who;
-  document.getElementById('dlgTxt').textContent=(typeof node.say==='function'?node.say(dlgNPC):node.say)||'';
-  // node-entry gift (once per node)
-  if(node.give&&!dlgGranted[id]){dlgGranted[id]=true;applyGive(typeof node.give==='function'?node.give(dlgNPC):node.give);}
-  if(node.fx&&!dlgGranted['fx:'+id]){dlgGranted['fx:'+id]=true;applyFx(node.fx);}
-  const box=document.getElementById('dlgOpts');
-  box.innerHTML='';
-  if(node.opts&&node.opts.length){
-    dlgChoice=true;box.classList.add('on');
-    node.opts.forEach((o,i)=>{
-      const b=document.createElement('button');
-      b.className='dlgOpt';
-      b.innerHTML='<span class="onum">'+(i+1)+'</span>'+escapeHtml(o.t);
-      b.onclick=ev=>{ev.stopPropagation();chooseDlgOpt(i);};
-      box.appendChild(b);
-    });
-    document.getElementById('dlgHint').textContent=node.quiz?'answer him — 1·2·3 or tap':'choose — 1·2·3 or tap';
-  }else{
-    dlgChoice=false;box.classList.remove('on');
-    document.getElementById('dlgHint').textContent=(node.next||node.end)?'ACT / E — go on':'ACT / E — go on';
-  }
-}
-function chooseDlgOpt(i){
-  const node=dlgTree.nodes[dlgNode];
-  if(!node||!node.opts||!node.opts[i])return;
-  const o=node.opts[i];
-  applyFx(o.fx);applyGive(o.give);
-  if(o.end){closeDlg();return;}
-  if(o.next){showDlgNode(o.next);return;}
-  closeDlg();
-}
-function escapeHtml(s){return String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
-function closeDlg(){
-  document.getElementById('dlg').classList.remove('on');
-  document.getElementById('dlgOpts').classList.remove('on');
-  if(dlgNPC)dlgNPC.done=true;
-  dlgChoice=false;dlgTree=null;dlgNode=null;
-  state='play';
-  const notes=dlgPendingNotes.slice();dlgPendingNotes=[];
-  const runNotes=idx=>{if(idx>=notes.length)return;fieldNote(notes[idx],()=>runNotes(idx+1));};
-  runNotes(0);
+  showDlgLine();
 }
 function showDlgLine(){
   document.getElementById('dlgWho').textContent=dlgNPC.who;
   document.getElementById('dlgTxt').textContent=dlgNPC.lines[dlgIdx];
-  document.getElementById('dlgOpts').classList.remove('on');
   document.getElementById('dlgHint').textContent=(dlgIdx<dlgNPC.lines.length-1)?'ACT / E — continue':'ACT / E — go on';
 }
 function advanceDlg(){
-  // branching: on a choice node, ACT/E does nothing (must pick)
-  if(dlgTree){
-    if(dlgChoice)return;
-    const node=dlgTree.nodes[dlgNode];
-    if(node&&node.next){showDlgNode(node.next);return;}
-    closeDlg();return;
-  }
-  // linear back-compat path
   dlgIdx++;
   if(dlgIdx<dlgNPC.lines.length){showDlgLine();return;}
   document.getElementById('dlg').classList.remove('on');
@@ -1298,11 +917,6 @@ function advanceDlg(){
   }
   state='play';
   if(g.note&&!noteSeen[g.note])fieldNote(g.note,()=>{});
-}
-/* click inside the speech bubble advances non-choice nodes */
-function dlgBoxClick(ev){
-  if(ev&&ev.target&&ev.target.closest&&ev.target.closest('.dlgOpt'))return;
-  act();
 }
 
 /* ── field notes & events ── */
@@ -1339,86 +953,27 @@ function closeEvent(){
 }
 
 /* ── capture ── */
-function captured(foe){
+function captured(){
   if(state!=='play')return;
-  // A lone patroller on foot may be talked to — riders and dogs never parley.
-  if(foe&&foe.k==='pat'&&marks<2&&!parleyUsed&&parleyCool<=0){
-    parleyUsed=true;parley(foe);return;
-  }
-  doCapture({});
-}
-function doCapture(opts){
-  opts=opts||{};
   sfx.sting();
   marks++;updHUD();
   hunt=Math.min(1.25,hunt+0.06);
   sheltered=false;shelter=null;
-  foes.forEach(f=>{f.det=0;f.mode=(f.k==='pat'||f.k==='rider'||f.k==='pair')?'patrol':'idle';});
+  foes.forEach(f=>{f.det=0;f.mode=f.k==='pat'||f.k==='rider'?'patrol':'idle';});
   const third=marks>=3;
   fieldNote('caught',()=>{
     if(third){
       showEvent('SEIZED — THE NIGHT IS LOST',
         `<p>Rough hands, a rope, a long walk back under guard. It takes a week of watching and waiting before another night opens — and this whole ground must be crossed again, wiser and hungrier.</p>`,
         [{t:'BEGIN THE NIGHT AGAIN',fn:()=>{closeEvent();nights++;stam=70;food=55;corn=0;yam=0;loadStage(stage,true);updHUD();}}]);
-    }else if(opts.humble){
-      showEvent('YOU TAKE THE MARK — AND A STEP',
-        `<p>You keep your eyes down and your voice slow, and he cuffs you and curses and marches you off — but a patroller on foot is a slow jailer, and the dark is close. A stumble, a slack rope, and you are into the trees again with your bundle still on your back. The mark stands: <b>${marks} of 3</b>. But you kept your corn, and you did not lose the ground.</p>`,
-        [{t:'SLIP THE ROPE — GO',fn:()=>{closeEvent();stam=Math.max(28,stam-18);food=Math.max(15,food-10);
-          respawnNear(opts.foe);scent=[];updHUD();}}]);
     }else{
       showEvent('SEIZED — AND SLIPPED',
-        `<p>They have you — a fist in your collar, a shout for a rope — and in the jostle of their triumph you twist free and are gone into the dark before the lantern swings around. Your corn is scattered. Your legs shake. The mark is real: <b>${marks} of 3</b> — and the hunt is faster now. They know you’re close.</p>`,
+        `<p>They have you — a fist in your collar, a shout for a rope — and in the jostle of their triumph you twist free and are gone into the dark before the lantern swings around. Your corn is scattered. Your legs shake. The mark is real: <b>${marks} of 3</b> — and the hunt is faster now. They know you\u2019re close.</p>`,
         [{t:'BACK TO SHELTER — RUN',fn:()=>{closeEvent();corn=0;yam=0;stam=Math.max(30,stam-25);food=Math.max(15,food-15);
           px=ckx;py=cky;scent=[];updHUD();}}]);
     }
   });
 }
-/* place the player a short head-start away from a foe, without landing in a wall */
-function respawnNear(foe){
-  if(!foe){px=ckx;py=cky;return;}
-  const ang=Math.atan2(py-foe.y,px-foe.x)||0;
-  const nx=foe.x+Math.cos(ang)*80,ny=foe.y+Math.sin(ang)*80;
-  if(!solidAt(nx+8,ny+10)&&nx>TS&&ny>TS){px=nx;py=ny;}
-  else{px=ckx;py=cky;}
-}
-/* ── patroller parley: talk, humble yourself, or run ── */
-function parley(foe){
-  state='event';
-  const tSum=stageTrust();
-  const odds=Math.max(0.15,Math.min(0.85,0.34+tSum*0.11));
-  const oddsPct=Math.round(odds*100);
-  const oddsWord=odds>=0.6?'good':odds>=0.4?'fair':'long';
-  showEvent('STOPPED ON THE ROAD',
-    `<p>A lantern swings up into your face. The patroller has one hand on your shoulder and the other near his belt. <em>“Whose boy are you, and where’s your pass?”</em></p>
-     <p style="color:#9fb0d8;font-size:.9em">He may know every planter in this county — or none. Your odds on the forged errand look <b>${oddsWord}</b> (${oddsPct}%), the better for every name the local people trusted you with tonight.</p>`,
-    [
-      {t:'“I’m on a night errand for Master —, sir.” (forged pass · '+oddsPct+'%)',fn:()=>{
-        closeEvent();fieldNote('parley',()=>{
-          if(Math.random()<odds){
-            toast('he grunts, waves you on — and takes your corn for his trouble');
-            foe.det=0;foe.mode='patrol';corn=0;food=Math.max(12,food-8);
-            parleyCool=600;state='play';updHUD();
-          }else{
-            toast('“I know every soul that man owns. You ain’t one.”');
-            doCapture({});
-          }
-        });
-      }},
-      {t:'Bow low, talk slow, buy a moment. (take the mark · keep your corn · slip away)',fn:()=>{
-        closeEvent();fieldNote('parley',()=>{doCapture({humble:true,foe:foe});});
-      }},
-      {t:'Break his grip and RUN. (a burst of speed · no mark if you lose him)',fn:()=>{
-        closeEvent();fieldNote('parley',()=>{
-          adren=ADREN_MAX;runBoost=360;
-          foe.mode='chase';foe.det=100;foe.alertT=0;hunt=Math.min(1.3,hunt+0.03);
-          burst(px+8,py+8,'#FF6A5A');sfx.sting();
-          toast('you tear loose — RUN, and don’t let him see where you go');
-          parleyCool=400;state='play';
-        });
-      }},
-    ]);
-}
-function stageTrust(){let s=0;for(const k in TRUST){if(k.indexOf(stage+':')===0)s+=TRUST[k];}return s;}
 
 /* ── shelter enter / exit ── */
 function enterShelter(it){
@@ -1447,8 +1002,8 @@ function act(){
   // NPC in range?
   for(const n of npcs){
     if(Math.hypot(n.x+10-(px+8),n.y+10-(py+10))<40){
-      if(n.needs==='net'&&!haveNet){
-        openDlg(n);   /* Tasker's tree — the ask for the net */
+      if(n.needs==='net'&&!haveNet&&!n.done){
+        openDlg({who:n.who,lines:[n.lines[0],n.lines[1],n.lines[2]],give:{note:'waterman'},done:false});
         return;}
       if(n.needs==='net'&&haveNet&&!n.ferried){
         n.ferried=true;
@@ -1517,7 +1072,7 @@ function step(){
     if(tick%20===0)updHUD();
     if(tick%30===0)updPhaseBar();
     if(tick%14===0&&shelter)smoke.push({x:shelter.x*TS+17+(Math.random()*6-3),y:shelter.y*TS+2,l:90,r:2+Math.random()*2});
-    updateFoes();soundTick();stepFX();stepWeather();
+    updateFoes();soundTick();stepFX();
     return;
   }
 
@@ -1533,8 +1088,6 @@ function step(){
   /* ── speed: hunger slows, adrenaline overrides ── */
   let spd=creep?0.85:1.9;
   if(inWater)spd*=0.55;
-  if(runBoost>0){runBoost--;spd*=1.5;}   /* the burst you bought by running from a parley */
-  if(parleyCool>0)parleyCool--;
   adrenOn=false;
   if(food<=0){
     if(chased&&adren>0&&!creep){adrenOn=true;adren--;}   /* fear runs on nothing */
@@ -1553,7 +1106,7 @@ function step(){
     if(!solidAt(nx+3,py+6)&&!solidAt(nx+13,py+6)&&!solidAt(nx+3,py+16)&&!solidAt(nx+13,py+16))px=nx;
     if(!solidAt(px+3,ny+6)&&!solidAt(px+13,ny+6)&&!solidAt(px+3,ny+16)&&!solidAt(px+13,ny+16))py=ny;
     anim+=spd*0.25;
-    const drain=(creep?0.008:0.02)*(inWater?1.8:1)*wxStamina;
+    const drain=(creep?0.008:0.02)*(inWater?1.8:1)*(pal.rain?1.5:1);
     stam=Math.max(0,stam-drain);
     food=Math.max(0,food-(creep?0.018:0.032));
   }else{
@@ -1565,24 +1118,11 @@ function step(){
 
   // scent trail (not in water, weak in rain)
   if(moving&&!inWater&&tick%22===0){
-    scent.push({x:px+8,y:py+12,t:wxWet?350:900,f:anim});
+    scent.push({x:px+8,y:py+12,t:pal.rain?350:900,f:anim});
     if(scent.length>60)scent.shift();
   }
   scent.forEach(s2=>s2.t--);
   scent=scent.filter(s2=>s2.t>0);
-
-  /* ── the Blue Run river: ford (safe, patrolled) vs rope crossing (hard) ── */
-  const curTile=tileAtPx(px+8,py+12);
-  if(curTile==='G'){
-    scent=[];                                   /* over the water — no trail */
-    if(moving)stam=Math.max(0,stam-0.5);        /* the rope crossing drains hard */
-    if(!noteSeen.fords)fieldNote('fords',()=>{});
-    if(stam<25){sweptDownstream();}
-  }else if(curTile==='~'&&fordTiles.length){
-    const ptx=Math.floor((px+8)/TS),pty=Math.floor((py+12)/TS);
-    if(fordTiles.some(t=>t.x===ptx&&t.y===pty)&&!noteSeen.fords)fieldNote('fords',()=>{});
-  }
-  if(state!=='play')return;
 
   /* ── the strobing sky: short nights to run, brief killing days ── */
   tickClock();
@@ -1597,8 +1137,6 @@ function step(){
   updateFoes();
   soundTick();
   stepFX();
-  stepWeather();
-  if(wxWet&&!noteSeen.weather)fieldNote('weather',()=>{});
 }
 function enterShelterSilent(it){sheltered=true;shelter=it;it.used=true;if(it.k==='camp')it.lit=true;}
 function stepFX(){
@@ -1611,43 +1149,7 @@ function stepFX(){
   flies.forEach(f=>{f.ph+=0.05;f.vx+=(Math.random()-0.5)*0.04;f.vy+=(Math.random()-0.5)*0.04;
     f.vx*=0.96;f.vy*=0.96;f.x+=f.vx;f.y+=f.vy;});
   clouds.forEach(cl=>{cl.x+=cl.s;if(cl.x-cl.w>VW)cl.x=-cl.w;});
-  if(wxWet)rain.forEach(r2=>{r2.y+=r2.s;r2.x-=1.4;if(r2.y>VH){r2.y=-10;r2.x=Math.random()*(VW+80);}});
-  // drifting embers over lit camps
-  if(tick%9===0)items.forEach(it=>{if(it.k==='camp'&&it.lit)
-    pfx.push({x:it.x*TS+17+(Math.random()*8-4),y:it.y*TS+10,vx:(Math.random()-.5)*0.25,vy:-0.5-Math.random()*0.4,l:28+((Math.random()*20)|0),col:'#FF9A3A'});});
-  // rain splashes at the player's feet instead of dry footprints
-  if(wxWet&&moving&&!sheltered&&tick%7===0)splashes.push({x:px+8,y:py+16,r:1,l:15});
-  splashes.forEach(s2=>{s2.r+=0.45;s2.l--;});splashes=splashes.filter(s2=>s2.l>0);
-  stepAmbient();
-}
-/* deer, owls/bats — ambient life */
-function stepAmbient(){
-  deer.forEach(d=>{
-    if(d.flee>0){
-      d.flee--;d.gait+=0.45;
-      const nx=d.x+Math.cos(d.dir)*2.4,ny=d.y+Math.sin(d.dir)*2.4,t=tileAtPx(nx+6,ny+6);
-      if(!solidAt(nx+6,ny+6)&&t!=='~'&&t!=='='&&t!=='G')  {d.x=nx;d.y=ny;} else d.dir+=1.7;
-    }else{
-      d.gait*=0.9;
-      const dd=Math.hypot(d.x-px,d.y-py);
-      if(!sheltered&&state==='play'&&dd<72&&moving&&!creep){
-        d.flee=72;d.dir=Math.atan2(d.y-py,d.x-px);
-        // a bolting deer is noise — nearby foes on patrol perk up
-        foes.forEach(f=>{if((f.k==='pat'||f.k==='rider'||f.k==='pair')&&f.mode==='patrol'&&Math.hypot(f.x-d.x,f.y-d.y)<170)f.det=Math.min(95,f.det+15);});
-        sNoise(0.12,0.05,-1200);toast('a deer bolts — noise carries');
-      }else{
-        if(tick%150===((d.bob*13)|0)%150)d.dir=Math.random()*Math.PI*2;
-        if(tick%3===0){const nx=d.x+Math.cos(d.dir)*0.22,ny=d.y+Math.sin(d.dir)*0.22,t=tileAtPx(nx+6,ny+6);
-          if(!solidAt(nx+6,ny+6)&&t!=='~'&&t!=='='&&t!=='G'){d.x=nx;d.y=ny;}}
-      }
-    }
-  });
-  // owl or bat crossing the moon
-  if(skyBirds.length<2&&tick%360===0&&Math.random()<0.6)
-    skyBirds.push({x:-24,y:16+Math.random()*46,vx:0.7+Math.random()*0.7,ph:Math.random()*7,owl:Math.random()<0.5});
-  skyBirds.forEach(b=>{b.x+=b.vx;b.ph+=0.35;});
-  skyBirds=skyBirds.filter(b=>b.x<VW+30);
-  if(skyBirds.some(b=>b.owl)&&tick%600===120&&AC&&threat<0.2)sfx.owl();
+  if(pal&&pal.rain)rain.forEach(r2=>{r2.y+=r2.s;r2.x-=1.4;if(r2.y>VH){r2.y=-10;r2.x=Math.random()*(VW+80);}});
 }
 
 /* ── a day passes in hiding ── */
@@ -1667,8 +1169,6 @@ function tickClock(){
       phaseT=NIGHT_MIN+((Math.random()*NIGHT_SPAN)|0);
       scent=[];hunt=Math.max(1,hunt-0.015);
       foes.forEach(f=>{if(f.mode==='chase'){f.mode=f.k==='dog'?'idle':'patrol';f.det=Math.min(f.det,40);}});
-      rollWeather(false);   /* a new sky over every night */
-      if(wxWet)toast(wx==='storm'?'a storm breaks — thunder to the west':'rain comes on — a mercy and a burden');
     }
     updPhaseBar();
   }
@@ -1750,8 +1250,7 @@ function endGame(){
 function updateFoes(){
   let anySeen=false;
   const inWater=tileAtPx(px+8,py+12)==='~';
-  const lightSee=lightning>0.3?2.5:1;         /* a lightning flash exposes the open ground */
-  const rainFog=wxLantern*lightSee;           /* rain shortens every lantern; lightning lengthens all sight */
+  const rainFog=pal.rain?0.55:1;   /* rain shortens every lantern */
   foes.forEach(f=>{
     const dx=px+8-f.x,dy=py+10-f.y,dist=Math.hypot(dx,dy);
     if(f.k==='pat'){
@@ -1784,7 +1283,7 @@ function updateFoes(){
             else if(!solidAt(f.x+8,ny+8))f.y=ny;
           }
           f.dir=Math.atan2(dy,dx);
-          if(dist<20){captured(f);return;}
+          if(dist<20){captured();return;}
         }
         if((!los(f.x,f.y,px+8,py+10)&&dist>150)||f.alertT>900){
           f.mode='patrol';f.det=0;
@@ -1819,53 +1318,14 @@ function updateFoes(){
           else{if(!solidAt(nx+10,f.y+10)&&tileAtPx(nx+10,f.y+10)!=='~')f.x=nx;
             else if(!solidAt(f.x+10,ny+10)&&tileAtPx(f.x+10,ny+10)!=='~')f.y=ny;}
           f.dir=Math.atan2(dy,dx);
-          if(dist<24){captured(f);return;}
+          if(dist<24){captured();return;}
           if(tileAtPx(px+8,py+12)===','&&creep&&dist>60){f.det=Math.max(0,f.det-3);}
           if((!los(f.x,f.y,px+8,py+10)&&dist>190)||f.alertT>800){f.mode='patrol';f.det=0;}
           anySeen=true;
         }
       }
-    }else if(f.k==='pair'){
-      const cone=Math.abs(((Math.atan2(dy,dx)-f.dir+Math.PI*3)%(Math.PI*2))-Math.PI);
-      const range=(creep?100:150)*rainFog;
-      const shielded=sheltered||inWater;              /* only water or shelter hides you from a pair */
-      const sees=dist<range&&cone<0.6&&!shielded&&los(f.x,f.y,px+8,py+10);
-      let scented=false;
-      if(!shielded)for(let si=scent.length-1;si>=0;si--){const s2=scent[si];
-        if(s2.t>250&&Math.hypot(s2.x-f.x,s2.y-f.y)<95*wxNose){scented=true;break;}}
-      if(sees)f.det=Math.min(100,f.det+(dist<80?4:2.2));
-      else if(scented)f.det=Math.min(100,f.det+1.6);   /* the dog's nose feeds his alarm */
-      else f.det=Math.max(0,f.det-(shielded?3:0.9));
-      if(f.det>=100&&f.mode!=='chase'){f.mode='chase';f.alertT=0;burst(f.x,f.y-14,'#FF6A5A');if(f.barkT<=0){sfx.bark();f.barkT=90;}}
-      if(f.det>25)anySeen=true;
-      if(f.barkT>0)f.barkT--;
-      if(f.mode==='patrol'){
-        if(f.pause>0)f.pause--;
-        else{
-          const nx=f.x+Math.cos(f.dir)*f.spd*hunt,ny=f.y+Math.sin(f.dir)*f.spd*hunt;
-          if(solidAt(nx+8,ny+8)||tileAtPx(nx+8,ny+8)==='~'||Math.random()<0.004){
-            f.dir=Math.random()*Math.PI*2;f.pause=40+Math.random()*80;}
-          else{f.x=nx;f.y=ny;}
-        }
-      }else{
-        f.alertT++;
-        if(sheltered){if(f.alertT>260){f.mode='patrol';f.det=0;}}
-        else{
-          const sp=1.25*hunt;                          /* slower than either alone — the leash */
-          const nx=f.x+dx/dist*sp,ny=f.y+dy/dist*sp;
-          if(!solidAt(nx+8,ny+8)&&tileAtPx(nx+8,ny+8)!=='~'){f.x=nx;f.y=ny;}
-          else{if(!solidAt(nx+8,f.y+8)&&tileAtPx(nx+8,f.y+8)!=='~')f.x=nx;
-            else if(!solidAt(f.x+8,ny+8)&&tileAtPx(f.x+8,ny+8)!=='~')f.y=ny;}
-          f.dir=Math.atan2(dy,dx);
-          if(f.barkT<=0){sfx.bark();f.barkT=95;}
-          if(dist<20){captured(f);return;}
-          if(inWater&&dist>120){f.mode='patrol';f.det=Math.min(f.det,40);}
-          if(f.alertT>1000)f.mode='patrol';
-          anySeen=true;
-        }
-      }
     }else{ // dog
-      const noseMul=wxNose;   /* rain kills the nose */
+      const noseMul=pal.rain?0.4:1;   /* rain kills the nose */
       if(f.mode==='idle'){
         let best=-1,bd=120*noseMul;
         scent.forEach((s2,i2)=>{const d2=Math.hypot(s2.x-f.x,s2.y-f.y);
@@ -1901,21 +1361,13 @@ function updateFoes(){
           const sp=1.9*Math.min(hunt,1.12);
           const nx=f.x+dx/dist*sp,ny=f.y+dy/dist*sp;
           if(!solidAt(nx+8,ny+8)&&tileAtPx(nx+8,ny+8)!=='~'){f.x=nx;f.y=ny;}
-          if(dist<18){captured(f);return;}
+          if(dist<18){captured();return;}
           if(dist>240){f.mode='idle';}
           anySeen=true;
         }
       }
     }
   });
-  // dog pack — a lone chasing hound howls in ONE packmate; never more than two at once
-  const chasers=foes.filter(f=>f.k==='dog'&&f.mode==='chase');
-  if(chasers.length===1){
-    const lead=chasers[0];let cand=null,cd=400;
-    foes.forEach(f=>{if(f.k==='dog'&&f.mode!=='chase'){const d=Math.hypot(f.x-lead.x,f.y-lead.y);if(d<cd){cd=d;cand=f;}}});
-    if(cand){cand.mode='chase';cand.trail=-1;cand.barkT=0;
-      if(tick%90===0){sfx.bark();setTimeout(()=>sfx.bark(),100);burst(cand.x,cand.y-12,'#E8C55A');}}
-  }
   let mx=0;foes.forEach(f=>{if(f.mode==='chase')mx=1;else mx=Math.max(mx,(f.det||0)/100*0.8);});
   threat=threat+(mx-threat)*0.08;
   seen=anySeen&&!sheltered;
@@ -2057,29 +1509,11 @@ function render(){
       c.fillStyle='#3E2E1A';c.fillRect(sx+3,sy+12,TS-6,5);
       c.fillStyle='#4A381F';c.fillRect(sx+6,sy+4,4,22);c.fillRect(sx+TS-11,sy+4,4,22);
       c.fillStyle='rgba(255,255,255,0.04)';c.fillRect(sx+3,sy+12,TS-6,1.5);}
-    else if(t==='G'){
-      // rope-guide crossing over deep water — planks and a hand-line
-      c.fillStyle='#0C2136';c.fillRect(sx,sy,TS,TS);
-      const wv=Math.sin(tick*0.05+x*1.2+y)*1.5;
-      c.fillStyle='rgba(140,180,220,0.08)';c.fillRect(sx,sy+18+wv,TS,2);
-      c.fillStyle='#5A4224';                          // planks
-      for(let k=0;k<3;k++)c.fillRect(sx+3,sy+7+k*8+wv*0.3,TS-6,4);
-      c.strokeStyle='rgba(214,196,150,0.7)';c.lineWidth=1.5; // the guide rope
-      c.beginPath();c.moveTo(sx+2,sy+4);c.lineTo(sx+TS-2,sy+6);c.stroke();
-      c.fillStyle='#3A2C18';c.fillRect(sx+1,sy+2,3,TS-4);c.fillRect(sx+TS-4,sy+2,3,TS-4);}
     else if(t==='X'){
       const gl=0.5+0.4*Math.sin(tick*0.08+x);
       c.fillStyle=`rgba(232,197,90,${0.12*gl})`;c.fillRect(sx,sy,TS,TS);
       c.fillStyle=`rgba(232,197,90,${0.75*gl})`;
       c.font='13px Georgia';c.textAlign='center';c.fillText('✦',sx+TS/2,sy+TS/2+4);c.textAlign='left';}
-  }
-  // Isaiah's ford, lit once you've learned to read the water
-  if(fordSafe&&fordTiles.length){
-    const gl=0.55+0.4*Math.sin(tick*0.09);
-    c.fillStyle=`rgba(232,197,90,${gl})`;c.font='14px Georgia';c.textAlign='center';
-    fordTiles.forEach(t2=>{const fx3=t2.x*TS-camX+TS/2,fy3=t2.y*TS-camY+TS/2+5;
-      if(fx3>-20&&fx3<VW+20&&fy3>-20&&fy3<VH+20)c.fillText('✦',fx3,fy3);});
-    c.textAlign='left';
   }
   // footprints / scent (visible so the player learns the system)
   scent.forEach((s2,i)=>{
@@ -2088,25 +1522,6 @@ function render(){
     const off=(i%2===0)?-2.5:2.5;
     c.save();c.translate(s2.x-camX+off,s2.y-camY);c.rotate(face);
     c.beginPath();c.ellipse(0,0,2,3.6,0,0,Math.PI*2);c.fill();c.restore();});
-  // rain splashes at the feet
-  splashes.forEach(s2=>{const a=Math.min(0.3,s2.l/15*0.3);
-    c.strokeStyle=`rgba(170,195,220,${a})`;c.lineWidth=1;
-    c.beginPath();c.arc(s2.x-camX,s2.y-camY,s2.r,0,Math.PI*2);c.stroke();});
-  // deer — skittish ambient life
-  deer.forEach(d=>{
-    const dx2=d.x-camX,dy2=d.y-camY;
-    if(dx2<-40||dx2>VW+40||dy2<-40||dy2>VH+40)return;
-    const bound=d.flee>0?Math.abs(Math.sin(d.gait))*4:0;
-    const facing=Math.cos(d.dir)>=0?1:-1;
-    c.fillStyle='rgba(0,0,0,0.3)';c.beginPath();c.ellipse(dx2+6,dy2+15,8,3,0,0,Math.PI*2);c.fill();
-    c.fillStyle='#6B4A2E';
-    c.fillRect(dx2,dy2+3-bound,13,7);                       // body
-    c.fillRect(dx2+2,dy2+9-bound,2.5,6);c.fillRect(dx2+9,dy2+9-bound,2.5,6); // legs
-    c.beginPath();c.ellipse(dx2+(facing>0?13:0),dy2+2-bound,3,2.5,0,0,Math.PI*2);c.fill(); // head
-    c.strokeStyle='#4A3320';c.lineWidth=1;                 // neck + small antler tick
-    c.beginPath();c.moveTo(dx2+(facing>0?11:2),dy2+4-bound);c.lineTo(dx2+(facing>0?14:-1),dy2-1-bound);c.stroke();
-    if(d.flee>0){c.fillStyle='#D8C088';c.beginPath();c.ellipse(dx2+(facing>0?-1:14),dy2+4-bound,1.6,2.4,0,0,Math.PI*2);c.fill();} // white tail up
-  });
   // items & shelters
   items.forEach(it=>{
     if(it.got)return;const sx=it.x*TS-camX+17,sy=it.y*TS-camY+17;
@@ -2178,12 +1593,12 @@ function render(){
   foes.forEach(f=>{
     const sx=f.x-camX,sy=f.y-camY;
     if(sx<-160||sx>VW+160||sy<-160||sy>VH+160)return;
-    if(f.k==='pat'||f.k==='pair'){
+    if(f.k==='pat'){
       const g2=c.createRadialGradient(sx+8,sy+8,6,sx+8+Math.cos(f.dir)*70,sy+8+Math.sin(f.dir)*70,120);
-      g2.addColorStop(0,`rgba(255,200,110,${wxWet?0.20:0.30})`);g2.addColorStop(1,'rgba(255,200,110,0)');
+      g2.addColorStop(0,`rgba(255,200,110,${pal.rain?0.20:0.30})`);g2.addColorStop(1,'rgba(255,200,110,0)');
       c.fillStyle=g2;
       c.beginPath();c.moveTo(sx+8,sy+8);
-      c.arc(sx+8,sy+8,(f.mode==='chase'?170:145)*wxLantern,f.dir-0.58,f.dir+0.58);c.closePath();c.fill();
+      c.arc(sx+8,sy+8,(f.mode==='chase'?170:145)*(pal.rain?0.6:1),f.dir-0.58,f.dir+0.58);c.closePath();c.fill();
       c.fillStyle='rgba(0,0,0,0.35)';c.beginPath();c.ellipse(sx+8,sy+20,8,3,0,0,Math.PI*2);c.fill();
       const wob=f.mode==='chase'?Math.sin(tick*0.4)*1.5:Math.sin(tick*0.1+f.bob)*0.7;
       c.fillStyle=f.mode==='chase'?'#5E2A22':'#3A3026';c.fillRect(sx+2,sy+6,13,12);
@@ -2199,27 +1614,12 @@ function render(){
         c.strokeStyle='rgba(255,255,255,0.25)';c.strokeRect(sx,sy-14,16,3);}
       if(f.mode==='chase'){c.fillStyle='#FF6A5A';c.font='bold 12px Georgia';c.textAlign='center';
         c.fillText('!',sx+8,sy-16);c.textAlign='left';}
-      // handler pair: a leashed hound at the man's side, straining toward you
-      if(f.k==='pair'){
-        const side=Math.cos(f.dir)>=0?1:-1;
-        const dgx=sx+8+side*15,dgy=sy+14+Math.sin(tick*0.25)*1.2;
-        c.strokeStyle='rgba(210,200,180,0.5)';c.lineWidth=1;
-        c.beginPath();c.moveTo(sx+8,sy+10);c.lineTo(dgx,dgy);c.stroke();  // the leash
-        c.fillStyle='rgba(0,0,0,0.3)';c.beginPath();c.ellipse(dgx,dgy+7,8,3,0,0,Math.PI*2);c.fill();
-        c.fillStyle='#241E1A';c.fillRect(dgx-8,dgy,16,7);
-        c.beginPath();c.arc(dgx+side*8,dgy+1,4,0,Math.PI*2);c.fill();                 // head
-        const rn=f.mode==='chase'?Math.sin(tick*0.5)*2:0;
-        c.fillRect(dgx-6,dgy+6+rn,3,4);c.fillRect(dgx+3,dgy+6-rn,3,4);
-        c.strokeStyle='#241E1A';c.lineWidth=2;c.beginPath();c.moveTo(dgx-side*8,dgy+1);c.lineTo(dgx-side*12,dgy-3);c.stroke();
-        if(f.mode==='chase'&&tick%40<20){c.fillStyle='rgba(232,197,90,0.85)';c.font='9px Georgia';c.textAlign='center';
-          c.fillText('~bay~',dgx,dgy-6);c.textAlign='left';}
-      }
     }else if(f.k==='rider'){
       const g2=c.createRadialGradient(sx+10,sy+8,8,sx+10+Math.cos(f.dir)*95,sy+8+Math.sin(f.dir)*95,150);
-      g2.addColorStop(0,`rgba(255,200,110,${wxWet?0.18:0.28})`);g2.addColorStop(1,'rgba(255,200,110,0)');
+      g2.addColorStop(0,`rgba(255,200,110,${pal.rain?0.18:0.28})`);g2.addColorStop(1,'rgba(255,200,110,0)');
       c.fillStyle=g2;
       c.beginPath();c.moveTo(sx+10,sy+8);
-      c.arc(sx+10,sy+8,(f.mode==='chase'?220:195)*wxLantern,f.dir-0.5,f.dir+0.5);c.closePath();c.fill();
+      c.arc(sx+10,sy+8,(f.mode==='chase'?220:195)*(pal.rain?0.6:1),f.dir-0.5,f.dir+0.5);c.closePath();c.fill();
       c.fillStyle='rgba(0,0,0,0.4)';c.beginPath();c.ellipse(sx+11,sy+26,13,4,0,0,Math.PI*2);c.fill();
       const trot=(f.mode==='chase'?Math.sin(tick*0.5)*2:Math.sin(tick*0.15));
       c.fillStyle='#2E2320';c.fillRect(sx,sy+8,24,10);
@@ -2304,25 +1704,17 @@ function render(){
     g2.addColorStop(0,`rgba(190,230,120,${a})`);g2.addColorStop(1,'rgba(190,230,120,0)');
     c.fillStyle=g2;c.beginPath();c.arc(fx2,fy2,6,0,Math.PI*2);c.fill();});
 
-  /* ── parallax canopy shadow — slow soft blobs for depth over forest ground ── */
-  for(let k=0;k<4;k++){
-    const bx=((tick*0.05*(k*0.5+1)+k*260-camX*0.03)%(VW+360))-180;
-    const by=60+k*104+Math.sin(tick*0.004+k*1.7)*30;
-    const g3=c.createRadialGradient(bx,by,10,bx,by,150);
-    g3.addColorStop(0,'rgba(0,0,0,0.035)');g3.addColorStop(1,'rgba(0,0,0,0)');
-    c.fillStyle=g3;c.beginPath();c.ellipse(bx,by,150,64,0,0,Math.PI*2);c.fill();
-  }
   /* ── fog banks ── */
-  if(effFog()>0){
+  if(pal.fog>0){
     for(let k=0;k<3;k++){
       const fx2=((tick*0.12*(k+1)+k*300)%(VW+400))-200;
       const fy2=90+k*130+Math.sin(tick*0.007+k)*24;
       const g2=c.createRadialGradient(fx2,fy2,20,fx2,fy2,200);
-      g2.addColorStop(0,`rgba(170,185,205,${effFog()})`);g2.addColorStop(1,'rgba(170,185,205,0)');
+      g2.addColorStop(0,`rgba(170,185,205,${pal.fog})`);g2.addColorStop(1,'rgba(170,185,205,0)');
       c.fillStyle=g2;c.beginPath();c.ellipse(fx2,fy2,200,70,0,0,Math.PI*2);c.fill();}
   }
   /* ── rain ── */
-  if(wxWet){
+  if(pal.rain){
     c.strokeStyle='rgba(170,195,220,0.16)';c.lineWidth=1;
     c.beginPath();
     rain.forEach(r2=>{c.moveTo(r2.x,r2.y);c.lineTo(r2.x-r2.l*0.28,r2.y+r2.l);});
@@ -2357,20 +1749,6 @@ function render(){
     }
   }
   c.restore();
-
-  /* ── storm lightning: telegraph flicker, then an illuminating flash + fork ── */
-  if(lightWarn>0&&!sheltered){
-    c.fillStyle=`rgba(190,205,235,${0.03+0.03*Math.random()})`;c.fillRect(0,0,VW,VH);
-  }
-  if(lightning>0){
-    c.fillStyle=`rgba(226,234,255,${0.5*lightning})`;c.fillRect(0,0,VW,VH);
-    if(lightForks.length){
-      c.strokeStyle=`rgba(255,255,255,${Math.min(1,lightning+0.2)})`;c.lineWidth=2;
-      c.beginPath();c.moveTo(lightForks[0].x,lightForks[0].y);
-      for(let i=1;i<lightForks.length;i++)c.lineTo(lightForks[i].x,lightForks[i].y);
-      c.stroke();
-    }
-  }
 
   /* ── threat vignette ── */
   if(threat>0.1){
@@ -2440,16 +1818,6 @@ function render(){
   // dim companions
   for(let i=0;i<12;i++){c.fillStyle=`rgba(200,215,255,${0.13+0.15*Math.sin(tick*0.04+i*2)})`;
     c.fillRect((i*89+40)%VW,8+(i*37)%46,2,2);}
-  // owls / bats crossing the sky
-  skyBirds.forEach(b=>{
-    const w=Math.sin(b.ph)*(b.owl?3:5);
-    c.fillStyle=b.owl?'rgba(20,24,36,0.85)':'rgba(14,16,26,0.9)';
-    if(b.owl){c.beginPath();c.ellipse(b.x,b.y,3,4,0,0,Math.PI*2);c.fill();
-      c.beginPath();c.moveTo(b.x,b.y);c.lineTo(b.x-6,b.y-w);c.lineTo(b.x-3,b.y);c.closePath();c.fill();
-      c.beginPath();c.moveTo(b.x,b.y);c.lineTo(b.x+6,b.y-w);c.lineTo(b.x+3,b.y);c.closePath();c.fill();}
-    else{c.beginPath();c.moveTo(b.x,b.y);c.quadraticCurveTo(b.x-4,b.y-w,b.x-7,b.y);c.quadraticCurveTo(b.x-4,b.y-1,b.x,b.y);
-      c.moveTo(b.x,b.y);c.quadraticCurveTo(b.x+4,b.y-w,b.x+7,b.y);c.quadraticCurveTo(b.x+4,b.y-1,b.x,b.y);c.fill();}
-  });
 }
 
 /* goals */
@@ -2477,25 +1845,12 @@ function currentGoal(){
 }
 
 /* ════════════════ FLOW ════════════════ */
-/* per-stage chapter vignettes — monochrome gold-on-dark line art, ~60×60, inline */
-const _vg='<svg viewBox="0 0 60 60" width="58" height="58" fill="none" stroke="#E8C55A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">';
-const VIGNETTES=[
- /* I cotton boll */   _vg+'<path d="M30 40 V30"/><path d="M30 30 q-10 -4 -12 -14 q10 2 12 10 q2 -8 12 -10 q-2 10 -12 14"/><circle cx="24" cy="20" r="3"/><circle cx="36" cy="20" r="3"/><circle cx="30" cy="15" r="3"/><path d="M22 44 h16"/></svg>',
- /* II river bend */   _vg+'<path d="M8 12 q18 8 8 20 q-10 12 12 18"/><path d="M20 10 q16 10 6 22 q-9 11 12 18" opacity="0.5"/><path d="M40 46 l4 -2 M44 40 l4 -1"/></svg>',
- /* III pine */        _vg+'<path d="M30 8 l9 14 h-6 l7 12 h-6 l6 10 H20 l6 -10 h-6 l7 -12 h-6 z"/><path d="M30 44 v8"/></svg>',
- /* IV tar kiln */     _vg+'<path d="M16 44 h28 l-4 -14 H20 z"/><path d="M22 30 q8 -8 16 0"/><path d="M30 22 q-3 -6 0 -10 q3 4 0 10" opacity="0.7"/><path d="M14 44 h32"/></svg>',
- /* V tobacco leaf */  _vg+'<path d="M30 50 C14 44 14 20 30 10 C46 20 46 44 30 50 Z"/><path d="M30 12 V48"/><path d="M30 24 l-8 -4 M30 30 l8 -3 M30 38 l-8 -2"/></svg>',
- /* VI hills */        _vg+'<path d="M6 42 q10 -16 20 -4 q8 -14 18 -2 q6 -8 10 -2"/><path d="M6 50 q12 -12 22 -4 q10 -10 26 -2" opacity="0.55"/></svg>',
- /* VII Potomac */     _vg+'<path d="M8 22 h44 M8 30 h44 M8 38 h44" opacity="0.6"/><path d="M20 46 q10 -6 20 0 l-3 4 h-14 z"/><path d="M30 42 V30 l6 4" /></svg>',
- /* VIII home fence */ _vg+'<path d="M12 26 v22 M22 26 v22 M32 26 v22 M42 26 v22"/><path d="M8 32 h40 M8 40 h40"/><path d="M12 26 l4 -5 M22 26 l4 -5 M32 26 l4 -5 M42 26 l4 -5"/></svg>',
-];
 function showChap(){
   document.getElementById('ovTitle').classList.remove('on');
   const S=STAGES[stage];
   const nn=ROMAN[Math.min(nights-1,ROMAN.length-1)];
   document.getElementById('chNo').textContent=S.card[0].replace('NIGHT?','NIGHT '+nn);
   document.getElementById('chTitle').textContent=S.card[1];
-  document.getElementById('chVig').innerHTML=VIGNETTES[stage]||'';
   document.getElementById('chText').innerHTML=S.card[2];
   document.getElementById('ovChap').classList.add('on');
   state='chap';
