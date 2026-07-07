@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History Games — Brian A. Robinson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,400&family=Special+Elite&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EFE6D0; --paper-2:#E0D4B6; --news:#F4EEDC;
+  --ink:#221E19; --mimeo:#6E4E9E; --red:#A8342A;
+  --tan:#C9B891; --good:#3E6B3A; --gold:#8a6d1f; --p2:#1F4E63;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper-2);
+  background-image:radial-gradient(ellipse at 30% 8%, rgba(255,255,255,.4), transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(34,30,25,.015) 3px 4px);
+  color:var(--ink);
+  font-family:'Libre Franklin',sans-serif;
+  font-size:16px;line-height:1.55;min-height:100vh;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px 70px}
+
+header{text-align:center;border-bottom:4px double var(--ink);padding:18px 8px 16px;margin-bottom:22px}
+.eyebrow{font-family:'Special Elite',monospace;font-size:.78rem;letter-spacing:.14em;color:var(--mimeo);text-transform:uppercase}
+h1{
+  font-family:'Oswald',sans-serif;font-weight:700;
+  font-size:clamp(2.4rem,8vw,4.2rem);letter-spacing:.05em;line-height:.95;text-transform:uppercase;
+  margin-top:4px;
+}
+h1 .sign{display:inline-block;background:var(--ink);color:var(--paper);padding:.04em .22em;transform:rotate(-1deg)}
+.subhead{
+  font-family:'Special Elite',monospace;font-size:.9rem;margin-top:10px;
+  max-width:640px;margin-left:auto;margin-right:auto;color:#3a3229;
+}
+.byline{
+  font-family:'Playfair Display',serif;font-weight:700;font-style:italic;
+  font-size:1rem;margin-top:8px;color:#4d453a;
+}
+
+/* section titles */
+.sectionhead{
+  display:flex;align-items:baseline;gap:14px;margin:26px 0 14px;
+}
+.sectionhead h2{
+  font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;font-size:1.1rem;white-space:nowrap;
+}
+.sectionhead .rule{flex:1;height:0;border-top:2px solid var(--ink)}
+.sectionhead .stamp{
+  font-family:'Special Elite',monospace;font-size:.7rem;color:var(--mimeo);
+  border:2px solid var(--mimeo);padding:2px 8px;letter-spacing:.12em;transform:rotate(-2deg);
+}
+
+/* card grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+
+.card{
+  position:relative;background:var(--paper);border:2px solid var(--ink);
+  box-shadow:4px 4px 0 rgba(34,30,25,.25);padding:0;
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .15s, box-shadow .15s;
+  text-decoration:none;color:var(--ink);
+}
+.card:hover{transform:translate(-3px,-3px);box-shadow:7px 7px 0 rgba(34,30,25,.3)}
+.card.featured{grid-column:span 2}
+@media (max-width:640px){.card.featured{grid-column:span 1}}
+
+.card .banner{
+  padding:14px 16px 12px;
+  color:var(--paper);position:relative;
+  border-bottom:2px solid var(--ink);
+}
+.card .banner .kicker{
+  font-family:'Special Elite',monospace;font-size:.7rem;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.85;
+}
+.card .banner .title{
+  font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;font-size:1.35rem;line-height:1.05;margin-top:4px;
+}
+.card .banner .era{
+  font-family:'Playfair Display',serif;font-style:italic;font-weight:700;
+  font-size:.9rem;margin-top:4px;opacity:.95;
+}
+.card .newtag{
+  position:absolute;top:8px;right:8px;
+  font-family:'Special Elite',monospace;font-size:.66rem;letter-spacing:.14em;
+  background:var(--paper);color:var(--red);border:2px solid var(--red);
+  padding:2px 8px;transform:rotate(6deg);
+}
+
+.card .body{padding:14px 16px 12px;flex:1;display:flex;flex-direction:column}
+.card .desc{font-size:.9rem;color:#3a3229;flex:1}
+.card .tags{
+  margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;
+}
+.card .tag{
+  font-family:'Special Elite',monospace;font-size:.66rem;letter-spacing:.08em;
+  text-transform:uppercase;padding:2px 8px;border:1px solid var(--ink);
+  background:var(--news);color:#3a3229;
+}
+.card .cta{
+  margin:10px 16px 14px;padding:10px;text-align:center;
+  background:var(--ink);color:var(--paper);
+  font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;font-size:.85rem;
+  border:2px solid var(--ink);
+}
+.card:hover .cta{background:var(--red);border-color:var(--red)}
+
+/* banner color themes */
+.banner.red{background:var(--red)}
+.banner.mimeo{background:var(--mimeo)}
+.banner.good{background:var(--good)}
+.banner.gold{background:var(--gold)}
+.banner.p2{background:var(--p2)}
+.banner.ink{background:var(--ink)}
+
+/* about panel */
+.about{
+  background:var(--paper);border:2px solid var(--ink);
+  box-shadow:4px 4px 0 rgba(34,30,25,.25);
+  padding:18px 20px;margin-top:26px;position:relative;
+}
+.about .stamp{
+  position:absolute;top:14px;right:14px;
+  font-family:'Special Elite',monospace;font-size:.7rem;color:var(--red);
+  border:2px solid var(--red);padding:3px 10px;transform:rotate(3deg);letter-spacing:.12em;
+}
+.about h3{
+  font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;font-size:1rem;border-bottom:1px solid var(--ink);
+  padding-bottom:6px;margin-bottom:10px;
+}
+.about p{font-size:.9rem;margin-bottom:8px;color:#3a3229}
+.about .contact{
+  font-family:'Special Elite',monospace;font-size:.82rem;margin-top:12px;color:#4d453a;
+}
+.about a{color:var(--mimeo);text-decoration:none;border-bottom:1px dotted var(--mimeo)}
+.about a:hover{color:var(--red);border-bottom-color:var(--red)}
+
+/* footer */
+footer{
+  text-align:center;font-family:'Special Elite',monospace;font-size:.75rem;
+  color:#6b6152;margin-top:34px;padding-top:18px;border-top:1px dashed #8a8172;
+}
+
+@media (prefers-reduced-motion: reduce){.card,.card:hover{transition:none;transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Public History Lab &mdash; Interactive Projects</div>
+  <h1><span class="sign">HISTORY&nbsp;GAMES</span></h1>
+  <div class="byline">by Brian A. Robinson</div>
+  <div class="subhead">Playable histories of the African American experience &mdash; primary-source detective work, campaign strategy, community building, and archival authentication, in the browser.</div>
+</header>
+
+<!-- STRATEGY & CAMPAIGN GAMES -->
+<div class="sectionhead">
+  <h2>Strategy &amp; Campaign</h2>
+  <div class="rule"></div>
+  <div class="stamp">CASE FILE A</div>
+</div>
+
+<div class="grid">
+
+  <a class="card featured" href="sit_down.html">
+    <div class="banner red">
+      <span class="newtag">NEW</span>
+      <div class="kicker">Coordinating Committee &mdash; Durham</div>
+      <div class="title">Sit Down</div>
+      <div class="era">Spring Semester, 1960</div>
+    </div>
+    <div class="body">
+      <div class="desc">You chair a student sit-in coordinating committee with fourteen weeks to break the merchants' resolve. Assign named volunteers, train them in nonviolent discipline, mind the bail fund, weather crisis moments at the counters, and read your weekly progress in a mimeographed newspaper front page. Built on the Royal Ice Cream and Greensboro traditions.</div>
+      <div class="tags">
+        <span class="tag">Campaign strategy</span>
+        <span class="tag">Named roster</span>
+        <span class="tag">Crisis decisions</span>
+        <span class="tag">Newspaper reveals</span>
+      </div>
+    </div>
+    <div class="cta">Take the Chair &rarr;</div>
+  </a>
+
+  <a class="card" href="parrish_street.html">
+    <div class="banner good">
+      <div class="kicker">Black Wall Street</div>
+      <div class="title">Parrish Street</div>
+      <div class="era">Durham, 1898&ndash;1929</div>
+    </div>
+    <div class="body">
+      <div class="desc">Build a Black business district from the founding of the Mutual through the boom years. Balance insurance, banking, real estate, and community trust in a decade-by-decade economic simulation.</div>
+      <div class="tags">
+        <span class="tag">Economic strategy</span>
+        <span class="tag">Community building</span>
+      </div>
+    </div>
+    <div class="cta">Open the Ledger &rarr;</div>
+  </a>
+
+  <a class="card" href="freedom_quest.html">
+    <div class="banner mimeo">
+      <div class="kicker">Escape RPG</div>
+      <div class="title">Freedom Quest</div>
+      <div class="era">Antebellum South</div>
+    </div>
+    <div class="body">
+      <div class="desc">A role-playing journey along Underground Railroad routes. Choose paths, gather help from conductors and safe houses, and weigh the risks that every fugitive weighed in real time.</div>
+      <div class="tags">
+        <span class="tag">RPG</span>
+        <span class="tag">Choice-driven</span>
+      </div>
+    </div>
+    <div class="cta">Begin the Journey &rarr;</div>
+  </a>
+
+  <a class="card" href="charles_ball.html">
+    <div class="banner ink">
+      <div class="kicker">Stealth</div>
+      <div class="title">Charles Ball</div>
+      <div class="era">The Domestic Slave Trade</div>
+    </div>
+    <div class="body">
+      <div class="desc">Based on the 1836 narrative. Move by night, avoid patrols, and navigate a landscape mapped for capture. The tension is second-to-second and the stakes are historical.</div>
+      <div class="tags">
+        <span class="tag">Stealth</span>
+        <span class="tag">Narrative-driven</span>
+      </div>
+    </div>
+    <div class="cta">Move at Nightfall &rarr;</div>
+  </a>
+
+  <a class="card" href="miles_to_go.html">
+    <div class="banner gold">
+      <div class="kicker">Navigation under constraint</div>
+      <div class="title">Miles to Go</div>
+      <div class="era">Jim Crow Highways</div>
+    </div>
+    <div class="body">
+      <div class="desc">Cross a segregated country by car with the Green Book on the passenger seat. Every stop for gas, food, and rest is a calculation. Reach your destination without becoming a statistic.</div>
+      <div class="tags">
+        <span class="tag">Navigation</span>
+        <span class="tag">Resource management</span>
+      </div>
+    </div>
+    <div class="cta">Start the Engine &rarr;</div>
+  </a>
+
+</div>
+
+<!-- SOURCE & ARCHIVE GAMES -->
+<div class="sectionhead">
+  <h2>Source &amp; Archive</h2>
+  <div class="rule"></div>
+  <div class="stamp" style="color:var(--red);border-color:var(--red)">CASE FILE B</div>
+</div>
+
+<div class="grid">
+
+  <a class="card featured" href="forgery_file.html">
+    <div class="banner p2">
+      <span class="newtag">NEW</span>
+      <div class="kicker">Bureau of Historical Records</div>
+      <div class="title">The Forgery File</div>
+      <div class="era">An Archival Trivia Game</div>
+    </div>
+    <div class="body">
+      <div class="desc">Two documents are genuine. One is planted. Find the forgery. Eleven themed cabinets and 110 case files spanning Carolina, Freedom, Migration, Movement, Politics, Sports, Pioneers, and four decades of Black music. Wager your reputation, race the clock, and play solo or head-to-head in versus mode.</div>
+      <div class="tags">
+        <span class="tag">Trivia</span>
+        <span class="tag">Source criticism</span>
+        <span class="tag">Solo &amp; versus</span>
+        <span class="tag">11 cabinets &bull; 110 cases</span>
+      </div>
+    </div>
+    <div class="cta">Report to the Bureau &rarr;</div>
+  </a>
+
+  <a class="card" href="against_the_grain.html">
+    <div class="banner mimeo">
+      <div class="kicker">Primary-source detective work</div>
+      <div class="title">Against the Grain</div>
+      <div class="era">Reading Historical Documents</div>
+    </div>
+    <div class="body">
+      <div class="desc">Interrogate slaveholder ledgers, court records, and runaway advertisements the way historians do &mdash; reading against the grain to recover the lives the documents tried to obscure.</div>
+      <div class="tags">
+        <span class="tag">Document analysis</span>
+        <span class="tag">Historical method</span>
+      </div>
+    </div>
+    <div class="cta">Open the Archive &rarr;</div>
+  </a>
+
+</div>
+
+<!-- ABOUT -->
+<div class="about">
+  <span class="stamp">ABOUT THE PROJECT</span>
+  <h3>About These Games</h3>
+  <p>These games are built to make African American history playable, discussable, and hard to forget. Each one is designed to teach a specific historical skill or truth &mdash; source criticism, campaign logistics, the economics of Black enterprise, the calculus of escape and mobility &mdash; through mechanics rather than memorization.</p>
+  <p>All games run in the browser on any device. Nothing to install. Classroom use is warmly encouraged, and each game is designed to open a discussion, not close one.</p>
+  <p class="contact"><strong>Brian A. Robinson</strong> &bull; Assistant Professor of History, North Carolina Central University &bull; Feedback and classroom queries welcome.</p>
+</div>
+
+<footer>
+  &copy; Brian A. Robinson &bull; History Games &bull; North Carolina Central University
+</footer>
+
+</div>
+</body>
+</html>
